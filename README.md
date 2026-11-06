@@ -2,6 +2,8 @@
 
 A Chrome extension that enhances the [cor3.gg](https://cor3.gg) experience by monitoring markets, expeditions, daily ops, and providing timer alerts — all from a compact popup UI.
 
+> 本仓库为简体中文汉化版本，中文文档见 [README.zh-CN.md](README.zh-CN.md)。
+
 ## Affiliation & Disclaimer
 
 This extension is in no way affiliated with, partnered with, or endorsed by cor3.gg, Fragmentary Order, or Rant Gaming Studios.

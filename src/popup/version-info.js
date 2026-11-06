@@ -4,6 +4,12 @@ import { getCor3Tab } from './utils.js';
 const checkUpdateBtn = document.getElementById('checkUpdateBtn');
 const updateResult = document.getElementById('updateResult');
 
+// 上游原仓库：网站版本（web / system / patch）仍从这里读取，保证与作者保持同步
+const UPSTREAM_REPO = 'Femtoce11/cor3-helper';
+// 本汉化 Fork：扩展自身版本与发布下载走这里
+const FORK_REPO = 'OWNER/cor3-helper-zh';
+const rawUrl = (repo, file) => `https://raw.githubusercontent.com/${repo}/main/${file}`;
+
 function compareVersions(v1, v2) {
     if (!v1 || !v2) return 0;
 
@@ -44,13 +50,13 @@ checkUpdateBtn.addEventListener('click', async () => {
         const localManifest = chrome.runtime.getManifest();
         const localExtVersion = localManifest.version;
 
-        const versionsResp = await fetch('https://raw.githubusercontent.com/Femtoce11/cor3-helper/main/versions.json', { cache: 'no-store' });
+        const versionsResp = await fetch(rawUrl(FORK_REPO, 'versions.json'), { cache: 'no-store' });
         if (!versionsResp.ok) throw new Error('获取远程版本失败');
         const remote = await versionsResp.json();
 
         let remoteExtVersion = null;
         try {
-            const pkgResp = await fetch('https://raw.githubusercontent.com/Femtoce11/cor3-helper/main/package.json', { cache: 'no-store' });
+            const pkgResp = await fetch(rawUrl(FORK_REPO, 'package.json'), { cache: 'no-store' });
             if (pkgResp.ok) {
                 const remotePkg = await pkgResp.json();
                 remoteExtVersion = remotePkg.version || null;
@@ -70,7 +76,7 @@ checkUpdateBtn.addEventListener('click', async () => {
         if (messages.length > 0) {
             let html = `检测到更新：<br>${messages.join('<br>')}`;
             if (extBehind) {
-                html += `<br><a href="https://github.com/Femtoce11/cor3-helper/releases" target="_blank" style="color:var(--accent-cyan);">从 GitHub 下载</a><br><span style="font-size:9px;color:var(--text-muted);">下载 ZIP，解压后在 chrome://extensions 重新加载</span>`;
+                html += `<br><a href="https://github.com/${FORK_REPO}/releases" target="_blank" style="color:var(--accent-cyan);">从 GitHub 下载</a><br><span style="font-size:9px;color:var(--text-muted);">下载 ZIP，解压后在 chrome://extensions 重新加载</span>`;
             }
             _safeSetHtml(updateResult, html);
             updateResult.style.color = 'var(--accent-orange)';
@@ -146,7 +152,7 @@ async function autoCheckWebsiteUpdated() {
     const patchVersionData = document.getElementById('patchVersionData');
     if (!webVersionNotice || !webVersionData || !systemVersionNotice || !systemVersionData) return;
     try {
-        const resp = await fetch('https://raw.githubusercontent.com/Femtoce11/cor3-helper/main/versions.json', { cache: 'no-store' });
+        const resp = await fetch(rawUrl(UPSTREAM_REPO, 'versions.json'), { cache: 'no-store' });
         if (!resp.ok) return;
         const remote = await resp.json();
         const { webVersion, systemVersion, patchVersion } = await chrome.storage.local.get(['webVersion', 'systemVersion', 'patchVersion']);
