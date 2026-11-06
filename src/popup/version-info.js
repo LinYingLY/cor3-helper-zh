@@ -7,7 +7,7 @@ const updateResult = document.getElementById('updateResult');
 // 上游原仓库：网站版本（web / system / patch）仍从这里读取，保证与作者保持同步
 const UPSTREAM_REPO = 'Femtoce11/cor3-helper';
 // 本汉化 Fork：扩展自身版本与发布下载走这里
-const FORK_REPO = 'OWNER/cor3-helper-zh';
+const FORK_REPO = 'LinYingLY/cor3-helper-zh';
 const rawUrl = (repo, file) => `https://raw.githubusercontent.com/${repo}/main/${file}`;
 
 function compareVersions(v1, v2) {
