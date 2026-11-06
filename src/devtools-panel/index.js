@@ -64,7 +64,7 @@ async function refreshPageSelector() {
     if (pages === 0) {
         const opt = document.createElement('option');
         opt.value = '-1';
-        opt.textContent = '0-now';
+        opt.textContent = '0-现在';
         pageSelector.appendChild(opt);
     } else {
         for (let i = 0; i < pages; i++) {
@@ -112,7 +112,7 @@ async function pullLiveMessages() {
         applyFilters();
         await refreshPageSelector();
     } catch (e) {
-        console.log('[COR3 Panel] Failed to pull live messages:', e);
+        console.log('[COR3 面板] 拉取实时消息失败：', e);
     }
 }
 
@@ -268,9 +268,9 @@ function selectMessage(index) {
     detailPanel.classList.add('open');
 
     if (isLogCategory()) {
-        safeSetHtml(detailMeta, `<span>Time: ${formatTime(m.timestamp)}</span>`
-            + `<span>Level: <strong class="log-level ${m.level || 'info'}">${(m.level || 'info').toUpperCase()}</strong></span>`
-            + `<span>Category: <strong>${escapeHtml(m.category || currentCategory)}</strong></span>`);
+        safeSetHtml(detailMeta, `<span>时间: ${formatTime(m.timestamp)}</span>`
+            + `<span>级别：<strong class="log-level ${m.level || 'info'}">${(m.level || 'info').toUpperCase()}</strong></span>`
+            + `<span>分类：<strong>${escapeHtml(m.category || currentCategory)}</strong></span>`);
         selectedRawMessage = m.message || '';
     } else {
         const parsed = parseEvent(m.message);
@@ -278,13 +278,13 @@ function selectMessage(index) {
         const action = msgData ? extractAction(msgData) : '\u2014';
         const server = msgData ? resolveServer(msgData) : '\u2014';
         const dirClass = m.direction === 'sent' ? 'dir-sent' : 'dir-received';
-        const dirLabel = m.direction === 'sent' ? '\u25B2 SENT' : '\u25BC RECEIVED';
+        const dirLabel = m.direction === 'sent' ? '\u25B2 已发送' : '\u25BC 已接收';
         safeSetHtml(detailMeta, `<span class="${dirClass}">${dirLabel}</span>`
-            + `<span>Time: ${formatTime(m.timestamp)}</span>`
-            + `<span>Event: <strong>${escapeHtml(parsed.event)}</strong></span>`
-            + `<span>Action: <strong>${escapeHtml(action)}</strong></span>`
-            + `<span>Server: <strong>${escapeHtml(server)}</strong></span>`
-            + `<span>Size: ${formatSize(m.message)}</span>`);
+            + `<span>时间: ${formatTime(m.timestamp)}</span>`
+            + `<span>事件：<strong>${escapeHtml(parsed.event)}</strong></span>`
+            + `<span>操作：<strong>${escapeHtml(action)}</strong></span>`
+            + `<span>服务器：<strong>${escapeHtml(server)}</strong></span>`
+            + `<span>大小： ${formatSize(m.message)}</span>`);
         selectedRawMessage = m.message;
     }
     renderDetailBody();
@@ -319,7 +319,7 @@ function closeDetail() {
 // --- Stats ---
 function updateStats() {
     if (isLogCategory()) {
-        statsLabel.textContent = `(${filteredMessages.length} entries)`;
+        statsLabel.textContent = `(${filteredMessages.length} 条)`;
     } else {
         const sent = filteredMessages.filter(m => m.direction === 'sent').length;
         const recv = filteredMessages.filter(m => m.direction === 'received').length;
@@ -330,18 +330,18 @@ function updateStats() {
 function toggleLive() {
     liveMode = !liveMode;
     btnLive.classList.toggle('active', liveMode);
-    btnLive.textContent = liveMode ? '\u25CF Live ON' : '\u25CF Live';
+    btnLive.textContent = liveMode ? '\u25CF 实时开启' : '\u25CF 实时';
 
     if (liveMode) {
         lastLiveTimestamp = new Date().toISOString();
         allMessages = [];
         applyFilters();
         liveTimer = setInterval(pullLiveMessages, 1500);
-        console.log('[COR3 Panel] Live mode ON from', lastLiveTimestamp);
+        console.log('[COR3 面板] 实时模式开启，来源：', lastLiveTimestamp);
     } else {
         if (liveTimer) clearInterval(liveTimer);
         liveTimer = null;
-        console.log('[COR3 Panel] Live mode OFF');
+        console.log('[COR3 面板] 实时模式关闭');
         refreshPageSelector().then(() => loadCurrentPage());
     }
 }
@@ -388,7 +388,7 @@ function exportAsJson() {
 
 function exportAsMd() {
     if (isLogCategory()) {
-        let md = '| Time | Level | Message |\n';
+        let md = '| 时间 | 级别 | 消息 |\n';
         md += '|------|-------|---------|\n';
         for (const m of filteredMessages) {
             const msg = (m.message || '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
@@ -396,7 +396,7 @@ function exportAsMd() {
         }
         downloadFile('cor3-' + currentCategory + '-export.md', md, 'text/markdown');
     } else {
-        let md = '| Dir | Time | Event | Action | Server | Preview | Size |\n';
+        let md = '| 目录 | 时间 | 事件 | 操作 | 服务器 | 预览 | 大小 |\n';
         md += '|-----|------|-------|--------|--------|---------|------|\n';
         for (const m of filteredMessages) {
             const parsed = parseEvent(m.message);
@@ -433,10 +433,10 @@ async function sendWsMessage() {
             message: msg
         });
         sendInput.value = '';
-        console.log('[COR3 Panel] Sent WS message to tab', tabId);
+        console.log('[COR3 面板] 已向标签页发送 WS 消息', tabId);
     } catch (e) {
-        console.log('[COR3 Panel] Failed to send WS message:', e);
-        alert('Failed to send: ' + e.message);
+        console.log('[COR3 面板] 发送 WS 消息失败：', e);
+        alert('发送失败：' + e.message);
     }
 }
 
@@ -510,7 +510,7 @@ categorySelect.addEventListener('change', async () => {
     if (liveMode) {
         liveMode = false;
         btnLive.classList.remove('active');
-        btnLive.textContent = '\u25CF Live';
+        btnLive.textContent = '\u25CF 实时';
         if (liveTimer) clearInterval(liveTimer);
         liveTimer = null;
     }
@@ -556,7 +556,7 @@ pageSelector.addEventListener('change', () => {
     if (liveMode) {
         liveMode = false;
         btnLive.classList.remove('active');
-        btnLive.textContent = '\u25CF Live';
+        btnLive.textContent = '\u25CF 实时';
         if (liveTimer) clearInterval(liveTimer);
         liveTimer = null;
     }
@@ -642,8 +642,8 @@ document.addEventListener('keydown', (e) => {
 
 // --- Initial load: populate page selector and load latest page ---
 (async function init() {
-    console.log('[COR3 Panel] Initializing, inspected tab:', getInspectedTabId());
+    console.log('[COR3 面板] 正在初始化，受检标签页：', getInspectedTabId());
     await refreshPageSelector();
     await loadCurrentPage();
-    console.log('[COR3 Panel] Init complete \u2014 totalCount:', totalCount, 'loaded:', allMessages.length);
+    console.log('[COR3 面板] 初始化完成——totalCount：', totalCount, 'loaded:', allMessages.length);
 })();

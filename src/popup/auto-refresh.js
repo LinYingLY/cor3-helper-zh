@@ -33,25 +33,25 @@ setInterval(() => {
     if (state.coreNextJobsResetAt) {
         const homeResetEl = marketContainer.querySelector('.home-reset-timer');
         if (homeResetEl) {
-            homeResetEl.textContent = `⏳ Jobs Reset: ${formatTimeRemaining(state.coreNextJobsResetAt)}`;
+            homeResetEl.textContent = `⏳ 任务重置： ${formatTimeRemaining(state.coreNextJobsResetAt)}`;
         }
     }
     if (state.bmiNextJobsResetAt) {
         const darkResetEl = darkMarketContainer.querySelector('.dark-reset-timer');
         if (darkResetEl) {
-            darkResetEl.textContent = `⏳ Jobs Reset: ${formatTimeRemaining(state.bmiNextJobsResetAt)}`;
+            darkResetEl.textContent = `⏳ 任务重置： ${formatTimeRemaining(state.bmiNextJobsResetAt)}`;
         }
     }
     if (state.soyuzNextJobsResetAt) {
         const soyuzResetEl = soyuzMarketContainer.querySelector('.soyuz-reset-timer');
         if (soyuzResetEl) {
-            soyuzResetEl.textContent = `⏳ Jobs Reset: ${formatTimeRemaining(state.soyuzNextJobsResetAt)}`;
+            soyuzResetEl.textContent = `⏳ 任务重置： ${formatTimeRemaining(state.soyuzNextJobsResetAt)}`;
         }
     }
     if (state.usolNextJobsResetAt) {
         const usolResetEl = usolMarketContainer.querySelector('.usol-reset-timer');
         if (usolResetEl) {
-            usolResetEl.textContent = `⏳ Jobs Reset: ${formatTimeRemaining(state.usolNextJobsResetAt)}`;
+            usolResetEl.textContent = `⏳ 任务重置： ${formatTimeRemaining(state.usolNextJobsResetAt)}`;
         }
     }
 
@@ -63,7 +63,7 @@ setInterval(() => {
 
     document.querySelectorAll('.auto-jobs-reset-timer').forEach(el => {
         const resetAt = el.dataset.resetAt;
-        if (resetAt) el.textContent = '⏳ Jobs Reset: ' + formatTimeRemaining(resetAt);
+        if (resetAt) el.textContent = '⏳ 任务重置： ' + formatTimeRemaining(resetAt);
     });
 
     updatePinnedTimerValues();

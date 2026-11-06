@@ -12,12 +12,12 @@ import { waitForIceWallStuckClear, waitForMinigameWindow } from '../shared/hack-
 
 export async function processQueue() {
     if (state.running) {
-        log('Auto Job Solver already running — ignoring duplicate start', 'warn');
+        log('自动任务求解器已在运行——忽略重复启动', 'warn');
         return;
     }
 
     if (state.abortFlag) {
-        log('Stop signal received before start — aborting', 'warn');
+        log('启动前收到停止信号 — 已中止', 'warn');
         signalDone();
         return;
     }
@@ -30,7 +30,7 @@ export async function processQueue() {
     var waitAttempts = 0;
     while (window.__cor3InitialFetchInProgress && waitAttempts < 10 && !state.abortFlag) {
         waitAttempts++;
-        log('Initial page load in progress — delaying auto-jobs start (attempt ' + waitAttempts + '/10, waiting 10s)...', 'warn');
+        log('页面首次加载中 — 延迟自动任务启动（尝试 ' + waitAttempts + '/10，等待 10 秒)...', 'warn');
         await new Promise(function (r) { setTimeout(r, 10000); });
     }
     if (state.abortFlag) { signalDone(); return; }
@@ -57,7 +57,7 @@ export async function processQueue() {
         return ta - tb;
     });
 
-    log('Auto Job Solver started — processing ' + state.jobQueue.length + ' job(s)');
+    log('自动任务求解器已启动——正在处理 ' + state.jobQueue.length + ' 个任务');
 
     // Apply locked-job states from ICE Wall reload (if any)
     var lockedJobs = state.solverSettings && state.solverSettings.lockedJobs;
@@ -68,27 +68,27 @@ export async function processQueue() {
             var locked = lockedJobs[lk];
             var matchingJob = state.jobQueue.find(function (j) { return j.jobId === locked.jobId; });
             if (!matchingJob) {
-                log('Locked job ' + locked.jobId + ' no longer in queue — ignoring', 'warn');
+                log('已锁定任务：' + locked.jobId + ' 已不在队列 — 忽略', 'warn');
                 continue;
             }
             if (locked.lockExpiresAt && new Date(locked.lockExpiresAt).getTime() > now) {
                 var lockMins = Math.ceil((new Date(locked.lockExpiresAt).getTime() - now) / 60000);
                 matchingJob.status = 'skipped';
-                matchingJob.error = 'Minigame locked (~' + lockMins + 'm remaining)';
+                matchingJob.error = '小游戏已锁定(约' + lockMins + '分剩余)';
                 matchingJob.lockExpiresAt = locked.lockExpiresAt;
-                log('⚠️ Marked job as skipped (minigame locked): ' + matchingJob.name + ' — lock expires in ~' + lockMins + 'm', 'warn');
+                log('⚠️ Marked job as skipped (minigame locked): ' + matchingJob.name + ' — 锁将在约 ' + lockMins + 'm', 'warn');
                 appliedCount++;
             } else {
-                log('Lock expired for job: ' + (matchingJob.name || locked.jobId) + ' — keeping as pending');
+                log('任务锁定已过期：' + (matchingJob.name || locked.jobId) + ' — 保持待处理');
             }
         }
-        if (appliedCount > 0) log(appliedCount + ' job(s) marked as skipped from previous ICE Wall lockout');
+        if (appliedCount > 0) log(appliedCount + ' 个任务已标记跳过（上次冰墙(ICE)锁定所致）');
     }
 
     updateTracker();
 
     // Pre-start: check all servers for maintenance and skip unreachable jobs
-    log('Checking server maintenance status...');
+    log('正在检查服务器维护状态...');
     state._cachedMapData = null;
     try {
         await fetchMapData(true);
@@ -101,31 +101,31 @@ export async function processQueue() {
                 if (mCheck.blocked && mCheck.blockerName !== 'no-path') {
                     var mMins = Math.ceil((mCheck.remainingMs || 0) / 60000);
                     var mMsg = mCheck.blockerName === mj.serverName
-                        ? mj.serverName + ' in maintenance'
-                        : mj.serverName + ' unreachable (' + mCheck.blockerName + ' in maintenance)';
+                        ? mj.serverName + ' 维护中'
+                        : mj.serverName + ' 不可达 (' + mCheck.blockerName + ' 维护中)';
                     mj.status = 'skipped';
-                    mj.error = mMsg + ' (~' + mMins + 'm remaining)';
+                    mj.error = mMsg + ' (~' + mMins + '分剩余)';
                     mj.maintenanceEndsAt = mCheck.endsAt || null;
-                    log('\u26a0\ufe0f Skipping job: ' + mj.name + ' \u2014 ' + mMsg + ' (~' + mMins + 'm left)', 'warn');
+                    log('\u26a0\ufe0f 跳过任务：' + mj.name + ' \u2014 ' + mMsg + ' (~' + mMins + '分剩余)', 'warn');
                     skippedCount++;
                 }
             }
             if (skippedCount > 0) {
                 updateTracker();
                 saveCompletedResultsIncremental();
-                log(skippedCount + ' job(s) skipped due to server maintenance');
+                log(skippedCount + ' 个任务因服务器维护跳过');
             } else {
-                log('All servers reachable \u2014 no maintenance detected');
+                log('所有服务器均可访问——未检测到维护');
             }
         }
     } catch (e) {
-        log('\u26a0\ufe0f Could not fetch network map for pre-start maintenance check: ' + e.message + ' \u2014 continuing anyway', 'warn');
+        log('\u26a0\ufe0f 无法获取网络地图，无法进行启动前维护检查：' + e.message + ' \u2014 仍然继续', 'warn');
     }
 
     // Auto-claim any already-completed jobs first
     var completedJobs = state.jobQueue.filter(function (j) { return j.canComplete; });
     if (completedJobs.length > 0) {
-        log('Found ' + completedJobs.length + ' completable job(s) — claiming rewards first');
+        log('找到 ' + completedJobs.length + ' 个可完成任务 — 先领取奖励');
         for (var c = 0; c < completedJobs.length; c++) {
             if (state.abortFlag) break;
             var cj = completedJobs[c];
@@ -146,8 +146,8 @@ export async function processQueue() {
                     log('✅ Claimed reward for completed job: ' + cj.name + ' — 💰' + cReward.credits, 'success');
                 } else {
                     cj.status = 'failed';
-                    cj.error = 'Job completion returned no reward';
-                    log('Job completion returned no reward: ' + cj.name, 'warn');
+                    cj.error = '任务完成未返回奖励';
+                    log('任务完成未返回奖励：' + cj.name, 'warn');
                 }
             } catch (e) {
                 cj.status = 'failed';
@@ -164,7 +164,7 @@ export async function processQueue() {
 
     for (var i = 0; i < state.jobQueue.length; i++) {
         if (state.abortFlag) {
-            log('Auto Jobs aborted by user', 'warn');
+            log('自动任务已被用户中止', 'warn');
             break;
         }
 
@@ -177,8 +177,8 @@ export async function processQueue() {
 
         if (isJobBugged(job)) {
             job.status = 'bugged';
-            job.error = 'Bugged: ' + (job.type || job.name) + ' on D4RK RM7CE (logs tab unavailable)';
-            log('⚠️ Skipping bugged job: ' + job.name + ' on D4RK RM7CE — logs tab not available', 'warn');
+            job.error = '故障: ' + (job.type || job.name) + ' 于 D4RK RM7CE（日志标签页不可用）';
+            log('⚠️ Skipping bugged job: ' + job.name + ' 于 D4RK RM7CE — 日志标签页不可用', 'warn');
             updateTracker();
             continue;
         }
@@ -188,12 +188,12 @@ export async function processQueue() {
             if (pathCheck.blocked) {
                 var mins = Math.ceil(pathCheck.remainingMs / 60000);
                 var blockerMsg = pathCheck.blockerName === job.serverName
-                    ? job.serverName + ' in maintenance'
-                    : job.serverName + ' unreachable (' + pathCheck.blockerName + ' in maintenance)';
+                    ? job.serverName + ' 维护中'
+                    : job.serverName + ' 不可达 (' + pathCheck.blockerName + ' 维护中)';
                 job.status = 'skipped';
-                job.error = blockerMsg + ' (~' + mins + 'm remaining)';
+                job.error = blockerMsg + ' (~' + mins + '分剩余)';
                 job.maintenanceEndsAt = pathCheck.endsAt || null;
-                log('⚠️ Skipping job: ' + job.name + ' — ' + blockerMsg + ' (~' + mins + 'm left)', 'warn');
+                log('⚠️ Skipping job: ' + job.name + ' — ' + blockerMsg + ' (~' + mins + '分剩余)', 'warn');
                 updateTracker();
                 continue;
             }
@@ -206,7 +206,7 @@ export async function processQueue() {
         try {
             await ensureLoadoutForJob(job);
         } catch (loadoutErr) {
-            log('Loadout pre-check warning: ' + loadoutErr.message + ' — proceeding anyway', 'warn');
+            log('装备栏预检警告：' + loadoutErr.message + ' — 仍继续执行', 'warn');
         }
 
         try {
@@ -217,7 +217,7 @@ export async function processQueue() {
             } else if (job.marketKey === 'usol') {
                 await stepSetEndpoint(USOL_MARKET_SERVER_ID);
             }
-            log('Processing job ' + (i + 1) + '/' + state.jobQueue.length + ': ' + (job.name || job.type));
+            log('正在处理任务 ' + (i + 1) + '/' + state.jobQueue.length + ': ' + (job.name || job.type));
             var reward = await solveJob(job);
             if (reward) {
                 job.status = 'done';
@@ -225,18 +225,18 @@ export async function processQueue() {
                 log('✅ Job completed: ' + job.name + ' — 💰' + reward.credits + ' ⭐' + reward.reputation + ' 🏅' + reward.renown, 'success');
             } else {
                 job.status = 'failed';
-                job.error = 'Job completion returned no reward';
-                log('Job completion returned no reward: ' + job.name, 'warn');
+                job.error = '任务完成未返回奖励';
+                log('任务完成未返回奖励：' + job.name, 'warn');
             }
         } catch (e) {
             var errText = friendlyError(e.message);
             if (e.message && (e.message.includes('job-not-found-refresh') || e.message.includes('job-not-found') || e.message.includes('Job is not available'))) {
                 job.status = 'skipped';
-                job.error = 'Job no longer available (stale data)';
-                log('⚠️ Job skipped (stale): ' + job.name + ' — refreshing all market data', 'warn');
+                job.error = '任务已不存在（数据过期）';
+                log('⚠️ Job skipped (stale): ' + job.name + ' — 正在刷新全部市场数据', 'warn');
                 updateTracker();
                 saveCompletedResultsIncremental();
-                log('Refreshing all market data after stale job detected...');
+                log('检测到任务过期，正在刷新全部市场数据...');
                 window.postMessage({ type: 'COR3_REFRESH_ALL_MARKETS_SEQ', skipLots: true }, '*');
                 await new Promise(function (resolve) {
                     var refreshTimer = setTimeout(resolve, 30000);
@@ -249,13 +249,13 @@ export async function processQueue() {
                     }
                     window.addEventListener('message', onRefreshDone);
                 });
-                log('All market data refreshed — continuing with remaining jobs');
+                log('所有市场数据已刷新——继续处理剩余任务');
                 state._currentJobRef = null;
                 continue;
             }
             if (e.message === 'Aborted' || state.abortFlag) {
                 job.status = 'skipped';
-                job.error = 'Aborted by user';
+                job.error = '已被用户中止';
                 log('⚠️ Job aborted: ' + job.name, 'warn');
                 state._currentJobRef = null;
                 updateTracker();
@@ -272,7 +272,7 @@ export async function processQueue() {
                 log('🔒 Minigame locked — waiting up to 5s for minigame window to appear...', 'warn');
                 var minigameType = await waitForMinigameWindow(5000);
                 if (minigameType === 'icewall') {
-                    log('ICE Wall minigame detected — checking for stuck state...', 'warn');
+                    log('检测到冰墙小游戏 — 正在检查是否卡住...', 'warn');
                     var iceWallResult = await waitForIceWallStuckClear(log, 10000);
                     if (iceWallResult.reloaded) {
                         job.status = 'skipped';
@@ -280,7 +280,7 @@ export async function processQueue() {
                         updateTracker();
                         saveCompletedResultsIncremental();
                         state._currentJobRef = null;
-                        log('Requesting page reload to clear ICE Wall stuck UI — locked job: ' + job.name, 'warn');
+                        log('正在请求刷新页面以清除冰墙卡死界面 — 锁定的任务：' + job.name, 'warn');
                         window.postMessage({
                             type: 'COR3_AUTOJOB_ICE_WALL_RELOAD',
                             lockedJob: { jobId: job.jobId, lockExpiresAt: job.lockExpiresAt || null }
@@ -307,9 +307,9 @@ export async function processQueue() {
                     var mktCheck = await checkPathMaintenance(marketServerName);
                     if (mktCheck.blocked) {
                         var mktMins = Math.ceil(mktCheck.remainingMs / 60000);
-                        job.error = 'Market unreachable (' + mktCheck.blockerName + ' in maintenance, ~' + mktMins + 'm remaining)';
+                        job.error = '市场连不上（' + mktCheck.blockerName + ' 维护中, ~' + mktMins + '分剩余)';
                         job.maintenanceEndsAt = mktCheck.endsAt || null;
-                        log('⚠️ Job skipped (market unreachable): ' + job.name + ' — ' + mktCheck.blockerName + ' in maintenance (~' + mktMins + 'm left)', 'warn');
+                        log('⚠️ Job skipped (market unreachable): ' + job.name + ' — ' + mktCheck.blockerName + ' 维护中 (~' + mktMins + '分剩余)', 'warn');
                     } else {
                         job.error = errText;
                         job.maintenanceEndsAt = null;
@@ -328,25 +328,25 @@ export async function processQueue() {
             } else if (e.message && (e.message.includes('internal-error') || e.message.includes('Internal server error'))) {
                 job.status = 'pending';
                 job.error = null;
-                log('⚠️ Internal server error on job: ' + job.name + ' — delaying entire process for 5 minutes before retrying...', 'warn');
+                log('⚠️ Internal server error on job: ' + job.name + ' — 整个流程延迟 5 分钟后重试...', 'warn');
                 updateTracker();
                 for (var waitMin = 5; waitMin > 0 && !state.abortFlag; waitMin--) {
-                    log('⏳ Waiting ' + waitMin + ' minute(s) before resuming...', 'info');
+                    log('⏳ Waiting ' + waitMin + ' 分钟后继续...', 'info');
                     await delay(60000);
                 }
                 if (!state.abortFlag) {
-                    log('Resuming after internal server error delay — retrying job: ' + job.name);
+                    log('服务器内部错误延迟结束，恢复执行 — 正在重试任务：' + job.name);
                     i--;
                 }
                 state._currentJobRef = null;
                 continue;
             } else if (e.message && (e.message.includes('Timeout') || e.message.includes('timed out') || e.message.includes('timeout'))) {
                 job.status = 'skipped';
-                job.error = errText + ' (will retry next run)';
+                job.error = errText + ' (将在下次运行时重试)';
                 log('⚠️ Job skipped (timeout): ' + job.name + ' — ' + errText, 'warn');
             } else if (e.message && e.message.includes('rate-limited')) {
                 job.status = 'skipped';
-                job.error = errText + ' (will retry next run)';
+                job.error = errText + ' (将在下次运行时重试)';
                 log('⚠️ Job skipped (rate limited): ' + job.name + ' — ' + errText, 'warn');
             } else {
                 job.status = 'failed';
@@ -366,7 +366,7 @@ export async function processQueue() {
             await delay(1000);
             if (i < state.jobQueue.length - 1 && !state.abortFlag) {
                 var interJobDelay = 2000 + Math.floor(Math.random() * 1500);
-                log('Waiting ' + Math.round(interJobDelay / 1000) + 's before next job...');
+                log('等待 ' + Math.round(interJobDelay / 1000) + ' 秒后开始下一任务...');
                 await delay(interJobDelay);
             }
         } catch (delayErr) {
@@ -384,10 +384,10 @@ export async function processQueue() {
     var totalRep = state.jobQueue.reduce(function (sum, j) { return sum + (j.reward ? j.reward.reputation : 0); }, 0);
     var totalRenown = state.jobQueue.reduce(function (sum, j) { return sum + (j.reward ? j.reward.renown : 0); }, 0);
 
-    var depositStr = totalDeposit > 0 ? ' (deposits: -' + totalDeposit + ')' : '';
+    var depositStr = totalDeposit > 0 ? ' (存入：-' + totalDeposit + ')' : '';
     var buggedStr = buggedCount > 0 ? ', ' + buggedCount + ' bugged' : '';
-    var skippedStr = skippedCount > 0 ? ', ' + skippedCount + ' skipped (maintenance)' : '';
-    log('=== Auto Jobs Complete: ' + doneCount + ' done, ' + failedCount + ' failed' + buggedStr + skippedStr + '. Net: 💰' + totalCredits + depositStr + ' ⭐' + totalRep + ' 🏅' + totalRenown + ' ===', 'success');
+    var skippedStr = skippedCount > 0 ? ', ' + skippedCount + ' 跳过（维护中）' : '';
+    log('=== 自动任务完成：' + doneCount + ' 已完成,' + failedCount + ' 失败' + buggedStr + skippedStr + '. 净收益：💰' + totalCredits + depositStr + ' ⭐' + totalRep + ' 🏅' + totalRenown + ' ===', 'success');
 
     var completedResults = state.jobQueue.map(function (j) {
         return {
@@ -402,7 +402,7 @@ export async function processQueue() {
 
     if (!state.abortFlag) {
         await new Promise(function (r) { setTimeout(r, 500); });
-        log('Refreshing all markets sequentially...');
+        log('正在依次刷新所有市场...');
         window.postMessage({ type: 'COR3_REFRESH_ALL_MARKETS_SEQ', skipLots: true }, '*');
         await new Promise(function (resolve) {
             var timer = setTimeout(resolve, 30000);
@@ -415,12 +415,12 @@ export async function processQueue() {
             }
             window.addEventListener('message', onDone);
         });
-        log('Market refresh complete.');
+        log('市场刷新完成。');
     }
 
     } catch (queueErr) {
         if (queueErr && queueErr.message !== 'Aborted') {
-            log('Unexpected error in processQueue: ' + queueErr.message, 'error');
+            log('processQueue 中出现意外错误：' + queueErr.message, 'error');
         }
     } finally {
         signalDone();

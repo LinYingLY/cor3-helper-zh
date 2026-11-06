@@ -178,9 +178,9 @@ export function setupMessageListener() {
                                 fetchDailyRewards(token);
                             }
                             if (data && data.hasClaimedToday) {
-                                console.log('[COR3 Helper] Daily already claimed — skipping solver');
+                                console.log('[COR3 Helper] 每日已领取 — 跳过求解器');
                                 chrome.storage.sync.set({ autoDailyHackEnabled: false });
-                                chrome.storage.local.set({ dailyHackLog: 'Daily already claimed today — skipping automation.', dailyHackLogUpdatedAt: Date.now() });
+                                chrome.storage.local.set({ dailyHackLog: '今日每日奖励已领取 — 跳过自动化。', dailyHackLogUpdatedAt: Date.now() });
                                 return;
                             }
                             ensureAntiAfkEnabled();
@@ -229,7 +229,7 @@ export function setupMessageListener() {
             chrome.storage.local.get('bearerToken', (result) => {
                 const token = result.bearerToken;
                 if (!token) {
-                    sendResponse({ error: 'no token' });
+                    sendResponse({ error: '无令牌' });
                     return;
                 }
                 fetch('https://svc-corie.cor3.gg/api/user-daily-claim', {
@@ -247,39 +247,39 @@ export function setupMessageListener() {
                     }
                     sendResponse({ data: data });
                 })
-                .catch(e => { cor3LogError('content.js', e, { action: 'fetchDailyOps' }); sendResponse({ error: e.message || 'fetch failed' }); });
+                .catch(e => { cor3LogError('content.js', e, { action: 'fetchDailyOps' }); sendResponse({ error: e.message || '请求失败' }); });
             });
             return true; // keep channel open for async sendResponse
         } else if (request.action === "disableBackground") {
             chrome.storage.sync.set({ disableBackground: true });
             deleteBackgroundElements();
-            console.log('[COR3 Helper] Background elements deleted');
+            console.log('[COR3 Helper] 后台元素已删除');
             sendResponse({ success: true });
         } else if (request.action === "enableBackground") {
             chrome.storage.sync.set({ disableBackground: false });
-            console.log('[COR3 Helper] Background elements will be restored on page reload');
+            console.log('[COR3 Helper] 后台元素将在页面刷新后恢复');
             sendResponse({ success: true });
         } else if (request.action === "disableNetworkFog") {
             chrome.storage.sync.set({ disableNetworkFog: true });
             startNetworkFogObserver();
             hideNetworkFogVideos();
-            console.log('[COR3 Helper] Network fog disabled');
+            console.log('[COR3 Helper] 网络迷雾已禁用');
             sendResponse({ success: true });
         } else if (request.action === "enableNetworkFog") {
             chrome.storage.sync.set({ disableNetworkFog: false });
             stopNetworkFogObserver();
             showNetworkFogVideos();
-            console.log('[COR3 Helper] Network fog re-enabled');
+            console.log('[COR3 Helper] 网络迷雾已重新启用');
             sendResponse({ success: true });
         } else if (request.action === "moveNotificationsLeft") {
             chrome.storage.sync.set({ moveNotificationsLeft: true });
             applyNotificationsLeft();
-            console.log('[COR3 Helper] Notifications moved to left');
+            console.log('[COR3 Helper] 通知已移到左侧');
             sendResponse({ success: true });
         } else if (request.action === "moveNotificationsRight") {
             chrome.storage.sync.set({ moveNotificationsLeft: false });
             removeNotificationsLeft();
-            console.log('[COR3 Helper] Notifications moved back to right');
+            console.log('[COR3 Helper] 通知已移回右侧');
             sendResponse({ success: true });
         } else if (request.action === "getVersionFallbacks") {
             sendResponse({
@@ -303,8 +303,8 @@ export function setupMessageListener() {
                             var expired = lockedJobs.length - stillLocked.length;
                             settings.lockedJobs = stillLocked;
                             chrome.storage.local.set({ autoJobsLockedJobs: stillLocked });
-                            if (expired > 0) console.log('[COR3 Helper] Pruned ' + expired + ' expired lock(s) from autoJobsLockedJobs');
-                            if (stillLocked.length > 0) console.log('[COR3 Helper] Passing ' + stillLocked.length + ' locked job(s) to solver');
+                            if (expired > 0) console.log('[COR3 Helper] 已清理 ' + expired + ' 个已过期锁(来自 autoJobsLockedJobs)');
+                            if (stillLocked.length > 0) console.log('[COR3 Helper] 正在传递 ' + stillLocked.length + ' 个锁定任务已交给求解器');
                         }
                         window.postMessage({ type: 'COR3_AUTOJOB_START', jobs: jobs, settings: settings }, '*');
                     });
@@ -351,7 +351,7 @@ export function setupMessageListener() {
                             window.postMessage({ type: dismissRefreshType }, '*');
                         }
                     } catch (e) {
-                        console.log('[COR3 Helper] dismissFailedJobs error:', e);
+                        console.log('[COR3 Helper] dismissFailedJobs 出错：', e);
                     } finally {
                         _automationFinish('clear-failed-jobs');
                     }

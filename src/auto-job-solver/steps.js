@@ -44,13 +44,13 @@ export async function stepSetEndpoint(serverId) {
     var endpointLabel = getServerNameById(serverId) || serverId;
 
     if (state._lastEndpointServerId === serverId) {
-        log('Endpoint already set to ' + endpointLabel + ' — skipping duplicate set.endpoint');
+        log('端点已设置为 ' + endpointLabel + ' — 跳过重复的 set.endpoint');
         return;
     }
 
     await fetchMapData(true);
 
-    log('Setting endpoint to ' + endpointLabel);
+    log('正在设置端点为 ' + endpointLabel);
     var raceResult = await _sendSetEndpoint(serverId);
 
     if (raceResult.unreachable) {
@@ -58,8 +58,8 @@ export async function stepSetEndpoint(serverId) {
             var initMaint = serverMap.isReady() ? serverMap.getServer(serverId) : null;
             var initRemaining = (initMaint && initMaint.maintenanceEndsAt) ? new Date(initMaint.maintenanceEndsAt).getTime() - Date.now() : 0;
             var initMins = initRemaining > 0 ? Math.ceil(initRemaining / 60000) : 0;
-            var initSuffix = initMins > 0 ? ' (~' + initMins + 'm remaining)' : '';
-            throw new Error(endpointLabel + ' is in maintenance' + initSuffix);
+            var initSuffix = initMins > 0 ? ' (~' + initMins + '分剩余)' : '';
+            throw new Error(endpointLabel + ' 正在维护' + initSuffix);
         }
         var allPaths = serverMap.isReady() ? serverMap.findAllPaths(serverId) : [];
         var path = serverMap.isReady() ? serverMap.findBestReachablePath(serverId) : null;
@@ -68,9 +68,9 @@ export async function stepSetEndpoint(serverId) {
             var noPathCheck = await checkPathMaintenance(endpointLabel);
             if (noPathCheck.blocked) {
                 var nMins = Math.ceil(noPathCheck.remainingMs / 60000);
-                throw new Error(endpointLabel + ' unreachable (' + noPathCheck.blockerName + ' in maintenance, ~' + nMins + 'm remaining)');
+                throw new Error(endpointLabel + ' 不可达 (' + noPathCheck.blockerName + ' 维护中, ~' + nMins + '分剩余)');
             }
-            throw new Error(endpointLabel + ' unreachable (no path to server)');
+            throw new Error(endpointLabel + ' 不可达 (无通往服务器的路径)');
         }
         var pathThroughSuccess = false;
         var triedPathCount = 0;
@@ -86,7 +86,7 @@ export async function stepSetEndpoint(serverId) {
                     var mRemaining = targetSrv.maintenanceEndsAt ? new Date(targetSrv.maintenanceEndsAt).getTime() - Date.now() : 0;
                     if (mRemaining > 0) {
                         var mMins = Math.ceil(mRemaining / 60000);
-                        throw new Error(endpointLabel + ' is in maintenance (~' + mMins + 'm remaining) — skipping path-through');
+                        throw new Error(endpointLabel + ' 维护中（约 ' + mMins + '分钟剩余）— 跳过直达路径');
                     }
                 }
             }
@@ -99,8 +99,8 @@ export async function stepSetEndpoint(serverId) {
                 log('⚡ Path-through: setting endpoint to ' + intermediate.name + ' (' + (pi + 1) + '/' + (currentPath.length - 1) + ')');
                 var intResult = await _sendSetEndpoint(intermediate.id);
                 if (intResult.unreachable) {
-                    var intMsg = intermediate.name + ' unreachable on this path';
-                    log('⚡ Path-through: ' + intMsg + ' — will try next path', 'warn');
+                    var intMsg = intermediate.name + ' 此路径上不可达';
+                    log('⚡ Path-through: ' + intMsg + ' — 将尝试下一条路径', 'warn');
                     pathFailed = true;
                     break;
                 }
@@ -108,7 +108,7 @@ export async function stepSetEndpoint(serverId) {
                 try {
                     await stepLogin(intermediate.id);
                 } catch (e) {
-                    log('⚡ Path-through: login/hack failed on ' + intermediate.name + ': ' + e.message + ' — will try next path', 'warn');
+                    log('⚡ Path-through: login/hack failed on ' + intermediate.name + ': ' + e.message + ' — 将尝试下一条路径', 'warn');
                     pathFailed = true;
                     break;
                 }
@@ -125,24 +125,24 @@ export async function stepSetEndpoint(serverId) {
                 var maintCheck = serverMap.isReady() ? serverMap.getServer(serverId) : null;
                 var maintRemaining = (maintCheck && maintCheck.maintenanceEndsAt) ? new Date(maintCheck.maintenanceEndsAt).getTime() - Date.now() : 0;
                 var maintMins = maintRemaining > 0 ? Math.ceil(maintRemaining / 60000) : 0;
-                var maintSuffix = maintMins > 0 ? ' (~' + maintMins + 'm remaining)' : '';
-                throw new Error(endpointLabel + ' is in maintenance' + maintSuffix + ' — aborting path-through');
+                var maintSuffix = maintMins > 0 ? ' (~' + maintMins + '分剩余)' : '';
+                throw new Error(endpointLabel + ' 正在维护' + maintSuffix + ' — 放弃路径穿透');
             }
-            log('⚡ Endpoint still unreachable after path ' + triedPathCount + ' — trying next', 'warn');
+            log('⚡ Endpoint still unreachable after path ' + triedPathCount + ' — 尝试下一个', 'warn');
         }
 
         if (!pathThroughSuccess && raceResult.unreachable) {
             var finalCheck = await checkPathMaintenance(endpointLabel);
             if (finalCheck.blocked) {
                 var fMins = Math.ceil(finalCheck.remainingMs / 60000);
-                throw new Error(endpointLabel + ' still unreachable after ' + triedPathCount + ' path(s) (' + finalCheck.blockerName + ' in maintenance, ~' + fMins + 'm remaining)');
+                throw new Error(endpointLabel + ' 仍不可达，已尝试 ' + triedPathCount + ' 条路径（' + finalCheck.blockerName + ' 维护中, ~' + fMins + '分剩余)');
             }
-            throw new Error(endpointLabel + ' still unreachable after ' + triedPathCount + ' path attempt(s)');
+            throw new Error(endpointLabel + ' 仍不可达，已尝试 ' + triedPathCount + ' 次路径尝试');
         }
     }
 
     if (raceResult.timeout) {
-        log('Endpoint set timeout (may already be set)', 'warn');
+        log('端点设置超时(可能已设置)', 'warn');
     }
     state._lastEndpointServerId = serverId;
     await delay(humanDelay());
@@ -151,17 +151,17 @@ export async function stepSetEndpoint(serverId) {
 // Step: Login to server (use existing access or hack)
 export async function stepLogin(serverId) {
     var serverLabel = getServerNameById(serverId) || serverId;
-    log('Checking login status for ' + serverLabel);
+    log('正在检查登录状态 ' + serverLabel);
     sendCmd('get.login.status', { serverId: serverId });
     var loginData;
     try {
         loginData = await waitForEvent('COR3_AUTOJOB_SAI_LOGIN_STATUS', 10000);
     } catch (e) {
-        throw new Error('Failed to get login status: ' + e.message);
+        throw new Error('获取登录状态失败: ' + e.message);
     }
 
     if (loginData.error) {
-        throw new Error('Login status error: ' + friendlyError(loginData.error.message || JSON.stringify(loginData.error)));
+        throw new Error('登录状态错误：' + friendlyError(loginData.error.message || JSON.stringify(loginData.error)));
     }
 
     var data = loginData.data;
@@ -169,27 +169,27 @@ export async function stepLogin(serverId) {
         var accessObj = data.activeAccesses[0];
         var accessId = accessObj.id;
         var accessType = accessObj.accessType || accessObj.type || 'unknown';
-        log('Using existing access on ' + serverLabel + ' (' + accessType + ')');
+        log('使用已有访问：' + serverLabel + ' (' + accessType + ')');
         sendCmd('login.with-access', { serverId: serverId, accessGrantId: accessId });
         var loginResult;
         try {
             loginResult = await waitForEvent('COR3_AUTOJOB_SAI_LOGIN_RESULT', 10000);
         } catch (e) {
-            throw new Error('Login with access timed out');
+            throw new Error('凭访问权限登录超时');
         }
         if (loginResult.error || !(loginResult.data && loginResult.data.success)) {
-            throw new Error('Login with access failed');
+            throw new Error('凭访问权限登录失败');
         }
-        log('Logged in via existing access to ' + serverLabel, 'success');
+        log('通过已有访问登录：' + serverLabel, 'success');
     } else {
         // Log hack power info
         var loginDefenceRate = (data && data.serverDefenceRate) ? data.serverDefenceRate : 0;
         var loginHackPower = 0;
         if (data && data.hackTools && data.hackTools.length > 0) {
             loginHackPower = data.hackTools[0].hackPower || 0;
-            log('Hack info — serverDefenceRate: ' + loginDefenceRate + ', equipped hackPower: ' + loginHackPower + ' (' + (data.hackTools[0].name || 'unknown') + ')' + (loginDefenceRate > 0 ? (loginHackPower >= loginDefenceRate ? ' ✓' : ' ✗ INSUFFICIENT') : ''));
+            log('破解信息 — serverDefenceRate: ' + loginDefenceRate + ', 已装备破解算力: ' + loginHackPower + ' (' + (data.hackTools[0].name || 'unknown') + ')' + (loginDefenceRate > 0 ? (loginHackPower >= loginDefenceRate ? ' ✓' : ' ✗ 不足') : ''));
         } else if (loginDefenceRate > 0) {
-            log('Hack info — serverDefenceRate: ' + loginDefenceRate + ', no hack tools equipped', 'warn');
+            log('破解信息 — serverDefenceRate: ' + loginDefenceRate + ', 未装备破解工具', 'warn');
         }
 
         var MAX_HACK_ATTEMPTS = 6;
@@ -199,9 +199,9 @@ export async function stepLogin(serverId) {
         while (hackAttempt < MAX_HACK_ATTEMPTS && !loggedIn) {
             hackAttempt++;
             if (hackAttempt > 1) {
-                log('Hack attempt ' + hackAttempt + '/' + MAX_HACK_ATTEMPTS + ' on ' + serverLabel, 'warn');
+                log('破解尝试 ' + hackAttempt + '/' + MAX_HACK_ATTEMPTS + ' 在 ' + serverLabel, 'warn');
             } else {
-                log('No active access to ' + serverLabel + ' — starting hack');
+                log('无有效访问：' + serverLabel + ' — 开始破解');
             }
             ensureDecryptSolverEnabled();
             ensureIceWallSolverEnabled();
@@ -213,7 +213,7 @@ export async function stepLogin(serverId) {
                 hackResult = await new Promise(function (resolve, reject) {
                     var done = false;
                     var timer = safeTimeout(function () {
-                        if (!done) { done = true; window.removeEventListener('message', onMsg); reject(new Error('Timeout')); }
+                        if (!done) { done = true; window.removeEventListener('message', onMsg); reject(new Error('超时')); }
                     }, 30000);
                     function onMsg(evt) {
                         if (!evt.data) return;
@@ -228,7 +228,7 @@ export async function stepLogin(serverId) {
                     window.addEventListener('message', onMsg);
                 });
             } catch (e) {
-                log('Hack start event timed out — checking if hack already completed...', 'warn');
+                log('破解开始事件超时 — 正在检查破解是否已完成...', 'warn');
                 sendCmd('get.login.status', { serverId: serverId });
                 try {
                     var fallbackLogin = await waitForEvent('COR3_AUTOJOB_SAI_LOGIN_STATUS', 10000);
@@ -236,7 +236,7 @@ export async function stepLogin(serverId) {
                         var fbAccess = fallbackLogin.data.activeAccesses[0];
                         var fbAccessId = fbAccess.id;
                         var fbType = fbAccess.accessType || fbAccess.type || 'unknown';
-                        log('Hack already completed (found ' + fbType + ' access after timeout) — logging in', 'success');
+                        log('破解已完成(发现 ' + fbType + ' 超时后访问) — 正在登录', 'success');
                         sendCmd('login.with-access', { serverId: serverId, accessGrantId: fbAccessId });
                         try { await waitForEvent('COR3_AUTOJOB_SAI_LOGIN_RESULT', 10000); } catch (e2) { /* proceed */ }
                         await delay(humanDelay());
@@ -244,14 +244,14 @@ export async function stepLogin(serverId) {
                     }
                 } catch (e2) { /* login status also failed */ }
                 if (hackAttempt < MAX_HACK_ATTEMPTS) {
-                    log('Hack timed out — will retry', 'warn');
+                    log('破解超时 — 将重试', 'warn');
                     await delay(2000);
                     continue;
                 }
-                throw new Error('Hack start timed out after ' + MAX_HACK_ATTEMPTS + ' attempts');
+                throw new Error('破解开始超时，已等待 ' + MAX_HACK_ATTEMPTS + ' 次尝试');
             }
             if (hackResult.error) {
-                log('Hack returned error: ' + friendlyError(hackResult.error.message || JSON.stringify(hackResult.error)) + ' — checking access...', 'warn');
+                log('破解返回错误：' + friendlyError(hackResult.error.message || JSON.stringify(hackResult.error)) + ' — 正在检查访问权限...', 'warn');
                 sendCmd('get.login.status', { serverId: serverId });
                 try {
                     var errLogin = await waitForEvent('COR3_AUTOJOB_SAI_LOGIN_STATUS', 10000);
@@ -259,7 +259,7 @@ export async function stepLogin(serverId) {
                         var errAccess = errLogin.data.activeAccesses[0];
                         var errAccessId = errAccess.id;
                         var errType = errAccess.accessType || errAccess.type || 'unknown';
-                        log('Already have ' + errType + ' access despite hack error — logging in', 'success');
+                        log('已拥有 ' + errType + ' 破解出错但已有访问 — 正在登录', 'success');
                         sendCmd('login.with-access', { serverId: serverId, accessGrantId: errAccessId });
                         try { await waitForEvent('COR3_AUTOJOB_SAI_LOGIN_RESULT', 10000); } catch (e2) { /* proceed */ }
                         await delay(humanDelay());
@@ -269,20 +269,20 @@ export async function stepLogin(serverId) {
 
                 var hackErrMsg = hackResult.error.message || JSON.stringify(hackResult.error);
                 if (hackErrMsg.indexOf('sai-no-hack-software') >= 0 || hackErrMsg.indexOf('sai-hack-impossible') >= 0) {
-                    log('Loadout: attempting software swap for hack retry...');
+                    log('装备栏：正在尝试更换软件以重试破解...');
                     var loadoutSwapped = await tryLoadoutSwapForError(hackErrMsg, { serverId: serverId, type: state._currentJobRef ? state._currentJobRef.type : '' });
                     if (loadoutSwapped) {
-                        log('Loadout: swap successful — will retry hack');
+                        log('装备栏：更换成功 — 将重试破解');
                         await delay(1000);
                         continue;
                     }
                 }
                 if (hackAttempt < MAX_HACK_ATTEMPTS) {
-                    log('Hack failed — will retry', 'warn');
+                    log('破解失败 — 将重试', 'warn');
                     await delay(2000);
                     continue;
                 }
-                throw new Error('Hack failed after ' + MAX_HACK_ATTEMPTS + ' attempts: ' + friendlyError(hackErrMsg));
+                throw new Error('破解失败,已尝试 ' + MAX_HACK_ATTEMPTS + ' 次尝试：' + friendlyError(hackErrMsg));
             }
             if (hackResult.data && hackResult.data.minigameLocked) {
                 var lockInfo = formatMinigameLockError(hackResult.data.lockData);
@@ -295,9 +295,9 @@ export async function stepLogin(serverId) {
                 }
             }
             if (hackResult.data && hackResult.data.autoHacked) {
-                log('Server auto-hacked (no minigame) — skipping solver wait', 'success');
+                log('服务器已自动破解（无小游戏）— 跳过等待求解器', 'success');
             } else if (hackResult.data && hackResult.data.minigameStarted) {
-                log('Hack minigame detected via minigame event');
+                log('通过小游戏事件检测到破解小游戏');
                 await waitForHackToBeDone();
             } else {
                 await waitForHackToBeDone();
@@ -311,7 +311,7 @@ export async function stepLogin(serverId) {
                 try {
                     loginData = await waitForEvent('COR3_AUTOJOB_SAI_LOGIN_STATUS', 5000);
                 } catch (e) {
-                    log('Login status not received after hack (poll ' + (attempt + 1) + '/' + maxPolls + '), retrying...', 'warn');
+                    log('破解后未收到登录状态（轮询 ' + (attempt + 1) + '/' + maxPolls + '), 正在重试...', 'warn');
                     continue;
                 }
                 if (loginData.data && loginData.data.activeAccesses && loginData.data.activeAccesses.length > 0) {
@@ -323,20 +323,20 @@ export async function stepLogin(serverId) {
                         await waitForEvent('COR3_AUTOJOB_SAI_LOGIN_RESULT', 10000);
                     } catch (e) { /* proceed anyway */ }
                     loggedIn = true;
-                    log('Logged in to ' + serverLabel + ' (' + postHackType + ')', 'success');
+                    log('已登录：' + serverLabel + ' (' + postHackType + ')', 'success');
                     break;
                 } else {
-                    log('No active access after hack (poll ' + (attempt + 1) + '/' + maxPolls + '), retrying...', 'warn');
+                    log('破解后没有有效访问（轮询 ' + (attempt + 1) + '/' + maxPolls + '), 正在重试...', 'warn');
                     await delay(5000);
                 }
             }
             if (!loggedIn) {
                 if (hackAttempt < MAX_HACK_ATTEMPTS) {
-                    log('Hack completed but no access granted — hack likely failed, retrying (' + hackAttempt + '/' + MAX_HACK_ATTEMPTS + ')', 'warn');
+                    log('破解完成但未获得访问权限 — 破解可能失败，正在重试 (' + hackAttempt + '/' + MAX_HACK_ATTEMPTS + ')', 'warn');
                     await delay(2000);
                     continue;
                 }
-                throw new Error('Hack failed after ' + MAX_HACK_ATTEMPTS + ' attempts — no access granted');
+                throw new Error('破解失败,已尝试 ' + MAX_HACK_ATTEMPTS + ' 次尝试 — 未获得访问权限');
             }
         }
     }
@@ -346,10 +346,10 @@ export async function stepLogin(serverId) {
 // Step: Take a job from market (tracks deposit paid)
 export async function stepTakeJob(job) {
     if (job.alreadyTaken) {
-        log('Job already taken — skipping take step');
+        log('任务已被接取 — 跳过接取步骤');
         return;
     }
-    log('Taking job: ' + jobLabel(job));
+    log('正在接取任务：' + jobLabel(job));
 
     var depositPaid = 0;
     var depositHandler = function (evt) {
@@ -366,11 +366,11 @@ export async function stepTakeJob(job) {
         if (evt.data && evt.data.type === 'COR3_AUTOJOB_DESKTOP_FILE' && evt.data.data && evt.data.data.file) {
             var fileData = evt.data.data.file;
             capturedFileInfo = fileData;
-            log('Captured file info: ' + fileData.name + ' (id: ' + fileData.id + ')');
+            log('已捕获文件信息: ' + fileData.name + ' (ID: ' + fileData.id + ')');
             var fId = fileData.folderId;
             if (fId) {
                 state.downloadFolderId = fId;
-                log('Captured download folder ID: ' + fId);
+                log('已捕获下载文件夹 ID: ' + fId);
             }
         }
     };
@@ -382,24 +382,24 @@ export async function stepTakeJob(job) {
         if (result.error) {
             window.removeEventListener('message', depositHandler);
             window.removeEventListener('message', fileHandler);
-            throw new Error('Job take error: ' + friendlyError(result.error.message || JSON.stringify(result.error)));
+            throw new Error('接取任务出错：' + friendlyError(result.error.message || JSON.stringify(result.error)));
         }
     } catch (e) {
         window.removeEventListener('message', depositHandler);
         window.removeEventListener('message', fileHandler);
-        throw new Error('Failed to take job: ' + e.message);
+        throw new Error('接取任务失败: ' + e.message);
     }
     window.removeEventListener('message', depositHandler);
 
     if (depositPaid > 0) {
         job.depositPaid = depositPaid;
-        log('Job taken (deposit: ' + depositPaid + ' credits)', 'success');
+        log('已接取任务（押金：' + depositPaid + ' 信用点)', 'success');
     } else {
-        log('Job taken successfully', 'success');
+        log('任务接取成功', 'success');
     }
     await delay(humanDelay());
 
-    log('Refreshing market data for job conditions...');
+    log('正在刷新市场数据以获取任务条件...');
     sendCmd('get.jobs', { marketId: job.marketId });
     var updatedConditions = await new Promise(function (resolve) {
         var timer;
@@ -436,7 +436,7 @@ export async function stepTakeJob(job) {
     if (updatedConditions) {
         if (updatedConditions.conditions && updatedConditions.conditions.items) {
             job.conditions = updatedConditions.conditions.items;
-            log('Updated job conditions from server');
+            log('已从服务器更新任务条件');
         }
         if (updatedConditions.canComplete !== undefined) {
             job.canComplete = updatedConditions.canComplete;
@@ -446,7 +446,7 @@ export async function stepTakeJob(job) {
 
 // Step: Check job completion status
 export async function stepCheckJobComplete(marketId, jobId) {
-    log('Checking job completion status');
+    log('正在检查任务完成状态');
     sendCmd('get.jobs', { marketId: marketId });
     await delay(1000);
     return true;
@@ -454,7 +454,7 @@ export async function stepCheckJobComplete(marketId, jobId) {
 
 // Step: Complete job and claim reward
 export async function stepCompleteJob(job) {
-    log('Completing job and claiming reward');
+    log('正在完成任务并领取奖励');
 
     var earnedCredits = 0;
     var earnedRenown = 0;
@@ -488,12 +488,12 @@ export async function stepCompleteJob(job) {
                 var errMsg = result.error.message || '';
                 if (errMsg.indexOf('not found') >= 0) {
                     window.removeEventListener('message', profileHandler);
-                    log('Job not found (stale ID) — skipping this job', 'error');
+                    log('未找到任务（ID 过期）— 跳过此任务', 'error');
                     throw new Error('job-not-found');
                 }
                 if (errMsg.indexOf('market-not-reachable') >= 0 && completeRetries < MAX_COMPLETE_RETRIES) {
                     completeRetries++;
-                    log('Market not reachable during job.complete — re-setting endpoint and retrying (' + completeRetries + '/' + MAX_COMPLETE_RETRIES + ')', 'warn');
+                    log('任务完成时连不上市场 — 重设端点并重试（' + completeRetries + '/' + MAX_COMPLETE_RETRIES + ')', 'warn');
                     await delay(1500);
                     var marketName = getMarketNameById(job.marketId);
                     if (marketName === 'D4RK') await stepSetEndpoint(DARK_MARKET_SERVER_ID);
@@ -503,8 +503,8 @@ export async function stepCompleteJob(job) {
                     continue;
                 }
                 window.removeEventListener('message', profileHandler);
-                var friendlyMsg = friendlyError(errMsg, result.error.failedConditions) || 'Unknown completion error';
-                log('Job completion error: ' + friendlyMsg, 'error');
+                var friendlyMsg = friendlyError(errMsg, result.error.failedConditions) || '未知完成错误';
+                log('任务完成出错：' + friendlyMsg, 'error');
                 throw new Error(errMsg);
             }
 
@@ -515,7 +515,7 @@ export async function stepCompleteJob(job) {
             var netCredits = grossCredits - deposit;
             var reputation = job.rewardReputation || 0;
             var renown = earnedRenown || 0;
-            log('Job completed!', 'success');
+            log('任务完成！', 'success');
 
             return {
                 credits: netCredits,
@@ -526,7 +526,7 @@ export async function stepCompleteJob(job) {
             };
         } catch (e) {
             window.removeEventListener('message', profileHandler);
-            log('Job completion timed out: ' + e.message, 'error');
+            log('任务完成超时：' + e.message, 'error');
             throw e;
         }
     }
@@ -538,21 +538,21 @@ export async function stepDiscoverDownloadFolder() {
 
     if (window.__cor3DownloadFolderId) {
         state.downloadFolderId = window.__cor3DownloadFolderId;
-        log('Using cached Downloads folder ID: ' + state.downloadFolderId);
+        log('使用缓存的下载文件夹 ID：' + state.downloadFolderId);
         return state.downloadFolderId;
     }
 
-    log('Waiting for Downloads folder ID from polling/WS...');
+    log('正在等待轮询/WS 返回下载文件夹 ID...');
     for (var attempt = 0; attempt < 10; attempt++) {
         await delay(500);
         if (window.__cor3DownloadFolderId) {
             state.downloadFolderId = window.__cor3DownloadFolderId;
-            log('Got Downloads folder ID from polling: ' + state.downloadFolderId);
+            log('通过轮询获取到下载文件夹 ID: ' + state.downloadFolderId);
             return state.downloadFolderId;
         }
     }
 
-    log('Sending explicit desktop.get.options command...');
+    log('正在发送显式 desktop.get.options 命令...');
     sendCmd('desktop.get.options', {});
     var result = await new Promise(function (resolve) {
         var timer;
@@ -569,31 +569,31 @@ export async function stepDiscoverDownloadFolder() {
         window.addEventListener('message', handler);
         timer = safeTimeout(function () {
             window.removeEventListener('message', handler);
-            log('desktop.get.options WS command timed out after 8s', 'warn');
+            log('desktop.get.options WS 命令在 8 秒后超时', 'warn');
             resolve(null);
         }, 8000);
     });
 
     if (!result && window.__cor3DownloadFolderId) {
         state.downloadFolderId = window.__cor3DownloadFolderId;
-        log('Got Downloads folder ID from global after WS attempt: ' + state.downloadFolderId);
+        log('WS 尝试后从全局获取到下载文件夹 ID: ' + state.downloadFolderId);
         return state.downloadFolderId;
     }
 
     if (result) {
-        log('desktop.get.options response — folders: ' + (result.folders ? result.folders.length : 0) + ', files: ' + (result.files ? result.files.length : 0));
+        log('desktop.get.options 响应 — 文件夹: ' + (result.folders ? result.folders.length : 0) + '，文件： ' + (result.files ? result.files.length : 0));
         if (result.folders) {
             var dlFolder = result.folders.find(function (f) { return f.name === 'Downloads'; });
             if (dlFolder) {
                 state.downloadFolderId = dlFolder.id;
-                log('Discovered Downloads folder ID: ' + dlFolder.id);
+                log('已发现下载文件夹 ID: ' + dlFolder.id);
                 return dlFolder.id;
             }
-            log('No "Downloads" folder found in: ' + result.folders.map(function(f) { return f.name; }).join(', '), 'warn');
+            log('在以下路径未找到“Downloads”文件夹：' + result.folders.map(function(f) { return f.name; }).join(', '), 'warn');
         }
     } else {
-        log('desktop.get.options returned null/empty', 'warn');
+        log('desktop.get.options 返回空值', 'warn');
     }
-    log('Could not discover Downloads folder ID', 'warn');
+    log('无法找到下载文件夹 ID', 'warn');
     return null;
 }

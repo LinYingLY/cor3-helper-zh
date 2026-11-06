@@ -27,15 +27,15 @@ const copyAllLogsBtn = document.getElementById('copyAllLogsBtn');
 const autoFinishAllJobsToggle = document.getElementById('autoFinishAllJobsToggle');
 
 const SUPPORTED_JOB_TYPES = [
-    'File Decryption',
-    'IP Injection',
-    'Data Download',
-    'Log Deletion',
-    'Log Download',
-    'Decrypt & Extract',
-    'File Elimination',
-    'Data Upload',
-    'IP Cleanup'
+    '文件解密',
+    'IP 注入',
+    '数据下载',
+    '日志删除',
+    '日志下载',
+    '解密并提取',
+    '文件清除',
+    '数据上传',
+    'IP 清理'
 ];
 
 const MARKET_IDS = {
@@ -91,7 +91,7 @@ const AUTO_JOBS_MAX_LOGS = 200;
 let autoJobsTracker = [];
 
 function updateAutoJobSolverStatus(enabled) {
-    autoJobSolverStatus.textContent = enabled ? 'Active' : 'Off';
+    autoJobSolverStatus.textContent = enabled ? '活跃' : '关';
     autoJobSolverStatus.style.color = enabled ? 'var(--accent-green)' : 'var(--text-dim)';
     autoJobSolverSection.style.display = enabled ? '' : 'none';
     var card = autoJobSolverSection.closest('.popout-card');
@@ -156,20 +156,20 @@ function renderAutoJobsMarket(container, data, marketKey, marketAvailable, maint
     _clearEl(container);
     if (marketAvailable === false) {
         let timerHtml = '';
-        if (blockerServer) timerHtml += ' (' + blockerServer + ' in maintenance';
+        if (blockerServer) timerHtml += ' (' + blockerServer + ' 维护中';
         if (maintenanceEndsAt) {
             const diff = new Date(maintenanceEndsAt).getTime() - Date.now();
             if (diff > 0) {
                 const mins = Math.ceil(diff / 60000);
-                timerHtml += (blockerServer ? ', ' : ' (') + '~' + mins + 'm remaining';
+                timerHtml += (blockerServer ? ', ' : ' (') + '~' + mins + '分剩余';
             }
         }
         if (timerHtml) timerHtml += ')';
         const marketLabel = marketKey === 'dark' ? 'D4RK' : marketKey === 'soyuz' ? 'SOYUZ' : marketKey === 'usol' ? 'USOL' : 'HOME';
-        container.appendChild(_h('div', {className: 'warning-banner'}, '⚠️ ' + marketLabel + ' market server is currently unreachable' + timerHtml + '.'));
+        container.appendChild(_h('div', {className: 'warning-banner'}, '⚠️ ' + marketLabel + ' 市场服务器当前不可达' + timerHtml + '.'));
     }
     if (!data || (!data.jobs && !data.recentJobs)) {
-        container.appendChild(_h('div', {className: 'auto-jobs-no-jobs'}, 'No jobs available. Click 🔄 to refresh market data.'));
+        container.appendChild(_h('div', {className: 'auto-jobs-no-jobs'}, '无可用任务。点击 🔄 刷新市场数据。'));
         return;
     }
 
@@ -177,7 +177,7 @@ function renderAutoJobsMarket(container, data, marketKey, marketAvailable, maint
         const timerDiv = document.createElement('div');
         timerDiv.className = 'auto-jobs-reset-timer';
         timerDiv.dataset.resetAt = data.nextJobsResetAt;
-        timerDiv.textContent = '⏳ Jobs Reset: ' + formatTimeRemaining(data.nextJobsResetAt);
+        timerDiv.textContent = '⏳ 任务重置： ' + formatTimeRemaining(data.nextJobsResetAt);
         container.appendChild(timerDiv);
     }
 
@@ -190,14 +190,14 @@ function renderAutoJobsMarket(container, data, marketKey, marketAvailable, maint
     if (availableJobs.length === 0) {
         const noJobsDiv = document.createElement('div');
         noJobsDiv.className = 'auto-jobs-no-jobs';
-        noJobsDiv.textContent = 'All jobs completed or expired.';
+        noJobsDiv.textContent = '所有任务均已完成或已过期。';
         container.appendChild(noJobsDiv);
         return;
     }
 
     const typeMap = {};
     for (const job of availableJobs) {
-        const typeName = job.name || 'Unknown';
+        const typeName = job.name || '未知';
         if (!typeMap[typeName]) typeMap[typeName] = [];
         typeMap[typeName].push(job);
     }
@@ -241,15 +241,15 @@ function renderAutoJobsMarket(container, data, marketKey, marketAvailable, maint
         if (!isSupported) {
             const tooltip = document.createElement('span');
             tooltip.className = 'unsupported-tooltip';
-            tooltip.textContent = 'Not supported';
-            tooltip.title = 'This job type is currently not supported';
+            tooltip.textContent = '不支持';
+            tooltip.title = '此任务类型当前不受支持';
             row.appendChild(tooltip);
         } else if (buggedCount > 0 && buggedCount === jobs.length) {
             const tooltip = document.createElement('span');
             tooltip.className = 'unsupported-tooltip';
             tooltip.style.color = 'var(--accent-orange)';
-            tooltip.textContent = 'Bugged';
-            tooltip.title = 'Log jobs on D4RK RM7CE are bugged (logs tab unavailable)';
+            tooltip.textContent = '异常';
+            tooltip.title = 'D4RK RM7CE 的日志任务存在 bug（日志标签页不可用）';
             row.appendChild(tooltip);
         }
 
@@ -268,7 +268,7 @@ function renderAutoJobsMarket(container, data, marketKey, marketAvailable, maint
     const selectAllLabel = document.createElement('label');
     selectAllLabel.className = "job-type-label";
     selectAllLabel.setAttribute('for', selectAllCb.id);
-    selectAllLabel.textContent = 'Select All';
+    selectAllLabel.textContent = '全选';
     const totalTaken = takenJobs.length;
     const selectAllCount = document.createElement('span');
     selectAllCount.className = 'job-type-count';
@@ -306,10 +306,10 @@ chrome.storage.sync.get('autoJobsSelectedTypes', (data) => {
 
 // Refresh button
 refreshAutoJobsBtn.addEventListener('click', async () => {
-    autoJobsContentHome.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, 'Refreshing (sequential)...'));
-    autoJobsContentDark.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, 'Refreshing (sequential)...'));
-    autoJobsContentSoyuz.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, 'Refreshing (sequential)...'));
-    autoJobsContentUsol.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, 'Refreshing (sequential)...'));
+    autoJobsContentHome.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, '正在刷新 (顺序)...'));
+    autoJobsContentDark.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, '正在刷新 (顺序)...'));
+    autoJobsContentSoyuz.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, '正在刷新 (顺序)...'));
+    autoJobsContentUsol.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, '正在刷新 (顺序)...'));
     try {
         const tab = await getCor3Tab();
         if (tab) {
@@ -337,7 +337,7 @@ copyAllLogsBtn.addEventListener('click', async () => {
     if (copyAllLogsBtn.dataset.busy === 'true') return;
     copyAllLogsBtn.dataset.busy = 'true';
     copyAllLogsBtn.textContent = '⏳';
-    copyAllLogsBtn.title = 'Collecting logs...';
+    copyAllLogsBtn.title = '正在收集日志...';
     const MAX_COPY_BYTES = 10 * 1024 * 1024;
     try {
         const storageKeys = ['autoJobsDebugLogs', 'valuableDebugLogs', 'cor3_errors'];
@@ -413,7 +413,7 @@ copyAllLogsBtn.addEventListener('click', async () => {
                 }
             }
         } catch (e) {
-            console.log('[COR3 Helper] Could not read logs from IndexedDB:', e);
+            console.log('[COR3 Helper] 读取 IndexedDB 日志出错：', e);
         }
 
         const mergedAutoJobLogs = idbAutoJobLogs.length > 0 ? idbAutoJobLogs : (storageData.autoJobsDebugLogs || []);
@@ -471,7 +471,7 @@ copyAllLogsBtn.addEventListener('click', async () => {
                     json = JSON.stringify(payload, null, 2);
                 }
             }
-            console.log('[COR3 Helper] Trimmed logs to ' + (json.length / 1024 / 1024).toFixed(2) + ' MB');
+            console.log('[COR3 Helper] 日志已裁剪至 ' + (json.length / 1024 / 1024).toFixed(2) + ' MB');
         }
 
         const wrapped = '```json\n' + json + '\n```';
@@ -479,20 +479,20 @@ copyAllLogsBtn.addEventListener('click', async () => {
 
         const sizeMB = (wrapped.length / 1024 / 1024).toFixed(1);
         copyAllLogsBtn.textContent = '✅';
-        copyAllLogsBtn.title = 'Logs copied (' + sizeMB + ' MB)';
+        copyAllLogsBtn.title = '日志已复制（' + sizeMB + ' MB)';
         setTimeout(() => {
             copyAllLogsBtn.textContent = '📋';
-            copyAllLogsBtn.title = 'Copy all debug logs to clipboard';
+            copyAllLogsBtn.title = '复制所有调试日志到剪贴板';
             copyAllLogsBtn.dataset.busy = 'false';
         }, 2000);
     } catch (e) {
-        console.log('[COR3 Helper] Copy all logs failed:', e);
+        console.log('[COR3 Helper] 复制全部日志失败：', e);
         cor3LogError('popup.js', e, { action: 'copyAllLogs' });
         copyAllLogsBtn.textContent = '❌';
-        copyAllLogsBtn.title = 'Failed to copy logs';
+        copyAllLogsBtn.title = '复制日志失败';
         setTimeout(() => {
             copyAllLogsBtn.textContent = '📋';
-            copyAllLogsBtn.title = 'Copy all debug logs to clipboard';
+            copyAllLogsBtn.title = '复制所有调试日志到剪贴板';
             copyAllLogsBtn.dataset.busy = 'false';
         }, 2000);
     }
@@ -502,9 +502,9 @@ copyAllLogsBtn.addEventListener('click', async () => {
 autoJobsStartBtn.addEventListener('click', async () => {
     if (autoJobsRunning) {
         autoJobsRunning = false;
-        autoJobsStartBtn.textContent = '▶ Start Auto Jobs';
+        autoJobsStartBtn.textContent = '▶ 开始自动任务';
         autoJobsStartBtn.className = 'auto-jobs-btn-start start';
-        addAutoJobLog('Auto Jobs stopped by user.', 'warn');
+        addAutoJobLog('自动任务已被用户停止。', 'warn');
         try {
             const tab = await getCor3Tab();
             if (tab) await chrome.tabs.sendMessage(tab.id, { action: "stopAutoJobs" });
@@ -512,7 +512,7 @@ autoJobsStartBtn.addEventListener('click', async () => {
         await chrome.storage.local.set({ autoJobsRunning: false });
     } else {
         autoJobsRunning = true;
-        autoJobsStartBtn.textContent = '■ Stop Auto Jobs';
+        autoJobsStartBtn.textContent = '■ 停止自动任务';
         autoJobsStartBtn.className = 'auto-jobs-btn-start stop';
 
         const { marketData, darkMarketData, soyuzMarketData, usolMarketData } = await chrome.storage.local.get(['marketData', 'darkMarketData', 'soyuzMarketData', 'usolMarketData']);
@@ -568,9 +568,9 @@ autoJobsStartBtn.addEventListener('click', async () => {
         });
 
         if (jobsToRun.length === 0) {
-            addAutoJobLog('No jobs selected or available to run.', 'warn');
+            addAutoJobLog('未选择任务，也没有可执行的任务。', 'warn');
             autoJobsRunning = false;
-            autoJobsStartBtn.textContent = '▶ Start Auto Jobs';
+            autoJobsStartBtn.textContent = '▶ 开始自动任务';
             autoJobsStartBtn.className = 'auto-jobs-btn-start start';
             return;
         }
@@ -580,7 +580,7 @@ autoJobsStartBtn.addEventListener('click', async () => {
         );
         autoJobsTracker = [...previousJobs, ...jobsToRun];
         renderDebugJobs();
-        addAutoJobLog(`Starting auto jobs: ${jobsToRun.length} job(s) queued.`, 'info');
+        addAutoJobLog(`正在启动自动任务： ${jobsToRun.length} 个任务已排队。`, 'info');
 
         await chrome.storage.local.set({ autoJobsRunning: true, autoJobsQueue: jobsToRun, autoJobsTracker: autoJobsTracker });
         try {
@@ -593,7 +593,7 @@ autoJobsStartBtn.addEventListener('click', async () => {
                 });
             }
         } catch (e) {
-            addAutoJobLog('Failed to send auto jobs to content script: ' + e.message, 'error');
+            addAutoJobLog('向内容脚本发送自动任务失败: ' + e.message, 'error');
         }
     }
 });
@@ -672,16 +672,16 @@ async function dismissFailedJobsForMarket(marketKey, btn) {
             marketKey: marketKey
         });
     } catch (e) {
-        console.log('[COR3 Helper] dismissFailedJobs sendMessage error:', e);
+        console.log('[COR3 Helper] dismissFailedJobs sendMessage 出错：', e);
         return;
     }
 
     if (resp && (resp.queueResult === 'queued' || resp.queueResult === 'already-running')) {
-        const activeType = resp.queueStatus && resp.queueStatus.active ? resp.queueStatus.active : 'another automation';
-        const friendlyNames = { 'auto-jobs': 'Auto Job Solver', 'auto-valuable': 'Auto Valuable Seller', 'auto-update-markets': 'Auto Update Markets', 'auto-send': 'Auto Send Mercenary', 'clear-failed-jobs': 'Clear Failed Jobs' };
+        const activeType = resp.queueStatus && resp.queueStatus.active ? resp.queueStatus.active : '另一个自动化';
+        const friendlyNames = { 'auto-jobs': '自动任务求解器', 'auto-valuable': '自动高价出售', 'auto-update-markets': '自动更新市场', 'auto-send': '自动派遣佣兵', 'clear-failed-jobs': '清空失败任务' };
         const activeName = friendlyNames[activeType] || activeType;
         if (btn) {
-            btn.title = 'Delayed — waiting for "' + activeName + '" to finish';
+            btn.title = '已延迟 — 正在等待 "' + activeName + '" 完成';
             btn.style.cursor = 'help';
         }
     }
@@ -693,7 +693,7 @@ async function dismissFailedJobsForMarket(marketKey, btn) {
         if (status.active !== 'clear-failed-jobs' && !(status.queued || []).includes('clear-failed-jobs')) break;
     }
 
-    addAutoJobLog(`🧹 Dismissed ${failedJobs.length} failed job(s) from ${marketKey} market`, 'info');
+    addAutoJobLog(`🧹 Dismissed ${failedJobs.length} 个失败任务，来自  ${marketKey} market`, 'info');
 }
 ['home', 'dark', 'soyuz', 'usol'].forEach(key => {
     const btnId = { home: 'cleanupCoreMarketBtn', dark: 'cleanupDarkMarketBtn', soyuz: 'cleanupSoyuzMarketBtn', usol: 'cleanupUsolMarketBtn' }[key];
@@ -703,7 +703,7 @@ async function dismissFailedJobsForMarket(marketKey, btn) {
             btn.disabled = true;
             btn.textContent = '⏳';
             const origTitle = btn.title;
-            try { await dismissFailedJobsForMarket(key, btn); } catch (e) { console.log('[COR3 Helper] Cleanup error:', e); cor3LogError('popup.js', e, { action: 'dismissFailedJobs', market: key }); }
+            try { await dismissFailedJobsForMarket(key, btn); } catch (e) { console.log('[COR3 Helper] 清理出错：', e); cor3LogError('popup.js', e, { action: 'dismissFailedJobs', market: key }); }
             btn.disabled = false;
             btn.textContent = '🧹';
             btn.title = origTitle;
@@ -794,7 +794,7 @@ function addAutoJobLog(msg, level = 'info') {
 
 export function renderDebugLogs() {
     if (autoJobsDebugLogs.length === 0) {
-        debugLogsBody.replaceChildren(_h('div', {style: 'color:var(--text-dim);'}, 'No logs yet.'));
+        debugLogsBody.replaceChildren(_h('div', {style: 'color:var(--text-dim);'}, '暂无日志。'));
         return;
     }
     const frag = document.createDocumentFragment();
@@ -928,7 +928,7 @@ export async function renderDebugJobs() {
     if (!hasAny) {
         const empty = document.createElement('div');
         empty.style.color = 'var(--text-dim)';
-        empty.textContent = 'No job data yet.';
+        empty.textContent = '暂无任务数据。';
         frag.appendChild(empty);
     }
     debugJobsBody.replaceChildren(frag);
@@ -945,10 +945,10 @@ function createDebugJobRow(job) {
     statusEl.textContent = st.toUpperCase();
     if (job.lockExpiresAt || job.maintenanceEndsAt) {
         const expiryDate = job.lockExpiresAt || job.maintenanceEndsAt;
-        const label = job.lockExpiresAt ? 'Minigame lock' : 'Maintenance';
+        const label = job.lockExpiresAt ? '小游戏锁定' : '维护';
         const diff = new Date(expiryDate).getTime() - Date.now();
         const mins = diff > 0 ? Math.ceil(diff / 60000) : 0;
-        statusEl.title = mins > 0 ? `${label} (~${mins}m remaining)` : `${label} (expired)`;
+        statusEl.title = mins > 0 ? `${label} (~${mins}分剩余)` : `${label} (expired)`;
         statusEl.style.cursor = 'help';
     } else if (job.error) {
         statusEl.title = job.error;
@@ -1001,10 +1001,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
         const running = changes.autoJobsRunning.newValue;
         autoJobsRunning = !!running;
         if (autoJobsRunning) {
-            autoJobsStartBtn.textContent = '■ Stop Auto Jobs';
+            autoJobsStartBtn.textContent = '■ 停止自动任务';
             autoJobsStartBtn.className = 'auto-jobs-btn-start stop';
         } else {
-            autoJobsStartBtn.textContent = '▶ Start Auto Jobs';
+            autoJobsStartBtn.textContent = '▶ 开始自动任务';
             autoJobsStartBtn.className = 'auto-jobs-btn-start start';
         }
     }
@@ -1031,7 +1031,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
         const usolReset = checkReset(changes.usolMarketData, 'usol');
         if (homeReset || darkReset || soyuzReset || usolReset) {
             const resetMarkets = [homeReset && 'HOME', darkReset && 'D4RK', soyuzReset && 'SOYUZ', usolReset && 'USOL'].filter(Boolean).join(', ');
-            addAutoJobLog('Job reset detected (' + resetMarkets + ') — clearing old tracker/results', 'info');
+            addAutoJobLog('检测到任务重置（' + resetMarkets + '）— 清除旧追踪器/结果', 'info');
             autoJobsTracker = autoJobsTracker.filter(j => {
                 if (homeReset && (j.marketKey || 'home') === 'home') return false;
                 if (darkReset && j.marketKey === 'dark') return false;
@@ -1078,7 +1078,7 @@ chrome.storage.local.get(['autoJobsDebugLogs', 'autoJobsTracker', 'autoJobsRunni
     }
     if (data.autoJobsRunning) {
         autoJobsRunning = true;
-        autoJobsStartBtn.textContent = '■ Stop Auto Jobs';
+        autoJobsStartBtn.textContent = '■ 停止自动任务';
         autoJobsStartBtn.className = 'auto-jobs-btn-start stop';
     }
 });

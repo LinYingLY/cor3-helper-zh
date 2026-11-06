@@ -36,11 +36,11 @@ export function autoSellCheapestItems(items, count, callback) {
         .sort((a, b) => a.sellPrice - b.sellPrice);
     const toSell = sellable.slice(0, Math.max(count, 1));
     if (toSell.length === 0) {
-        console.log('[COR3 Helper] Auto-sell: no sellable items found');
+        console.log('[COR3 Helper] 自动出售：没有可出售的物品');
         if (callback) callback();
         return;
     }
-    console.log('[COR3 Helper] Auto-sell: selling', toSell.length, 'item(s):', toSell.map(i => i.name + ' (' + i.sellPrice + ')').join(', '));
+    console.log('[COR3 Helper] 自动出售：正在出售', toSell.length, '物品：', toSell.map(i => i.name + ' (' + i.sellPrice + ')').join(', '));
     let idx = 0;
     function sellNext() {
         if (idx >= toSell.length) { if (callback) callback(); return; }
@@ -66,7 +66,7 @@ export function disableAutoSendDueToStashFull() {
     });
     window.postMessage({
         type: 'COR3_STASH_FULL_WARNING',
-        message: 'Stash is full. Clear stash before claiming more items. Auto-send mercenary disabled.'
+        message: '藏匿点已满。领取更多物品前请先清空藏匿点。自动派遣佣兵已禁用。'
     }, '*');
     autoSendInProgress = false;
     _automationFinish('auto-send');
@@ -76,16 +76,16 @@ export function disableAutoSendDueToStashFull() {
 export function checkAutoSendOnExpeditionData(expeditions) {
     if (!expeditions || !Array.isArray(expeditions) || autoSendInProgress) return;
     if (!_initialFetchDone) {
-        console.log('[COR3 Helper] Auto-send: deferred — initial data fetch still in progress');
+        console.log('[COR3 Helper] 自动派遣：已延迟 — 初始数据仍在获取中');
         return;
     }
     if (autoSendExpeditionBlocked) {
         var hasActive = expeditions.some(e => e.status !== 'COMPLETED' && e.status !== 'FAILED');
         if (hasActive) {
-            console.log('[COR3 Helper] Auto-send: still blocked — active expedition in progress');
+            console.log('[COR3 Helper] 自动派遣：仍被阻塞 — 有远征正在进行');
             return;
         }
-        console.log('[COR3 Helper] Auto-send: active expedition finished — unblocking');
+        console.log('[COR3 Helper] 自动派遣：进行中的远征已完成 — 解除阻塞');
         autoSendExpeditionBlocked = false;
         chrome.storage.local.remove('autoSendExpeditionBlocked');
     }
@@ -93,7 +93,7 @@ export function checkAutoSendOnExpeditionData(expeditions) {
     const _automationQueue = getAutomationQueue();
     if (_automationActive && _automationActive.type !== 'auto-send') {
         if (!_automationQueue.some(q => q.type === 'auto-send')) {
-            console.log('[COR3 Helper] Auto-send: queued (waiting for', _automationActive.type, 'to finish)');
+            console.log('[COR3 Helper] 自动派遣：已排队（等待', _automationActive.type, '后完成）');
             _automationQueue.push({ type: 'auto-send', run: function () {
                 chrome.storage.local.get('expeditionsData', (result) => {
                     setAutomationActive(null);
@@ -106,7 +106,7 @@ export function checkAutoSendOnExpeditionData(expeditions) {
             }});
             _broadcastQueueStatus();
         } else {
-            console.log('[COR3 Helper] Auto-send: already queued (waiting for', _automationActive.type, ')');
+            console.log('[COR3 Helper] 自动派遣：已排队（等待', _automationActive.type, ')');
         }
         return;
     }
@@ -118,17 +118,17 @@ export function checkAutoSendOnExpeditionData(expeditions) {
         if (!hasActiveExpeditions) {
             if (!initialMercsReady) {
                 if (autoSendDeferredWaiting) {
-                    console.log('[COR3 Helper] Auto-send: Already waiting for initial mercs — skipping duplicate deferral');
+                    console.log('[COR3 Helper] 自动派遣：已在等待初始佣兵 — 跳过重复延迟');
                     return;
                 }
                 autoSendDeferredWaiting = true;
-                console.log('[COR3 Helper] Auto-send: No active expeditions but initial mercs not ready — deferring');
+                console.log('[COR3 Helper] 自动派遣：没有进行中的远征，但初始佣兵未就绪 — 延迟');
                 function onInitialMercsDone(evt) {
                     if (evt.data && evt.data.type === 'COR3_USOL_MERCS_DONE') {
                         window.removeEventListener('message', onInitialMercsDone);
                         clearTimeout(deferTimeout);
                         autoSendDeferredWaiting = false;
-                        console.log('[COR3 Helper] Auto-send: Initial mercs now ready — re-checking expeditions');
+                        console.log('[COR3 Helper] 自动派遣：初始佣兵已就绪 — 正在重新检查远征');
                         initialMercsReady = true;
                         chrome.storage.local.get('expeditionsData', (result) => {
                             if (result.expeditionsData) {
@@ -142,7 +142,7 @@ export function checkAutoSendOnExpeditionData(expeditions) {
                     window.removeEventListener('message', onInitialMercsDone);
                     autoSendDeferredWaiting = false;
                     initialMercsReady = true;
-                    console.log('[COR3 Helper] Auto-send: Deferred merc wait timed out — proceeding');
+                    console.log('[COR3 Helper] 自动派遣：延迟等待佣兵超时 — 继续执行');
                     chrome.storage.local.get('expeditionsData', (result) => {
                         if (result.expeditionsData) {
                             checkAutoSendOnExpeditionData(result.expeditionsData);
@@ -151,7 +151,7 @@ export function checkAutoSendOnExpeditionData(expeditions) {
                 }, 60000);
                 return;
             }
-            console.log('[COR3 Helper] Auto-send: No active expeditions, refreshing mercs (CORE + USOL) before launch');
+            console.log('[COR3 Helper] 自动派遣：没有进行中的远征，发起前刷新佣兵（CORE + USOL）');
             autoSendInProgress = true;
             if (!getAutomationActive()) setAutomationActive({ type: 'auto-send', startedAt: Date.now() });
             _broadcastQueueStatus();
@@ -161,7 +161,7 @@ export function checkAutoSendOnExpeditionData(expeditions) {
             var mercDelay = 2500 + Math.floor(Math.random() * 1000);
             setTimeout(() => {
                 if (!autoSendInProgress || (getAutomationActive() && getAutomationActive().type !== 'auto-send')) {
-                    console.log('[COR3 Helper] Auto-send: merc refresh skipped (no longer active or another automation took over)');
+                    console.log('[COR3 Helper] 自动发送: 已跳过佣兵刷新 (不再活跃或已被其他自动化接管)');
                     return;
                 }
                 window.postMessage({ type: 'COR3_REQUEST_MERCENARIES' }, '*');
@@ -177,12 +177,12 @@ export function checkAutoSendOnExpeditionData(expeditions) {
                 _broadcastQueueStatus();
                 autoSendExpeditionId = exp.id;
                 if (!exp.containerOpenedAt) {
-                    console.log('[COR3 Helper] Auto-send: Detected COMPLETED expedition:', exp.id, '- opening container in 10s');
+                    console.log('[COR3 Helper] 自动发送: 检测到已完成的远征:', exp.id, '- 10 秒后打开容器');
                     setTimeout(() => {
                         window.postMessage({ type: 'COR3_OPEN_CONTAINER', expeditionId: exp.id }, '*');
                     }, 10000 + Math.floor(Math.random() * 500));
                 } else {
-                    console.log('[COR3 Helper] Auto-send: Detected COMPLETED expedition:', exp.id, '- container already open, collecting in 10s');
+                    console.log('[COR3 Helper] 自动发送: 检测到已完成的远征:', exp.id, '- 容器已打开，10 秒后收取');
                     setTimeout(() => {
                         window.postMessage({ type: 'COR3_COLLECT_ALL', expeditionId: exp.id }, '*');
                     }, 10000 + Math.floor(Math.random() * 500));
@@ -195,14 +195,14 @@ export function checkAutoSendOnExpeditionData(expeditions) {
 
 export function proceedWithMerc(mercId, allMercs, settings, localData) {
     if (!mercId) {
-        console.log('[COR3 Helper] Auto-send: no mercenary selected, aborting');
+        console.log('[COR3 Helper] 自动派遣：未选择佣兵，中止');
         autoSendInProgress = false;
         _automationFinish('auto-send');
         return;
     }
     const selectedMerc = allMercs.find(m => m.id === mercId);
     if (!selectedMerc || selectedMerc.status !== 'AVAILABLE') {
-        console.log('[COR3 Helper] Auto-send: selected mercenary not AVAILABLE (status: ' + (selectedMerc ? selectedMerc.status : 'not found') + '), aborting');
+        console.log('[COR3 Helper] 自动派遣：所选佣兵不可用（状态： ' + (selectedMerc ? selectedMerc.status : '未找到') + '），放弃');
         autoSendInProgress = false;
         _automationFinish('auto-send');
         return;
@@ -212,7 +212,7 @@ export function proceedWithMerc(mercId, allMercs, settings, localData) {
     const marketId = isUsol ? '019e4065-6ae8-760d-8724-58ab4f2cf7d7' : '019d3ea4-85bd-7389-904d-8f7c85841134';
     const config = localData[configKey];
     if (!config || !config.locations || config.locations.length === 0) {
-        console.log('[COR3 Helper] Auto-send: no expedition config available for ' + (isUsol ? 'USOL' : 'CORE') + ', aborting');
+        console.log('[COR3 Helper] 自动派遣：没有可用的远征配置，目标 ' + (isUsol ? 'USOL' : 'CORE') + '，放弃');
         autoSendInProgress = false;
         _automationFinish('auto-send');
         return;
@@ -223,7 +223,7 @@ export function proceedWithMerc(mercId, allMercs, settings, localData) {
     const zone = loc.zones && loc.zones[0] ? loc.zones[0] : null;
     const goal = zone && zone.goals && zone.goals[0] ? zone.goals[0] : null;
     if (!zone || !goal) {
-        console.log('[COR3 Helper] Auto-send: missing zone/goal config, aborting');
+        console.log('[COR3 Helper] 自动派遣：缺少区域/目标配置，中止');
         autoSendInProgress = false;
         _automationFinish('auto-send');
         return;
@@ -236,7 +236,7 @@ export function proceedWithMerc(mercId, allMercs, settings, localData) {
         goalId: goal.id,
         hasInsurance: false
     };
-    console.log('[COR3 Helper] Auto-send: launching expedition with mercenary:', selectedMerc.callsign, '(' + (isUsol ? 'USOL' : 'CORE') + ')');
+    console.log('[COR3 Helper] 自动派遣：正在用佣兵发起远征：', selectedMerc.callsign, '(' + (isUsol ? 'USOL' : 'CORE') + ')');
     setTimeout(() => {
         chrome.storage.local.set({ lastExpeditionLaunchData: launchConfig });
         window.postMessage({ type: 'COR3_LAUNCH_EXPEDITION', config: launchConfig }, '*');

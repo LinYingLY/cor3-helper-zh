@@ -40,7 +40,7 @@ export function installWebSocketProxy(handleWsMessage) {
             ws.__cor3IsMinigame = isMinigameSocket;
 
             if (url.includes('cor3') || url.includes('corie')) {
-                console.log('[COR3 Helper] Tracking WebSocket:', url, isMinigameSocket ? '(minigame — excluded from active tracking)' : '');
+                console.log('[COR3 Helper] 正在跟踪 WebSocket：', url, isMinigameSocket ? '（小游戏 — 不计入活跃追踪）' : '');
                 ws.__cor3Url = url;
                 if (!isMinigameSocket) {
                     trackedSockets.push(ws);
@@ -102,7 +102,7 @@ export function installWebSocketProxy(handleWsMessage) {
                     try {
                         if (!isMinigameSocket) {
                             if (getActiveSocket() !== ws) {
-                                console.log('[COR3 Helper] Active socket changed to:', ws.__cor3Url);
+                                console.log('[COR3 助手] 活动 socket 已切换为：', ws.__cor3Url);
                                 setActiveSocket(ws);
                             }
                             socketLastActivity.set(ws, Date.now());
@@ -122,12 +122,12 @@ export function installWebSocketProxy(handleWsMessage) {
 
                 // Auto-fetch all data when WS connects (page load/reload)
                 ws.addEventListener('open', function () {
-                    console.log('[COR3 Helper] WS connected — scheduling initial data fetch');
+                    console.log('[COR3 助手] WS 已连接——安排首次数据拉取');
                     // Wait for connection to stabilize, then fetch all data
                     setTimeout(function () {
                         // Clear pending retry ops — initial fetch covers expeditions, stash, dailyOps
                         if (tokenExpiredFlag || pendingRetryOps.length > 0) {
-                            console.log('[COR3 Helper] Clearing pending retries (initial fetch will cover them):', pendingRetryOps.join(', '));
+                            console.log('[COR3 Helper] 正在清除待处理重试（初始获取会覆盖它们）：', pendingRetryOps.join(', '));
                             setPendingRetryOps([]);
                             setTokenExpiredFlag(false);
                         }
@@ -137,7 +137,7 @@ export function installWebSocketProxy(handleWsMessage) {
 
                 // Clean up closed sockets
                 ws.addEventListener('close', function () {
-                    console.log('[COR3 Helper] WS closed');
+                    console.log('[COR3 助手] WS 已关闭');
                     const idx = trackedSockets.indexOf(ws);
                     if (idx !== -1) trackedSockets.splice(idx, 1);
                     socketLastActivity.delete(ws);

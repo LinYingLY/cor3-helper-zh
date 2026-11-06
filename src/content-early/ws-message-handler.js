@@ -34,11 +34,11 @@ export function handleWsMessage(rawData, socket) {
 
     // Handle token-expired error — close sockets to force game to reconnect with fresh token
     if (eventName === 'error' && payload && payload.message === 'token-expired') {
-        console.log('[COR3 Helper] Token expired detected — closing sockets to force reconnect');
+        console.log('[COR3 Helper] 检测到令牌过期 — 正在关闭套接字以强制重连');
         setTokenExpiredFlag(true);
         // Abort all in-flight market refreshes by bumping the abort ID
         var newAbortId = bumpMarketRefreshAbortId();
-        console.log('[COR3 Helper] Bumped market refresh abort ID to', newAbortId);
+        console.log('[COR3 Helper] 市场刷新中止 ID 已更新为', newAbortId);
         // Reset initial fetch so reconnect does a full fresh fetch (not partial retry)
         if (window.__cor3ResetInitialFetch) window.__cor3ResetInitialFetch();
         // Queue NON-market data fetches for retry (markets will be handled by initialFetch)
@@ -54,9 +54,9 @@ export function handleWsMessage(rawData, socket) {
         // Safety: if no new socket within 15s, log warning
         setTimeout(function () {
             if (trackedSockets.length === 0) {
-                console.log('[COR3 Helper] No new WebSocket connected after token-expired close — game may need page refresh');
+                console.log('[COR3 Helper] 令牌过期关闭后没有新的 WebSocket 连接 — 游戏可能需要刷新页面');
             } else {
-                console.log('[COR3 Helper] WebSocket reconnected after token-expired');
+                console.log('[COR3 助手] 令牌过期后 WebSocket 已重连');
             }
         }, 15000);
         return;
@@ -185,13 +185,13 @@ export function handleWsMessage(rawData, socket) {
                 requestId: payload.requestId
             }, '*');
         } else if (payload.error && payload.error.message === 'insufficient-credits') {
-            console.log('[COR3 Helper] collect.all failed: insufficient credits');
+            console.log('[COR3 Helper] collect.all 失败：信用点不足');
             window.postMessage({
                 type: 'COR3_WS_COLLECT_INSUFFICIENT_CREDITS',
                 error: payload.error.message
             }, '*');
         } else if (payload.error) {
-            console.log('[COR3 Helper] collect.all failed with unexpected error:', payload.error.message);
+            console.log('[COR3 Helper] collect.all 失败，出现意外错误：', payload.error.message);
             window.postMessage({
                 type: 'COR3_WS_STASH_FULL',
                 error: payload.error.message,
@@ -219,7 +219,7 @@ export function handleWsMessage(rawData, socket) {
     if (eventName === 'expeditions' && payload && payload.event && payload.event.action === 'launch') {
         // Check for launch errors
         if (payload.error && payload.error.message === 'Maximum 1 active expedition allowed') {
-            console.log('[COR3 Helper] Expedition launch failed: Maximum 1 active expedition allowed');
+            console.log('[COR3 Helper] 远征发起失败：最多只允许 1 个进行中的远征');
             window.postMessage({
                 type: 'COR3_WS_EXPEDITION_LAUNCH_ERROR',
                 error: payload.error.message
@@ -228,7 +228,7 @@ export function handleWsMessage(rawData, socket) {
         }
 
         if (payload.error && payload.error.message === 'This location requires an elite mercenary') {
-            console.log('[COR3 Helper] Expedition launch failed: quest location requires elite mercenary — will retry with default location');
+            console.log('[COR3 Helper] 远征发起失败：任务地点需要精英佣兵 — 将用默认地点重试');
             window.postMessage({
                 type: 'COR3_WS_EXPEDITION_ELITE_REQUIRED',
                 error: payload.error.message
@@ -237,7 +237,7 @@ export function handleWsMessage(rawData, socket) {
         }
 
         if (payload.error && payload.error.message === 'Mercenary is not available') {
-            console.log('[COR3 Helper] Expedition launch failed: Mercenary is not available');
+            console.log('[COR3 Helper] 远征发起失败：佣兵不可用');
             window.postMessage({
                 type: 'COR3_WS_MERC_NOT_AVAILABLE',
                 error: payload.error.message
@@ -247,7 +247,7 @@ export function handleWsMessage(rawData, socket) {
 
         // Check for insufficient credits error
         if (payload.error && payload.error.message === 'insufficient-credits') {
-            console.log('[COR3 Helper] Expedition launch failed: insufficient credits');
+            console.log('[COR3 Helper] 远征发起失败：信用点不足');
             window.postMessage({
                 type: 'COR3_WS_INSUFFICIENT_CREDITS',
                 error: payload.error.message
@@ -376,7 +376,7 @@ export function handleWsMessage(rawData, socket) {
     if (eventName === 'updater' && payload && payload.data) {
         var sv = payload.data.selectedVersion;
         if (sv) {
-            console.log('[COR3 Helper] Captured patch version from updater:', sv);
+            console.log('[COR3 Helper] 已从更新器捕获补丁版本：', sv);
             window.__cor3PatchVersion = sv;
             window.postMessage({ type: 'COR3_PATCH_VERSION', version: sv }, '*');
         }
@@ -389,7 +389,7 @@ export function handleWsMessage(rawData, socket) {
             var errMsg = payload.error && payload.error.message;
             var isUnreachableErr = errMsg === 'no-path-to-server' || errMsg === 'server-in-maintenance' || errMsg === 'market-not-reachable';
             if (payload.error && isUnreachableErr) {
-                console.log('[COR3 Helper] Server unreachable: ' + errMsg + ' (dark-pt: ' + !!window.__cor3DarkMarketPathThrough + ', dark-pend: ' + !!window.__cor3DarkMarketPending + ', soyuz-pt: ' + !!window.__cor3SoyuzMarketPathThrough + ', soyuz-pend: ' + !!window.__cor3SoyuzMarketPending + ', usol-pt: ' + !!window.__cor3UsolMarketPathThrough + ', usol-pend: ' + !!window.__cor3UsolMarketPending + ', devTc: ' + !!window.__cor3DevTcReachActive + ')');
+                console.log('[COR3 Helper] 服务器不可访问： ' + errMsg + ' (dark-pt：' + !!window.__cor3DarkMarketPathThrough + ', dark-pend: ' + !!window.__cor3DarkMarketPending + ', soyuz-pt: ' + !!window.__cor3SoyuzMarketPathThrough + ', soyuz-pend: ' + !!window.__cor3SoyuzMarketPending + ', usol-pt: ' + !!window.__cor3UsolMarketPathThrough + ', usol-pend: ' + !!window.__cor3UsolMarketPending + ', devTc: ' + !!window.__cor3DevTcReachActive + ')');
                 // During path-through or Dev TC reach test, forward as ENDPOINT_RESULT for the handler to deal with
                 if (window.__cor3DevTcReachActive || window.__cor3DarkMarketPathThrough || window.__cor3SoyuzMarketPathThrough || window.__cor3UsolMarketPathThrough) {
                     window.postMessage({
@@ -546,7 +546,7 @@ export function handleWsMessage(rawData, socket) {
     // --- Auto Job Solver: Intercept desktop responses ---
     if (eventName === 'desktop' && payload && payload.event) {
         var dAction = payload.event.action;
-        console.log('[COR3 Helper] Desktop event:', dAction);
+        console.log('[COR3 Helper] 桌面事件：', dAction);
         if (dAction === 'open.folder') {
             window.postMessage({ type: 'COR3_AUTOJOB_DESKTOP_FOLDER', data: payload.data, error: payload.error || null }, '*');
         }
@@ -564,13 +564,13 @@ export function handleWsMessage(rawData, socket) {
             window.postMessage({ type: 'COR3_AUTOJOB_FILE_ANALYSIS', data: payload.data, error: payload.error || null }, '*');
         }
         if (dAction === 'get.options') {
-            console.log('[COR3 Helper] Desktop get.options received — folders:', payload.data && payload.data.folders ? payload.data.folders.length : 0);
+            console.log('[COR3 Helper] 已收到桌面 get.options — 文件夹：', payload.data && payload.data.folders ? payload.data.folders.length : 0);
             // Cache Downloads folder ID globally for auto job solver
             if (payload.data && payload.data.folders) {
                 var dlf = payload.data.folders.find(function (f) { return f.name === 'Downloads'; });
                 if (dlf) {
                     window.__cor3DownloadFolderId = dlf.id;
-                    console.log('[COR3 Helper] Cached Downloads folder ID:', dlf.id);
+                    console.log('[COR3 Helper] 已缓存 Downloads 文件夹 ID：', dlf.id);
                 }
             }
             window.postMessage({ type: 'COR3_AUTOJOB_DESKTOP_OPTIONS', data: payload.data, error: payload.error || null }, '*');
@@ -605,7 +605,7 @@ export function handleWsMessage(rawData, socket) {
             window.postMessage({ type: 'COR3_AUTOJOB_JOB_TAKEN', data: payload.data, error: payload.error || null }, '*');
         }
         if (payload.event.action === 'job.complete') {
-            console.log('[COR3 Helper] AutoJob: job.complete intercepted', JSON.stringify(payload.data));
+            console.log('[COR3 Helper] 自动任务：已拦截 job.complete', JSON.stringify(payload.data));
             window.postMessage({ type: 'COR3_AUTOJOB_JOB_COMPLETED', data: payload.data, error: payload.error || null }, '*');
         }
         if (payload.event.action === 'job.can-complete') {
@@ -623,7 +623,7 @@ export function handleWsMessage(rawData, socket) {
 
     // Handle expedition update events for listening-based updates
     if (eventName === 'expeditions' && payload && payload.event && payload.event.action === 'update') {
-        console.log('[COR3 Helper] Expedition update event detected - data will flow through existing handlers');
+        console.log('[COR3 Helper] 检测到远征更新事件 - 数据将通过现有处理器传递');
         return;
     }
 
@@ -664,7 +664,7 @@ export function handleWsMessage(rawData, socket) {
                         expeditionId: expedition.id,
                         mercenaryCallsign: expedition.mercenary
                             ? expedition.mercenary.callsign
-                            : 'Unknown',
+                            : '未知',
                         locationName: expedition.locationName || '',
                         zoneName: expedition.zoneName || '',
                         riskScore: expedition.riskScore || 0,

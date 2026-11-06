@@ -15,7 +15,7 @@ export function setupEngineRelay() {
             chrome.storage.sync.get('autoDecryptEnabled', (result) => {
                 if (!result.autoDecryptEnabled) {
                     chrome.storage.sync.set({ autoDecryptEnabled: true });
-                    console.log('[COR3 Helper] Auto Job: Enabling decrypt solver for minigame');
+                    console.log('[COR3 助手] 自动任务：为小游戏启用解密求解器');
                 }
                 injectDecryptSolver();
             });
@@ -42,7 +42,7 @@ export function setupEngineRelay() {
             chrome.storage.sync.get('autoSimpleDecryptEnabled', (result) => {
                 if (!result.autoSimpleDecryptEnabled) {
                     chrome.storage.sync.set({ autoSimpleDecryptEnabled: true });
-                    console.log('[COR3 Helper] Auto Job: Enabling Simple Decrypt solver for minigame');
+                    console.log('[COR3 助手] 自动任务：为小游戏启用简易解密求解器');
                 }
                 injectSimpleDecryptSolver();
             });
@@ -51,7 +51,7 @@ export function setupEngineRelay() {
             chrome.storage.sync.get('autoIceWallEnabled', (result) => {
                 if (!result.autoIceWallEnabled) {
                     chrome.storage.sync.set({ autoIceWallEnabled: true });
-                    console.log('[COR3 Helper] Auto Job: Enabling ICE Wall solver for minigame');
+                    console.log('[COR3 助手] 自动任务：为小游戏启用冰墙(ICE)求解器');
                 }
                 injectIceWallSolver();
             });
@@ -92,7 +92,7 @@ export function setupEngineRelay() {
         }
         if (event.data && event.data.type === 'COR3_AUTOJOB_ICE_WALL_RELOAD') {
             var lockedJob = event.data.lockedJob;
-            console.log('[COR3 Helper] ICE Wall stuck — saving locked job and reloading page');
+            console.log('[COR3 Helper] 冰墙(ICE)卡住 — 已保存锁定任务并重新加载页面');
             chrome.storage.local.get('autoJobsLockedJobs', (prev) => {
                 var lockedList = prev.autoJobsLockedJobs || [];
                 if (lockedJob && lockedJob.jobId) {
@@ -114,7 +114,7 @@ export function setupEngineRelay() {
             setInitialFetchDone(false);
             chrome.storage.local.remove('initialFetchDoneAt');
             if (autoSendInProgress) {
-                console.log('[COR3 Helper] Token expired — aborting in-progress auto-send');
+                console.log('[COR3 Helper] 令牌过期 — 中止进行中的自动派遣');
                 setAutoSendInProgress(false);
                 setAutoSendExpeditionId(null);
                 setAutoSendAwaitingMercenaries(false);
@@ -124,12 +124,12 @@ export function setupEngineRelay() {
                 setAutoSendMercRetryCount(0);
                 _automationFinish('auto-send');
             }
-            console.log('[COR3 Helper] Token expired — cleared market refresh flags, gating automations until initial fetch done');
+            console.log('[COR3 Helper] 令牌过期 — 已清除市场刷新标记，初始获取完成前暂停自动化');
         }
         if (event.data && event.data.type === 'COR3_INITIAL_FETCH_DONE') {
             setInitialFetchDone(true);
             chrome.storage.local.set({ initialFetchDoneAt: Date.now() });
-            console.log('[COR3 Helper] Initial fetch done — automations unblocked');
+            console.log('[COR3 Helper] 初始获取完成 — 自动化已解除阻塞');
             chrome.storage.local.get('expeditionsData', (result) => {
                 if (result.expeditionsData) {
                     checkAutoSendOnExpeditionData(result.expeditionsData);

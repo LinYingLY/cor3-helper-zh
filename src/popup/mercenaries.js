@@ -33,13 +33,13 @@ let mercRestTimers = {};
 export function updateMercWarning(settings) {
     if (!mercWarning) return;
     if (settings && settings.disabledReason === 'stash_full' && !settings.enabled) {
-        mercWarning.textContent = '⚠️ Stash is full — auto-send mercenary disabled. Clear stash and re-enable auto-send to resume.';
+        mercWarning.textContent = '⚠️ 藏匿点已满 — 自动派遣佣兵已停用。清空藏匿点并重新启用自动派遣即可恢复。';
         mercWarning.style.borderColor = 'var(--accent-orange)';
         mercWarning.style.color = 'var(--accent-orange)';
         mercWarning.style.background = 'rgba(255,160,0,0.15)';
         mercWarning.style.display = '';
     } else if (settings && settings.disabledReason === 'insufficient_credits' && !settings.enabled) {
-        mercWarning.textContent = '⚠️ Insufficient credits — auto-send mercenary disabled. Earn more credits and re-enable auto-send to resume.';
+        mercWarning.textContent = '⚠️ 信用点不足 — 自动派遣佣兵已停用。赚取更多信用点并重新启用自动派遣即可恢复。';
         mercWarning.style.borderColor = 'var(--accent-red, #ff4444)';
         mercWarning.style.color = 'var(--accent-red, #ff4444)';
         mercWarning.style.background = 'rgba(255,68,68,0.15)';
@@ -55,7 +55,7 @@ mercenariesSectionToggle.addEventListener('click', () => {
 });
 
 export async function requestMercenaries() {
-    mercenariesContainer.replaceChildren(_noData('Loading mercenaries...'));
+    mercenariesContainer.replaceChildren(_noData('正在加载佣兵...'));
     try {
         const tab = await getCor3Tab();
         if (tab) {
@@ -266,29 +266,29 @@ function buildMercCard(merc, isElite) {
     }
 
     let html = `${avatarHtml}<div class="merc-details">`;
-    html += `<div class="merc-name">${merc.callsign || merc.name || 'Unknown'}`;
-    if (isElite) html += `<span class="merc-elite-badge">ELITE</span>`;
+    html += `<div class="merc-name">${merc.callsign || merc.name || '未知'}`;
+    if (isElite) html += `<span class="merc-elite-badge">精英</span>`;
     html += `</div>`;
     html += `<div style="margin-top:4px;"><span class="merc-status ${statusClass}">${status}</span>${restTimer}</div>`;
     if (merc.faction) {
         html += `<div class="merc-faction">`;
         const factionDisplay = (merc.faction.name || '').replace('factions.', '').replace(/([A-Z])/g, ' $1').trim().split(" ")[0].toUpperCase();
-        html += `Faction: <b>${factionDisplay}</b></div>`;
+        html += `阵营: <b>${factionDisplay}</b></div>`;
     }
     html += `<div class="merc-info">`;
-    html += `Rank: <b>${merc.rank || '--'}</b> · Missions: ${merc.missionsCompleted ?? '--'}<br>`;
-    html += `Spec: <b>${specName}</b>`;
+    html += `军衔: <b>${merc.rank || '--'}</b> · 任务数: ${merc.missionsCompleted ?? '--'}<br>`;
+    html += `专精: <b>${specName}</b>`;
     if (specDesc) html += ` <span style="color:var(--text-dim);font-size:9px;">— ${specDesc}</span>`;
-    html += `<br>Trait: <b>${traitName}</b>`;
+    html += `<br>特质: <b>${traitName}</b>`;
     if (traitDesc) html += ` <span style="color:var(--text-dim);font-size:9px;">— ${traitDesc}</span>`;
-    if (merc.reputationRequirement) html += `<br>Rep Required: ${merc.reputationRequirement}`;
+    if (merc.reputationRequirement) html += `<br>所需声望: ${merc.reputationRequirement}`;
     const cfg = merc._expeditionConfig;
     if (cfg) {
-        html += `<br><span style="color:var(--accent-orange);">Cost: 💰 ${(cfg.totalCost || 0).toLocaleString()}</span>`;
-        html += ` · <span style="color:var(--accent-cyan);">Risk: ${cfg.riskScore ?? '--'}</span>`;
+        html += `<br><span style="color:var(--accent-orange);">费用: 💰 ${(cfg.totalCost || 0).toLocaleString()}</span>`;
+        html += ` · <span style="color:var(--accent-cyan);">风险: ${cfg.riskScore ?? '--'}</span>`;
         if (cfg.outcomeChances) {
-            html += `<br>Failed-Survive: ${cfg.outcomeChances.failureSurviveChance ?? '--'}%`;
-            html += ` · Death: ${cfg.outcomeChances.deathChance ?? '--'}%`;
+            html += `<br>失败存活率: ${cfg.outcomeChances.failureSurviveChance ?? '--'}%`;
+            html += ` · 死亡率: ${cfg.outcomeChances.deathChance ?? '--'}%`;
         }
     }
     html += `</div></div>`;
@@ -313,16 +313,16 @@ function renderMercenaries(coreData, usolData, usolAvailable, usolMaintenanceEnd
 
     if (usolAvailable === false) {
         let timerHtml = '';
-        if (usolBlockerServer) timerHtml += ' (' + usolBlockerServer + ' in maintenance';
+        if (usolBlockerServer) timerHtml += ' (' + usolBlockerServer + ' 维护中';
         if (usolMaintenanceEndsAt) {
             const diff = new Date(usolMaintenanceEndsAt).getTime() - Date.now();
             if (diff > 0) {
                 const mins = Math.ceil(diff / 60000);
-                timerHtml += (usolBlockerServer ? ', ' : ' (') + '~' + mins + 'm remaining';
+                timerHtml += (usolBlockerServer ? ', ' : ' (') + '~' + mins + '分剩余';
             }
         }
         if (timerHtml) timerHtml += ')';
-        mercenariesContainer.appendChild(_h('div', {className: 'warning-banner'}, '⚠️ USOL market is currently unreachable' + timerHtml + '. USOL mercenaries may be unavailable.'));
+        mercenariesContainer.appendChild(_h('div', {className: 'warning-banner'}, '⚠️ USOL market is currently unreachable' + timerHtml + '. USOL 佣兵可能不可用。'));
     }
 
     const coreParsed = parseMercList(coreData);
@@ -378,7 +378,7 @@ function renderMercenaries(coreData, usolData, usolAvailable, usolMaintenanceEnd
     const hasUsol = usolParsed.mercs.length > 0 || usolParsed.eliteSlots.length > 0;
 
     if (!hasCore && !hasUsol) {
-        mercenariesContainer.replaceChildren(_noData('No mercenaries found.'));
+        mercenariesContainer.replaceChildren(_noData('未找到佣兵。'));
         return;
     }
 
@@ -387,7 +387,7 @@ function renderMercenaries(coreData, usolData, usolAvailable, usolMaintenanceEnd
         row.className = 'merc-market-row';
         const header = document.createElement('div');
         header.className = 'merc-market-header';
-        header.appendChild(_h('div', null, _h('span', {className: 'expand-arrow-sub'}, '▶'), _h('span', {className: 'merc-market-label'}, 'CORE Market (' + (coreParsed.mercs.length + coreParsed.eliteSlots.filter(es => es.mercenary).length) + ')')));
+        header.appendChild(_h('div', null, _h('span', {className: 'expand-arrow-sub'}, '▶'), _h('span', {className: 'merc-market-label'}, 'CORE 市场 (' + (coreParsed.mercs.length + coreParsed.eliteSlots.filter(es => es.mercenary).length) + ')')));
         header.appendChild(_h('img', {src: 'factions/core_faction-96x96.png', alt: 'CORE'}));
         const body = document.createElement('div');
         body.className = 'merc-market-body';
@@ -404,7 +404,7 @@ function renderMercenaries(coreData, usolData, usolAvailable, usolMaintenanceEnd
         row.className = 'merc-market-row';
         const header = document.createElement('div');
         header.className = 'merc-market-header';
-        header.appendChild(_h('div', null, _h('span', {className: 'expand-arrow-sub'}, '▶'), _h('span', {className: 'merc-market-label'}, 'USOL Market (' + (usolParsed.mercs.length + usolParsed.eliteSlots.filter(es => es.mercenary).length) + ')')));
+        header.appendChild(_h('div', null, _h('span', {className: 'expand-arrow-sub'}, '▶'), _h('span', {className: 'merc-market-label'}, 'USOL 市场（' + (usolParsed.mercs.length + usolParsed.eliteSlots.filter(es => es.mercenary).length) + ')')));
         header.appendChild(_h('img', {src: 'factions/usol_faction-96x96.png', alt: 'USOL'}));
         const body = document.createElement('div');
         body.className = 'merc-market-body';
@@ -423,7 +423,7 @@ function renderMercenaries(coreData, usolData, usolAvailable, usolMaintenanceEnd
     if (mercenariesData) {
         loadMercenaries();
     } else {
-        mercenariesContainer.replaceChildren(_noData('Waiting for mercenary data...'));
+        mercenariesContainer.replaceChildren(_noData('正在等待佣兵数据...'));
         let waited = 0;
         const pollInterval = setInterval(async () => {
             waited += 2000;
@@ -448,9 +448,9 @@ setInterval(() => {
             if (diff > 0) {
                 const h = Math.floor(diff / 3600000);
                 const m = Math.floor((diff % 3600000) / 60000);
-                el.textContent = `⏳ ${h}h ${m}m`;
+                el.textContent = `⏳ ${h}小时 ${m}分`;
             } else {
-                el.textContent = 'Ready!';
+                el.textContent = '就绪！';
                 el.style.color = 'var(--accent-green)';
                 delete mercRestTimers[mercId];
             }

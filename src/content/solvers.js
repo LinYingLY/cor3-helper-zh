@@ -92,7 +92,7 @@ export function injectAutoJobSolver() {
     script.src = chrome.runtime.getURL('auto-job-solver.js');
     script.onload = () => script.remove();
     (document.head || document.documentElement).appendChild(script);
-    console.log('[COR3 Helper] Auto Job Solver engine injected');
+    console.log('[COR3 助手] 自动任务求解器引擎已注入');
 }
 
 // --- Auto Valuable Seller Engine Injection ---
@@ -105,7 +105,7 @@ export function injectAutoValuableSeller() {
     script.src = chrome.runtime.getURL('auto-valuable-seller.js');
     script.onload = () => script.remove();
     (document.head || document.documentElement).appendChild(script);
-    console.log('[COR3 Helper] Auto Valuable Seller engine injected');
+    console.log('[COR3 助手] 自动高价出售引擎已注入');
 }
 
 export function ensureAntiAfkEnabled() {

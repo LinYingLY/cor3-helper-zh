@@ -43,7 +43,7 @@ export function checkAutoChooseFromContent(decisions) {
                 }
                 if (bestOpt) {
                     contentAutoChosenDecisions.add(d.messageId);
-                    console.log('[COR3 Helper] Auto-choose (content): picking "' + bestOpt.label + '" (score: ' + bestScore + ')');
+                    console.log('[COR3 助手] 自动选择（内容）：挑选 "' + bestOpt.label + '"（得分： ' + bestScore + ')');
                     window.postMessage({
                         type: 'COR3_RESPOND_DECISION',
                         expeditionId: d.expeditionId,

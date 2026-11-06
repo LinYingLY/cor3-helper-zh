@@ -1,5 +1,5 @@
 // ice-wall-solver.js
-// Auto-solver for "ICE Wall Break" hacking minigame on cor3.gg
+// Auto-solver for "冰墙突破" hacking minigame on cor3.gg
 // Injected into MAIN world. Controllable via window.__iceWallSolverAbort flag.
 // The ICE Wall Break game shows a large composite target (9 small triangles forming
 // a big triangle) and a board of ~100 triangles. The player must find where the
@@ -13,7 +13,7 @@
 
 (function () {
 	if (window.__iceWallSolverActive) {
-		console.log('\u26a0\ufe0f ICE Wall solver is already active. Aborting duplicate initialization.');
+		console.log('\u26a0\ufe0f 冰墙(ICE) 求解器已在运行，中止重复初始化。');
 		return;
 	}
 	window.__iceWallSolverActive = true;
@@ -447,11 +447,11 @@
 					for (var _fr of finalMap.values()) { if (_fr.fingerprint !== null) finalRevealed++; }
 					var finalPossible = findPossiblePositions(finalMap, targetPattern, invalidPositions);
 					if (finalPossible.length > 0 && finalPossible.length <= 5) {
-						console.log('\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f waitForUniqueCandidate timed out (' + finalRevealed + '/' + finalMap.size + ' revealed) \u2014 ' + finalPossible.length + ' possible position(s), attempting best guess');
+						console.log('\uD83D\uDD13 [COR3 助手] \u26a0\ufe0f waitForUniqueCandidate 超时（' + finalRevealed + '/' + finalMap.size + ' 已揭示) \u2014 ' + finalPossible.length + ' 个可能位置，尝试最佳猜测');
 						cleanup();
 						return resolve(finalMap);
 					}
-					console.log('\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f waitForUniqueCandidate timed out after ' + (TIMEOUT_MS / 1000) + 's (' + finalRevealed + '/' + finalMap.size + ' revealed)');
+					console.log('\uD83D\uDD13 [COR3 助手] \u26a0\ufe0f waitForUniqueCandidate 超时，已等待 ' + (TIMEOUT_MS / 1000) + 's (' + finalRevealed + '/' + finalMap.size + ' 已揭示)');
 					cleanup();
 					return resolve(null);
 				}
@@ -470,13 +470,13 @@
 					var now = Date.now();
 					if (now - startTime > 5000 && now - lastDiagTime > 5000) {
 						lastDiagTime = now;
-						console.log('\uD83D\uDD13 [COR3 Helper] Diag: 0 candidates, ' + possible.length + ' possible, ' + revealed + '/' + cellMap.size + ' revealed, anchor fp: ' + (targetPattern.anchorFingerprint || 'null').substring(0, 40));
+						console.log('\uD83D\uDD13 [COR3 助手] 诊断：0 个候选，' + possible.length + ' 种可能， ' + revealed + '/' + cellMap.size + ' 已揭示，锚点指纹： ' + (targetPattern.anchorFingerprint || 'null').substring(0, 40));
 					}
 					if (possible.length === 1) {
 						cleanup();
 						resolve(cellMap);
 					} else if (possible.length === 0) {
-						console.log('\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f No possible positions remain — giving up');
+						console.log('\uD83D\uDD13 [COR3 助手] \u26a0\ufe0f 无可用位置——放弃');
 						cleanup();
 						resolve(null);
 					}
@@ -497,7 +497,7 @@
 
 				console.log(
 					'%c\uD83D\uDD13 [COR3 Helper] ' + candidates.length +
-					' candidates (best: ' + candidates[0].matches + ' matches, ' + revealed + ' revealed) \u2014 waiting for more reveals...',
+					' 个候选(最佳：' + candidates[0].matches + ' 项匹配， ' + revealed + ' 已揭示）— 等待更多揭示...',
 					'color: #76C1D1'
 				);
 			}
@@ -541,12 +541,12 @@
 					for (var _tr of tMap.values()) { if (_tr.fingerprint !== null) tRevealed++; }
 					var tPossible = findPossiblePositions(tMap, targetPattern, invalidPositions);
 					if (tPossible.length > 0 && tPossible.length <= 5) {
-						console.log('\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f waitForUniqueCandidate poll timeout (' + tRevealed + '/' + tMap.size + ' revealed) \u2014 ' + tPossible.length + ' possible position(s), attempting best guess');
+						console.log('\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f waitForUniqueCandidate 轮询超时 (' + tRevealed + '/' + tMap.size + ' 已揭示) \u2014 ' + tPossible.length + ' 个可能位置，尝试最佳猜测');
 						cleanup();
 						resolve(tMap);
 						return;
 					}
-					console.log('\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f waitForUniqueCandidate poll timeout (' + tRevealed + '/' + tMap.size + ' revealed)');
+					console.log('\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f waitForUniqueCandidate 轮询超时 (' + tRevealed + '/' + tMap.size + ' 已揭示)');
 					cleanup();
 					resolve(null);
 					return;
@@ -593,25 +593,25 @@
 			if (candidates.length > 0) {
 				best = candidates.find(function (c) { return c.isCompleteMatch; }) || candidates[0];
 				console.log(
-					'%c\uD83D\uDD13 [COR3 Helper] \u2705 Match at col=' + best.col +
-					' row=' + best.row + ' (' + best.matches + ' matches' +
-					(best.isCompleteMatch ? ', complete' : '') + ')',
+					'%c\uD83D\uDD13 [COR3 助手] \u2705 匹配于 col=' + best.col +
+					' row=' + best.row + ' (' + best.matches + ' 项匹配' +
+					(best.isCompleteMatch ? '，完成' : '') + ')',
 					'color: #8fb24e; font-weight: bold'
 				);
-				postStatus('Clicking match (' + best.matches + ' hits)', 'info');
+				postStatus('正在点击匹配 (' + best.matches + ' 条命中)', 'info');
 			} else {
 				var possible = findPossiblePositions(cellMap, targetPattern, invalidPositions);
 				if (possible.length === 0) {
-					console.log('\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f No candidates or possible positions remain');
+					console.log('\uD83D\uDD13 [COR3 助手] \u26a0\ufe0f 没有候选或可用位置了');
 					return;
 				}
 				best = possible[0];
 				console.log(
-					'%c\uD83D\uDD13 [COR3 Helper] \u2705 Eliminated to col=' + best.col +
-					' row=' + best.row + ' (no other valid position)',
+					'%c\uD83D\uDD13 [COR3 助手] \u2705 已排除至 col=' + best.col +
+					' row=' + best.row + ' (无其他可用位置)',
 					'color: #a0d070; font-weight: bold'
 				);
-				postStatus('Clicking eliminated match', 'info');
+				postStatus('正在点击已消除的匹配', 'info');
 			}
 
 			var anchorCell = cellMap.get(best.col + ',' + best.row + ',up');
@@ -620,7 +620,7 @@
 			if (anchorCell) {
 				clickAnchor(anchorCell);
 			} else {
-				console.log('\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f Anchor cell not found after lock-in.');
+				console.log('\uD83D\uDD13 [COR3 助手] \u26a0\ufe0f 锁定后未找到锚点格。');
 			}
 
 			var advanced = await waitForAdvance(prevSig);
@@ -636,19 +636,19 @@
 				var match = fCell && fCell.fingerprint && fo.fingerprint && fCell.fingerprint === fo.fingerprint;
 				failedParts.push('off(' + fo.dc + ',' + fo.dr + ',' + fo.orient + '):' + (fCell && fCell.fingerprint ? fCell.fingerprint.substring(0, 40) : 'null') + (match ? ' ✓' : ' ✗'));
 			}
-			console.log('\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f Failed sequence at col=' + best.col + ' row=' + best.row + ':', failedParts.join(' | '));
+			console.log('\uD83D\uDD13 [COR3 助手] \u26a0\ufe0f 序列失败，col=' + best.col + ' row=' + best.row + ':', failedParts.join(' | '));
 			var attemptHtml = getAttemptRegionHtml(cellMap, best.col, best.row, targetPattern);
-			if (attemptHtml) console.log('\uD83D\uDD13 [COR3 Helper] Failed attempt SVG (col=' + best.col + ' row=' + best.row + '):\n' + attemptHtml);
+			if (attemptHtml) console.log('\uD83D\uDD13 [COR3 助手] 尝试失败 SVG（col=' + best.col + ' row=' + best.row + '):\n' + attemptHtml);
 			console.log(
-				'\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f False positive at col=' + best.col +
-				' row=' + best.row + ' (' + falsePositiveCount + '/' + MAX_FALSE_POSITIVES + ') \u2014 marking invalid and retrying...'
+				'\uD83D\uDD13 [COR3 助手] \u26a0\ufe0f 误判，col=' + best.col +
+				' row=' + best.row + ' (' + falsePositiveCount + '/' + MAX_FALSE_POSITIVES + '）\u2014 标记为无效并重试...'
 			);
-			postStatus('False positive (' + falsePositiveCount + '/' + MAX_FALSE_POSITIVES + '), retrying...', 'warn');
+			postStatus('误报 (' + falsePositiveCount + '/' + MAX_FALSE_POSITIVES + '), 正在重试...', 'warn');
 			invalidPositions.add(best.col + ',' + best.row);
 
 			if (falsePositiveCount >= MAX_FALSE_POSITIVES) {
-				console.log('\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f Max false positives reached — abandoning round');
-				postStatus('Max retries reached, skipping round', 'error');
+				console.log('\uD83D\uDD13 [COR3 助手] \u26a0\ufe0f 误判次数已达上限——放弃本轮');
+				postStatus('已达最大重试次数，跳过本轮', 'error');
 				return;
 			}
 
@@ -659,7 +659,7 @@
 
 			var remainingMap = buildCellMap();
 			var remainingPositions = findPossiblePositions(remainingMap, targetPattern, invalidPositions);
-			console.log('\uD83D\uDD13 [COR3 Helper] Retrying with ' + remainingPositions.length + ' remaining possible position(s)');
+			console.log('\uD83D\uDD13 [COR3 助手] 正在重试，使用 ' + remainingPositions.length + ' 个剩余可能位置');
 
 			await sleep(200);
 		}
@@ -669,10 +669,10 @@
 
 	async function runIceWallSolver() {
 		console.log(
-			'%c\uD83D\uDD13 [COR3 Helper] Starting ICE Wall solver...',
+			'%c\uD83D\uDD13 [COR3 助手] 启动冰墙(ICE) 求解器...',
 			'color: #4ec9f3; font-weight: bold'
 		);
-		postStatus('ICE Wall solver started', 'info');
+		postStatus('冰墙求解器已启动', 'info');
 
 		var totalRounds = null;
 		var counts = getRoundCounts();
@@ -705,18 +705,18 @@
 				var o = targetPattern.offsets[ti];
 				targetSeqParts.push('off(' + o.dc + ',' + o.dr + ',' + o.orient + '):' + (o.fingerprint ? o.fingerprint.substring(0, 40) : 'null'));
 			}
-			console.log('\uD83D\uDD13 [COR3 Helper] Target sequence:', targetSeqParts.join(' | '));
+			console.log('\uD83D\uDD13 [COR3 助手] 目标序列：', targetSeqParts.join(' | '));
 			var targetHtml = getTargetPreviewHtml();
-			if (targetHtml) console.log('\uD83D\uDD13 [COR3 Helper] Target SVG:\n' + targetHtml);
+			if (targetHtml) console.log('\uD83D\uDD13 [COR3 助手] 目标 SVG：\n' + targetHtml);
 
-			var roundLabel = 'Round ' + (roundsCompleted + 1) + totalLabel();
+			var roundLabel = '第 ' + (roundsCompleted + 1) + totalLabel();
 			var hintCount = 1 + targetPattern.offsets.length;
 			console.log(
 				'%c\uD83D\uDD13 [COR3 Helper] ' + roundLabel +
-				' \u2014 searching (' + hintCount + ' hints)...',
+				' \u2014 正在搜寻(' + hintCount + ' 条提示)...',
 				'color: #76C1D1; font-weight: bold'
 			);
-			postStatus(roundLabel + ': scanning (' + hintCount + ' hints)', 'info');
+			postStatus(roundLabel + '：扫描中（' + hintCount + ' 条提示)', 'info');
 
 			var completedBefore = (getRoundCounts() || {}).completed || roundsCompleted;
 			await runIceWallRound(targetPattern);
@@ -728,19 +728,19 @@
 			if (totalRounds !== null && roundsCompleted >= totalRounds) break;
 
 			console.log(
-				'%c\uD83D\uDD13 [COR3 Helper] Round ' + roundsCompleted + totalLabel() +
-				' complete. Waiting for next round...',
+				'%c\uD83D\uDD13 [COR3 助手] 轮次 ' + roundsCompleted + totalLabel() +
+				' 已完成。等待下一轮...',
 				'color: #888; font-style: italic'
 			);
-			postStatus('Round ' + roundsCompleted + totalLabel() + ': complete', 'success');
+			postStatus('第 ' + roundsCompleted + totalLabel() + '：完成', 'success');
 
 			if (!(await waitForNextRound(completedBefore, 10000))) {
-				console.log('\uD83D\uDD13 [COR3 Helper] \u26a0\ufe0f Timed out waiting for next round \u2014 stopping');
+				console.log('\uD83D\uDD13 [COR3 助手] \u26a0\ufe0f 等待下一轮超时——停止');
 				break;
 			}
 		}
 
-		var finishMsg = 'Finished (' + roundsCompleted + totalLabel() + ' round(s) completed)';
+		var finishMsg = '已完成 (' + roundsCompleted + totalLabel() + ' 轮已完成)';
 		console.log(
 			'%c\uD83D\uDD13 [COR3 Helper] ' + finishMsg,
 			'color: #8fb24e; font-weight: bold'
@@ -767,10 +767,10 @@
 			gameGeneration++;
 			pendingMinigameData = event.data.data;
 			var sp = pendingMinigameData.meta?.staticParams;
-			var logParts = ['Difficulty:', sp?.difficulty, 'Max Attempts:', sp?.maxAttempts];
-			if (sp?.timerDurationMs != null) logParts.push('Timer:', sp.timerDurationMs + 'ms');
+			var logParts = ['难度:', sp?.difficulty, '最大尝试次数：', sp?.maxAttempts];
+			if (sp?.timerDurationMs != null) logParts.push('计时器：', sp.timerDurationMs + 'ms');
 			console.log(
-				'%c\uD83D\uDD13 [COR3 Helper] ICE Wall minigame started!',
+				'%c\uD83D\uDD13 [COR3 助手] 冰墙(ICE) 小游戏已开始！',
 				'color: #4ec9f3; font-weight: bold',
 				...logParts
 			);
@@ -781,7 +781,7 @@
 
 	async function watchForIceWall() {
 		console.log(
-			'%c\uD83D\uDD13 [COR3 Helper] ICE Wall solver watching for minigame...',
+			'%c\uD83D\uDD13 [COR3 助手] 冰墙(ICE) 求解器正在等待小游戏...',
 			'color: #888; font-style: italic'
 		);
 
@@ -792,7 +792,7 @@
 				window.__iceWallGameEnded = false;
 				var currentGen = gameGeneration;
 				console.log(
-					'%c\uD83D\uDD13 [COR3 Helper] ICE Wall game detected in DOM!',
+					'%c\uD83D\uDD13 [COR3 助手] 在 DOM 中检测到冰墙(ICE) 小游戏！',
 					'color: #4ec9f3; font-weight: bold'
 				);
 
@@ -803,7 +803,7 @@
 				// Wait for the game app to be removed from DOM OR a new game to start
 				if (findIceWallApp() && !window.__iceWallGameEnded) {
 					console.log(
-						'%c\u23f3 [COR3 Helper] Waiting for ICE Wall game to close...',
+						'%c\u23f3 [COR3 助手] 等待冰墙(ICE) 小游戏关闭...',
 						'color: #888; font-style: italic'
 					);
 				}
@@ -816,12 +816,12 @@
 				// Notify any external code waiting for solver completion
 				while (solverListeners.length) {
 					var fn = solverListeners.shift();
-					try { fn(); } catch (e) { console.log('[COR3 Helper] Error in solver listener:', e); }
+					try { fn(); } catch (e) { console.log('[COR3 Helper] 求解器监听器出错：', e); }
 				}
 
 				if (!window.__iceWallSolverAbort) {
 					console.log(
-						'%c\uD83D\uDD13 [COR3 Helper] ICE Wall game closed. Watching for next one...',
+						'%c\uD83D\uDD13 [COR3 助手] 冰墙(ICE) 小游戏已关闭，等待下一个...',
 						'color: #888; font-style: italic'
 					);
 				}
@@ -836,7 +836,7 @@
 		window.__iceWallSolverActive = false;
 		window.__iceWallSolverAbort = false;
 		console.log(
-			'%c\uD83D\uDED1 [COR3 Helper] ICE Wall solver stopped.',
+			'%c\ud83d\udED1 [COR3 助手] 冰墙(ICE) 求解器已停止。',
 			'color: #ff5555; font-weight: bold'
 		);
 	}

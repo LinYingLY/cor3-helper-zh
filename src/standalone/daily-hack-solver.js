@@ -1,12 +1,12 @@
 // daily-hack-solver.js
 // Fully automated solver for daily hacking minigames on cor3.gg
-// Handles both "System Log Integrity" and "Signal Hack" puzzles end-to-end.
+// Handles both "系统日志完整性" and "信号破解" puzzles end-to-end.
 // Flow: Open daily ops tab → Start task → Detect puzzle → Solve → Close windows.
 // Injected into MAIN world. Controllable via window.__dailyHackAbort flag.
 
 (function () {
     if (window.__dailyHackActive) {
-        console.log('[COR3 Daily Hack] Solver already active.');
+        console.log('[COR3 每日破解] 求解器已在运行。');
         return;
     }
     window.__dailyHackActive = true;
@@ -15,7 +15,7 @@
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     const hlog = (msg, level) => {
         level = level || 'info';
-        console.log('[COR3 Daily Hack] ' + msg);
+        console.log('[COR3 每日破解] ' + msg);
         window.postMessage({ type: 'COR3_DAILY_HACK_LOG', message: msg }, '*');
     };
 
@@ -61,7 +61,7 @@
 
     // Encoding option header text → internal key
     const ENCODING_LABELS = {
-        'MORSE': 'Morse Numeric (0-9)',
+        'MORSE': '摩斯数字（0-9）',
         'BINARY': 'Binary Numeric'
     };
 
@@ -69,12 +69,12 @@
     const VALID_TYPES = new Set(['AUTH', 'TEMP-SYNC', 'SCAN', 'ROUTE-CHECK', 'RADIO-TEST', 'PING', 'SYNC']);
     const VALID_STATUSES = new Set(['OK', 'WARN', 'ERROR']);
     const ERROR_LABELS = {
-        TIME: 'Time format is incorrect',
-        TYPE: 'Event type is incorrect',
-        MISSING_SECTOR: 'Missing /sector parameter',
-        MISSING_STATUS: 'Missing /status parameter',
-        SECTOR_BAD: '/sector parameter is incorrect',
-        STATUS_BAD: '/status parameter is incorrect'
+        TIME: '时间格式不正确',
+        TYPE: '事件类型不正确',
+        MISSING_SECTOR: '缺少 /sector 参数',
+        MISSING_STATUS: '缺少 /status 参数',
+        SECTOR_BAD: '/sector 参数不正确',
+        STATUS_BAD: '/status 参数不正确'
     };
 
     function analyzeLogLine(rawText) {
@@ -146,7 +146,7 @@
             const closeBtn = document.querySelector('[data-component-name="close-app-btn"]');
             if (closeBtn) {
                 click(closeBtn);
-                hlog('Closed window ' + (i + 1));
+                hlog('已关闭窗口 ' + (i + 1));
             } else {
                 break;
             }
@@ -157,13 +157,13 @@
     // STEP 1: Open Daily Ops tab
     // =============================================
     async function openDailyOpsTab() {
-        hlog('Opening Daily Ops tab...');
+        hlog('正在打开每日行动标签页...');
         // Click the tab bar item that opens daily ops page
         let tabItem = document.querySelector('[data-component-name="TabBarItem-019a0c41-b17f-7abc-1234-567890abcde2"]');
         if (!tabItem) {
             tabItem = document.querySelector('[data-component-name="TabBarItem-019a0c41-b17f-7abc-1234-567890abcde1"]');
             if (!tabItem) {
-                hlog('Could not find Daily Ops tab bar item (.go3582441102)', 'error');
+                hlog('未找到每日行动标签页项 (.go3582441102)', 'error');
                 return false;
             }
         }
@@ -173,37 +173,37 @@
     }
 
     // =============================================
-    // STEP 2: Select "Daily Ops" section
+    // STEP 2: Select "每日行动" section
     // =============================================
     async function selectDailyOpsSection() {
-        hlog('Waiting for Start Task button...');
+        hlog('等待"开始任务"按钮...');
         const dailyOpsBtn = document.querySelector('.game-center-grid button:nth-child(2)');
         if (!dailyOpsBtn) {
             const startBtnCheck = await waitForEl('[data-component-name="DailyOpsStartButton"]', 8000);
             if (startBtnCheck) {
                 return true;
             }
-            hlog('Could not find Daily Ops section button (.game-center-grid button:nth-child(2))', 'error');
+            hlog('未找到每日行动区域按钮 (.game-center-grid button:nth-child(2))', 'error');
             return false;
         }
         click(dailyOpsBtn);
-        hlog('Clicked Daily Ops section');
+        hlog('已点击每日行动区域');
         await sleep(1000);
         return true;
     }
 
     // =============================================
-    // STEP 3: Click "Start Task" button
+    // STEP 3: Click "开始任务" button
     // =============================================
     async function clickStartTask() {
-        hlog('Waiting for Start Task button...');
+        hlog('等待"开始任务"按钮...');
         const startBtn = await waitForEl('[data-component-name="DailyOpsStartButton"]', 8000);
         if (!startBtn) {
-            hlog('Could not find Start Task button (.start-task-button)', 'error');
+            hlog('未找到开始任务按钮 (.start-task-button)', 'error');
             return false;
         }
         click(startBtn);
-        hlog('Clicked Start Task');
+        hlog('已点击开始任务');
         await sleep(1000);
         return true;
     }
@@ -212,22 +212,22 @@
     // Signal Hack — full end-to-end
     // =============================================
     async function solveSignalHackFull() {
-        hlog('Signal Hack detected');
+        hlog('检测到信号破解');
 
-        // Step A: Click "Get Signal" button
+        // Step A: Click "获取信号" button
         const getSignalBtn = await waitForEl('.go190644802', 5000);
         if (!getSignalBtn) {
-            hlog('Could not find Get Signal button (.go190644802)', 'error');
+            hlog('未找到获取信号按钮 (.go190644802)', 'error');
             return false;
         }
         click(getSignalBtn);
-        hlog('Clicked Get Signal');
+        hlog('已点击获取信号');
         await sleep(1500);
 
         // Step B: Wait for pulse timeline and decode
         const timeline = await waitForEl('.pulse-timeline', 10000);
         if (!timeline) {
-            hlog('Could not find pulse timeline after Get Signal', 'error');
+            hlog('获取信号后未找到脉冲时间线', 'error');
             return false;
         }
 
@@ -240,7 +240,7 @@
             const bar = g.querySelector('.pulse-bar');
             if (bar?.classList.contains('short')) return 'S';
             if (bar?.classList.contains('long')) return 'L';
-            console.log(`[COR3 Daily Hack] Pulse group #${i} couldn't be classified. Using "?".`);
+            console.log(`[COR3 每日破解] 脉冲组 #${i} 无法分类。使用 "?"。`);
             return '?';
         });
 
@@ -263,7 +263,7 @@
         const bd = countDigits(binaryResult);
         let encoding, value;
         if (md === 0 && bd === 0) {
-            hlog('Could not decode signal — no valid digits found', 'error');
+            hlog('无法解码信号 — 未找到有效数字', 'error');
             return false;
         } else if (md > bd) {
             encoding = 'MORSE';
@@ -279,18 +279,18 @@
             value = binaryResult;
         }
 
-        hlog(`Signal Hack → Type: ${encoding}, Value: ${value}`);
-        console.log(`[COR3 Daily Hack] Pulses: ${pulses.join(' ')}`);
+        hlog(`信号破解 → 类型： ${encoding}，价值： ${value}`);
+        console.log(`[COR3 每日破解] 脉冲： ${pulses.join(' ')}`);
 
-        // Step C: Click "Select Encoding" (next-button)
+        // Step C: Click "选择编码" (next-button)
         await sleep(500);
         const selectEncodingBtn = document.querySelector('.next-button');
         if (!selectEncodingBtn) {
-            hlog('Could not find Select Encoding button (.next-button)', 'error');
+            hlog('未找到选择编码按钮 (.next-button)', 'error');
             return false;
         }
         click(selectEncodingBtn);
-        hlog('Clicked Select Encoding');
+        hlog('已点击选择编码');
         await sleep(800);
 
         // Step D: Choose the correct encoding option
@@ -305,41 +305,41 @@
             }
         }
         if (!chosen) {
-            hlog(`Could not find encoding option "${targetLabel}"`, 'error');
+            hlog(`未找到编码选项 "${targetLabel}"`, 'error');
             return false;
         }
         click(chosen);
-        hlog(`Selected encoding: ${targetLabel}`);
+        hlog(`已选编码： ${targetLabel}`);
         await sleep(500);
 
-        // Step E: Click "Decode Signal" (next-button again)
+        // Step E: Click "判定" (next-button again)
         const decodeBtn = document.querySelector('.next-button');
         if (!decodeBtn) {
-            hlog('Could not find Decode Signal button (.next-button)', 'error');
+            hlog('未找到解码信号按钮 (.next-button)', 'error');
             return false;
         }
         click(decodeBtn);
-        hlog('Clicked Decode Signal');
+        hlog('已点击解码信号');
         await sleep(800);
 
         // Step F: Enter the code value
         const codeInput = await waitForEl('.code-input', 5000);
         if (!codeInput) {
-            hlog('Could not find code input (.code-input)', 'error');
+            hlog('未找到代码输入框 (.code-input)', 'error');
             return false;
         }
         setInputValue(codeInput, value);
-        hlog(`Entered code: ${value}`);
+        hlog(`已输入代码: ${value}`);
         await sleep(400);
 
-        // Step G: Click "CONFIRM CODE"
+        // Step G: Click "确认代码"
         const confirmBtn = document.querySelector('.submit-button');
         if (!confirmBtn) {
-            hlog('Could not find Confirm Code button (.submit-button)', 'error');
+            hlog('未找到确认代码按钮 (.submit-button)', 'error');
             return false;
         }
         click(confirmBtn);
-        hlog('Clicked CONFIRM CODE');
+        hlog('已点击确认代码');
         await sleep(1500);
 
         // Step H: Check for success
@@ -347,9 +347,9 @@
         if (resultTitle && resultTitle.classList.contains('success')) {
             hlog('✅ Signal Hack VERIFIED — Success!', 'success');
         } else if (resultTitle) {
-            hlog('Signal Hack result: ' + (resultTitle.textContent || '').trim(), 'warn');
+            hlog('信号破解结果：' + (resultTitle.textContent || '').trim(), 'warn');
         } else {
-            hlog('Could not verify result (no .result-title found)', 'warn');
+            hlog('无法验证结果 (未找到 .result-title)', 'warn');
         }
 
         // Step I: Close windows (decode screen + daily ops)
@@ -363,26 +363,26 @@
     // System Log Integrity — full end-to-end
     // =============================================
     async function solveSystemLogIntegrityFull() {
-        hlog('System Log Integrity detected');
+        hlog('检测到系统日志完整性');
 
-        // Step A: Click "Get Logs" button
+        // Step A: Click "获取日志" button
         const getLogsBtn = await waitForEl('.go190644802', 5000);
         if (!getLogsBtn) {
-            hlog('Could not find Get Logs button (.go190644802)', 'error');
+            hlog('未找到获取日志按钮 (.go190644802)', 'error');
             return false;
         }
         click(getLogsBtn);
-        hlog('Clicked Get Logs');
+        hlog('已点击获取日志');
         await sleep(4000);
         // Step B: Wait for pulse timeline and decode
         const log_entries = await waitForEl('.log-entries', 10000);
         if (!log_entries) {
-            hlog('Could not find log-entries after Get Logs', 'error');
+            hlog('获取日志后未找到日志条目', 'error');
             return false;
         }
         const logContainer = document.querySelector('.log-entries');
         if (!logContainer) {
-            hlog('Could not find log-entries container', 'error');
+            hlog('未找到日志条目容器', 'error');
             return false;
         }
         const entries = Array.from(logContainer.querySelectorAll('.log-entry.log-entry-appearing'));
@@ -400,16 +400,16 @@
         analyzed.sort((a, b) => b.issues.length - a.issues.length);
         const selected = analyzed.slice(0, 2);
         if (selected.length === 0) {
-            hlog('No invalid log entries found — puzzle may already be solved', 'warn');
+            hlog('未找到无效日志条目 — 谜题可能已解开', 'warn');
             return false;
         }
-        if (selected.length < 2) hlog(`Only found ${selected.length} invalid log(s)`);
+        if (selected.length < 2) hlog(`仅找到 ${selected.length} 无效日志`);
 
         for (const entry of selected) {
             clickCheckbox(entry.el);
         }
 
-        hlog(`Selected ${selected.length} wrong log(s)`);
+        hlog(`已选择 ${selected.length} 错误日志`);
         selected.forEach((e, i) => {
             console.log(`[SELECTED #${i + 1}] ${e.text}`);
             e.issues.forEach(iss => console.log(`  - ${ERROR_LABELS[iss] || iss}`));
@@ -418,7 +418,7 @@
         // Click confirm button
         const confirmSelectionBtn = document.querySelector('.confirm-button');
         if (!confirmSelectionBtn) {
-            hlog('Could not find .confirm-button', 'error');
+            hlog('未找到 .confirm-button', 'error');
             return false;
         }
         click(confirmSelectionBtn);
@@ -427,7 +427,7 @@
         // Handle analysis/fix phase
         const analysisContainer = await waitForEl('.analysis-container', 5000);
         if (!analysisContainer) {
-            hlog('Could not find .analysis-container after confirming', 'error');
+            hlog('确认后未找到 .analysis-container', 'error');
             return false;
         }
 
@@ -449,7 +449,7 @@
                 issues = match ? match.issues : null;
             }
             if (!issues || !issues.length) {
-                console.log('[COR3 Daily Hack] Could not map analysis block to picked issues:', lineText);
+                console.log('[COR3 每日破解] 分析区块与所选问题对应不上：', lineText);
                 continue;
             }
 
@@ -464,17 +464,17 @@
                         click(errBtn);
                         await sleep(25);
                     } else {
-                        console.log('[COR3 Daily Hack] Could not find error-type-button for:', label);
+                        console.log('[COR3 每日破解] 找不到 error-type-button：', label);
                     }
                 }
-                hlog(`Fixed: ${lineText.substring(0, 40)}...`);
+                hlog(`修复: ${lineText.substring(0, 40)}...`);
             }
         }
         await sleep(1000);
         // Click confirm button
         const confirmFixesBtn = document.querySelector('.confirm-button');
         if (!confirmFixesBtn) {
-            hlog('Could not find .confirm-button', 'error');
+            hlog('未找到 .confirm-button', 'error');
             return false;
         }
         click(confirmFixesBtn);
@@ -483,7 +483,7 @@
         // Click confirm button
         const scanBtn = document.querySelector('.scan-button');
         if (!scanBtn) {
-            hlog('Could not find .confirm-button', 'error');
+            hlog('未找到 .confirm-button', 'error');
             return false;
         }
         click(scanBtn);
@@ -494,7 +494,7 @@
         if (resultTitle && resultTitle.classList.contains('success')) {
             hlog('✅ System Log Integrity VERIFIED — Success!', 'success');
         } else if (resultTitle) {
-            hlog('Log Integrity result: ' + (resultTitle.textContent || '').trim(), 'warn');
+            hlog('日志完整性结果：' + (resultTitle.textContent || '').trim(), 'warn');
         }
 
         // Close windows
@@ -532,7 +532,7 @@
         if (!sectionSelected || window.__dailyHackAbort) return { success: false, abort: true };
 
         // STEP 3: Wait for puzzle to appear
-        hlog('Waiting for puzzle to appear...');
+        hlog('正在等待谜题出现...');
         let puzzle = null;
         let waited = 0;
         while (!puzzle && waited < 15000 && !window.__dailyHackAbort) {
@@ -541,14 +541,14 @@
             waited += 500;
         }
 
-        // STEP 4: Click "Start Task"
+        // STEP 4: Click "开始任务"
         const taskStarted = await clickStartTask();
         if (!taskStarted || window.__dailyHackAbort) return { success: false, abort: true };
 
         if (window.__dailyHackAbort) return { success: false, abort: true };
 
         if (!puzzle) {
-            hlog('No puzzle detected after 15s', 'error');
+            hlog('15 秒后仍未检测到谜题', 'error');
             return { success: false, abort: false };
         }
 
@@ -561,8 +561,8 @@
                 solved = await solveSystemLogIntegrityFull();
             }
         } catch (e) {
-            hlog('Error: ' + (e.message || e), 'error');
-            console.log('[COR3 Daily Hack] Error:', e);
+            hlog('错误：' + (e.message || e), 'error');
+            console.log('[COR3 每日破解] 错误：', e);
             solved = false;
         }
 
@@ -576,13 +576,13 @@
     }
 
     async function run() {
-        hlog('Solver started — full automation mode');
+        hlog('求解器已启动 — 全自动模式');
 
         for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
             if (window.__dailyHackAbort) break;
 
             if (attempt > 1) {
-                hlog(`Retry attempt ${attempt}/${MAX_ATTEMPTS} — closing windows and restarting...`, 'warn');
+                hlog(`重试次数 ${attempt}/${MAX_ATTEMPTS} — 正在关闭窗口并重启...`, 'warn');
                 await closeAppWindows(4);
                 await sleep(3000);
                 if (window.__dailyHackAbort) break;
@@ -591,7 +591,7 @@
             const result = await attemptSolve();
 
             if (result.abort) {
-                hlog('Solver aborted');
+                hlog('求解器已中止');
                 break;
             }
 
@@ -606,12 +606,12 @@
             }
 
             if (attempt < MAX_ATTEMPTS) {
-                hlog(`Attempt ${attempt}/${MAX_ATTEMPTS} failed — will retry...`, 'warn');
+                hlog(`尝试 ${attempt}/${MAX_ATTEMPTS} 失败 — 将重试...`, 'warn');
             }
         }
 
         // All attempts failed
-        hlog(`Daily hack failed after ${MAX_ATTEMPTS} attempts — disabling toggle`, 'error');
+        hlog(`每日破解失败，耗时  ${MAX_ATTEMPTS} 次尝试——正在禁用开关`, 'error');
         window.postMessage({ type: 'COR3_DAILY_HACK_DISABLE_TOGGLE' }, '*');
         cleanup();
     }

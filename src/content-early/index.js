@@ -2,7 +2,7 @@
 // Import order matters: state first, then ws layer, then features, then listeners.
 
 // Prevent double-execution (e.g. if injected twice)
-if (window.__cor3WsInterceptorActive) throw new Error('COR3 already active');
+if (window.__cor3WsInterceptorActive) throw new Error('COR3 已处于启用状态');
 window.__cor3WsInterceptorActive = true;
 
 // 1. Shared state (constants, globals, mutable vars)
@@ -45,5 +45,5 @@ import { installMessageListener, installSocketHealthCheck, scheduleVersionRepost
     installSocketHealthCheck();
     installMessageListener();
     scheduleVersionRepost();
-    console.log('[COR3 Helper] WebSocket interceptor installed');
+    console.log('[COR3 助手] WebSocket 拦截器已安装');
 })();

@@ -25,7 +25,7 @@ setupEngineRelay();
 setTimeout(() => {
     chrome.storage.local.get('expeditionsData', (result) => {
         if (result.expeditionsData) {
-            console.log('[COR3 Helper] Page load: checking cached expedition data for auto-send');
+            console.log('[COR3 Helper] 页面加载：正在检查缓存的远征数据用于自动派遣');
             checkAutoSendOnExpeditionData(result.expeditionsData);
         }
     });
@@ -36,7 +36,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'sync' || !changes.autoSendMerc) return;
     const newVal = changes.autoSendMerc.newValue;
     if (newVal && newVal.enabled) {
-        console.log('[COR3 Helper] Auto-send mercenary enabled — checking expedition data');
+        console.log('[COR3 Helper] 自动派遣佣兵已启用 — 正在检查远征数据');
         chrome.storage.local.get('expeditionsData', (result) => {
             if (result.expeditionsData) {
                 checkAutoSendOnExpeditionData(result.expeditionsData);
@@ -53,7 +53,7 @@ window.addEventListener('error', (e) => {
 });
 window.addEventListener('unhandledrejection', (e) => {
     if (typeof cor3LogEntry === 'function') {
-        var msg = e.reason ? (e.reason.stack || e.reason.message || String(e.reason)) : 'Unhandled rejection';
+        var msg = e.reason ? (e.reason.stack || e.reason.message || String(e.reason)) : '未处理的 Promise 拒绝';
         cor3LogEntry('error-logs', msg, 'error');
     }
 });
@@ -63,7 +63,7 @@ window.addEventListener('unhandledrejection', (e) => {
 chrome.storage.local.remove('initialFetchDoneAt');
 chrome.storage.local.get('autoJobsRunning', (data) => {
     if (data.autoJobsRunning) {
-        console.log('[COR3 Helper] Page reloaded — clearing stale auto-jobs state');
+        console.log('[COR3 Helper] 页面已重新加载 — 清除过期的自动任务状态');
         chrome.storage.local.set({ autoJobsRunning: false, autoJobsQueue: [] });
     }
 });

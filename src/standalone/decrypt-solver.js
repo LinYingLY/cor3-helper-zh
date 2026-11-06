@@ -81,7 +81,7 @@
 			const currentIdx = options.indexOf(currentVal);
 
 			if (currentIdx === -1) {
-				console.log(`⚠️ [submitGuess] Field ${f}: current value "${currentVal}" not found in options [${options.join(', ')}]`);
+				console.log(`⚠️ [submitGuess] Field ${f}：当前价值 "${currentVal}" 不在选项中 [${options.join(', ')}]`);
 			}
 
 			// Already at target? Skip navigation
@@ -104,7 +104,7 @@
 			const newVal = newValues[f];
 			const expectedVal = options[targetIdx];
 			if (newVal !== expectedVal) {
-				console.log(`⚠️ [submitGuess] Field ${f}: expected "${expectedVal}" after navigation but got "${newVal}". Aborting guess.`);
+				console.log(`⚠️ [submitGuess] Field ${f}：预期 "${expectedVal}"（跳转之后）但得到的是 "${newVal}"。放弃猜测。`);
 				return false;
 			}
 		}
@@ -140,7 +140,7 @@
 			}
 			await sleep(100);
 		}
-		console.log(`⚠️ [waitForResponse] Timed out after ${timeout}ms waiting for combo: "${combo}"`);
+		console.log(`⚠️ [waitForResponse] Timed out after ${timeout}毫秒等待组合：“${combo}"`);
 		return null;
 	}
 
@@ -220,7 +220,7 @@
 		}
 
 		console.log(
-			'%c📋 Detected fields:',
+			'%c📋 检测到的字段：',
 			'color: #b08944; font-weight: bold',
 			FIELDS.map((f, i) => `\n   ${i}: [${f.join(', ')}]`).join('')
 		);
@@ -235,7 +235,7 @@
 		const getDist = (a, b) => distMatrix[a * N + b];
 
 		if (solver.key === cachedSolver.key && memo.size > 0) {
-			console.log('%c♻️ Reusing cached solver', 'color: #8fb24e; font-weight: bold');
+			console.log('%c♻️ 复用缓存的求解器', 'color: #8fb24e; font-weight: bold');
 		}
 
 		// --- Minimax with Pruning ---
@@ -327,7 +327,7 @@
 			if (val === null) {
 				console.info(`❌ Mismatch count not found for ${label}`);
 			} else {
-				console.log(`   Mismatch: ${val}`);
+				console.log(`   不匹配： ${val}`);
 			}
 			return val;
 		};
@@ -353,11 +353,11 @@
 	// --- Watcher --------------------------------------------------------------
 
 	async function waitForMinigame() {
-		console.log('%c👀 [COR3 Helper] Decrypt solver watching for minigame...', 'color: #888; font-style: italic');
+		console.log('%c👀 [COR3 助手] 解密求解器正在等待小游戏...', 'color: #888; font-style: italic');
 		getOrCreateSolver([
 			['v1.0', 'v1.1', 'v2.0'],
 			['GET', 'PUT', 'POST'],
-			['LTE', 'Fiber', 'Sat'],
+			['LTE', '光纤', '周六'],
 			['AES', 'RSA', 'DES']
 		]);
 
@@ -373,12 +373,12 @@
 				const isReady = lines.length > 0 && lines[lines.length - 1].startsWith('Attempts:');
 
 				if (isReady) {
-					console.log('%c✅ [COR3 Helper] Minigame detected, starting solver...', 'color: #8fb24e; font-weight: bold');
+					console.log('%c✅ [COR3 助手] 检测到小游戏，正在启动求解器...', 'color: #8fb24e; font-weight: bold');
 					await runSolver();
 
 					if (window.__solverAbort) break;
 
-					console.log('%c⏳ [COR3 Helper] Waiting for minigame to close...', 'color: #888; font-style: italic');
+					console.log('%c⏳ [COR3 助手] 等待小游戏关闭...', 'color: #888; font-style: italic');
 					while (
 						!window.__solverAbort &&
 						document.querySelector(
@@ -389,7 +389,7 @@
 					}
 
 					if (!window.__solverAbort) {
-						console.log('%c👀 [COR3 Helper] Minigame closed. Watching for next one...', 'color: #888; font-style: italic');
+						console.log('%c👀 [COR3 助手] 小游戏已关闭，等待下一个...', 'color: #888; font-style: italic');
 					}
 				}
 			}
@@ -398,7 +398,7 @@
 		// Cleanup when aborted
 		window.__solverActive = false;
 		window.__solverAbort = false;
-		console.log('%c🛑 [COR3 Helper] Decrypt solver stopped.', 'color: #ff5555; font-weight: bold');
+		console.log('%c🛑 [COR3 助手] 解密求解器已停止。', 'color: #ff5555; font-weight: bold');
 	}
 
 	waitForMinigame();

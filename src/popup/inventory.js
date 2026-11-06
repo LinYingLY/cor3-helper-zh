@@ -18,7 +18,7 @@ inventorySectionToggle.addEventListener('click', () => {
 refreshInventoryBtn.addEventListener('click', () => requestAndLoadInventory());
 
 export async function requestAndLoadInventory() {
-    inventoryContainer.replaceChildren(_noData('Requesting inventory from server...'));
+    inventoryContainer.replaceChildren(_noData('正在向服务器请求物品栏...'));
     spaceInfo.textContent = '-- / --';
     try {
         const tab = await getCor3Tab();
@@ -118,34 +118,34 @@ async function renderSpecialistTimers(data) {
         var expiryRemaining = expiresAt - now;
         var graceRemaining = gracePeriodEndAt ? gracePeriodEndAt - now : null;
         var detailsEl = _h('div', {className: 'item-details'},
-            _h('div', {className: 'item-name', style: 'margin-bottom: 6px;'}, 'Stash Expansion Service'),
-            _h('div', {className: 'item-badges'}, _h('span', {className: 'rented-tag' + (isInGrace ? ' grace' : '')}, 'Rented: ' + bonusSlots))
+            _h('div', {className: 'item-name', style: 'margin-bottom: 6px;'}, '藏匿点扩容服务'),
+            _h('div', {className: 'item-badges'}, _h('span', {className: 'rented-tag' + (isInGrace ? ' grace' : '')}, '已租用：' + bonusSlots))
         );
 
         if (isInGrace) {
             var graceBox = _h('div', {className: 'stash-grace-box'},
-                _h('div', {className: 'stash-grace-header'}, 'THE RENT HAS ENDED'),
+                _h('div', {className: 'stash-grace-header'}, '租用已结束'),
                 _h('div', {className: 'stash-grace-body'},
-                    _h('div', {className: 'stash-grace-row'}, _h('span', null, 'Items to lose'), _h('span', {className: 'grace-value'}, String(itemsToLose))),
-                    _h('div', {className: 'stash-grace-row'}, _h('span', null, 'Expired slots'), _h('span', {className: 'grace-value'}, String(bonusSlots))),
-                    _h('div', {className: 'stash-grace-row'}, _h('span', null, 'Left time'), _h('span', {className: 'grace-value'}, formatCountdown(graceRemaining || 0)))
+                    _h('div', {className: 'stash-grace-row'}, _h('span', null, '会损失的物品'), _h('span', {className: 'grace-value'}, String(itemsToLose))),
+                    _h('div', {className: 'stash-grace-row'}, _h('span', null, '已过期槽位'), _h('span', {className: 'grace-value'}, String(bonusSlots))),
+                    _h('div', {className: 'stash-grace-row'}, _h('span', null, '剩余时间'), _h('span', {className: 'grace-value'}, formatCountdown(graceRemaining || 0)))
                 )
             );
             detailsEl.appendChild(graceBox);
             if (extendPriceId) {
                 detailsEl.appendChild(_h('div', {style: 'display:flex;justify-content:flex-end;margin-top:4px;'},
-                    _h('button', {className: 'stash-extend-btn', id: 'stashExtendBtn'}, 'Extend (\ud83d\udcb0' + (extendCredits || '?').toLocaleString() + ')')
+                    _h('button', {className: 'stash-extend-btn', id: 'stashExtendBtn'}, '延长 (\ud83d\udcb0' + (extendCredits || '?').toLocaleString() + ')')
                 ));
             }
         } else {
-            detailsEl.appendChild(_h('div', {className: 'specialist-timer-row'}, 'Expires in: ', _h('span', {className: 'specialist-timer'}, formatCountdown(expiryRemaining))));
+            detailsEl.appendChild(_h('div', {className: 'specialist-timer-row'}, '剩余时间: ', _h('span', {className: 'specialist-timer'}, formatCountdown(expiryRemaining))));
             if (graceRemaining !== null) {
-                detailsEl.appendChild(_h('div', {className: 'specialist-timer-row'}, 'Grace period ends: ', _h('span', {className: 'specialist-grace'}, formatCountdown(graceRemaining))));
+                detailsEl.appendChild(_h('div', {className: 'specialist-timer-row'}, '宽限期结束: ', _h('span', {className: 'specialist-grace'}, formatCountdown(graceRemaining))));
             }
         }
 
         specialistTimerInfo.replaceChildren(_h('div', {className: 'item-card tier-quest'},
-            _h('img', {src: 'https://cdn.cor3.gg/corie/characters/avatars/veran_avatar.png', alt: 'Specialist', loading: 'lazy'}),
+            _h('img', {src: 'https://cdn.cor3.gg/corie/characters/avatars/veran_avatar.png', alt: '专家', loading: 'lazy'}),
             detailsEl
         ));
         specialistTimerInfo.style.display = '';
@@ -154,9 +154,9 @@ async function renderSpecialistTimers(data) {
         if (extBtn && extendPriceId) {
             extBtn.addEventListener('click', function () {
                 extBtn.disabled = true;
-                extBtn.textContent = 'Extending...';
+                extBtn.textContent = '延长中…';
                 getCor3Tab().then(function (tab) {
-                    if (!tab) { extBtn.disabled = false; extBtn.textContent = 'Extend (💰' + (extendCredits || '?').toLocaleString() + ')'; return; }
+                    if (!tab) { extBtn.disabled = false; extBtn.textContent = '延长 (💰' + (extendCredits || '?').toLocaleString() + ')'; return; }
                     chrome.tabs.sendMessage(tab.id, {
                         action: 'purchaseSpecialist',
                         specialistType: activeSpecialist.specialistType || 'ENGINEER',
@@ -164,14 +164,14 @@ async function renderSpecialistTimers(data) {
                         level: activeTemp.level,
                         priceId: extendPriceId
                     }).then(function () {
-                        extBtn.textContent = 'Sent! Refreshing...';
+                        extBtn.textContent = '已发送！正在刷新...';
                         setTimeout(function () {
                             chrome.tabs.sendMessage(tab.id, { action: 'requestSpecialists' });
                         }, 2000);
                         setTimeout(function () { loadSpecialistTimers(); }, 4000);
                     }).catch(function () {
                         extBtn.disabled = false;
-                        extBtn.textContent = 'Extend (💰' + (extendCredits || '?').toLocaleString() + ')';
+                        extBtn.textContent = '延长 (💰' + (extendCredits || '?').toLocaleString() + ')';
                     });
                 });
             });
@@ -190,7 +190,7 @@ function renderInventory(data) {
     _clearEl(inventoryContainer);
 
     if (!data || !data.items || data.items.length === 0) {
-        inventoryContainer.replaceChildren(_noData('No items found.', 'Make sure you have the cor3.gg tab open.'));
+        inventoryContainer.replaceChildren(_noData('未找到物品。', '请确保已打开 cor3.gg 标签页。'));
         spaceInfo.textContent = '-- / --';
         return;
     }
@@ -244,7 +244,7 @@ function renderInventory(data) {
         if (item.canSell && item.sellPrice) {
             detailsEl.appendChild(_h('div', {className: 'item-action-row'},
                 _h('div', {className: 'item-price'}, '\ud83d\udcb0 ' + item.sellPrice.toLocaleString()),
-                _h('button', {className: 'sell-btn', dataset: {itemId: item.id, itemName: item.name}, title: 'Sell 1x ' + item.name}, '\ud83d\udcb0 Sell')
+                _h('button', {className: 'sell-btn', dataset: {itemId: item.id, itemName: item.name}, title: '出售 1x ' + item.name}, '\ud83d\udcb0 出售')
             ));
         }
 
@@ -260,8 +260,8 @@ function renderInventory(data) {
             const itemId = btn.dataset.itemId;
             if (!btn.classList.contains('sell-confirm')) {
                 btn.classList.add('sell-confirm');
-                btn.textContent = '✓ Confirm';
-                confirmTimeout = setTimeout(() => { btn.classList.remove('sell-confirm'); btn.textContent = '💰 Sell'; }, 3000);
+                btn.textContent = '✓ 确认';
+                confirmTimeout = setTimeout(() => { btn.classList.remove('sell-confirm'); btn.textContent = '💰 出售'; }, 3000);
                 return;
             }
             if (confirmTimeout) clearTimeout(confirmTimeout);
@@ -293,10 +293,10 @@ function showInventoryInfoPopup(item) {
 
     const INFO_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/><path d="M12 17V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="8" r="0.75" fill="currentColor"/></svg>';
 
-    let h = '<div class="info-title">' + INFO_SVG + ' ' + (item.name || 'Unknown').toUpperCase() + '</div>';
+    let h = '<div class="info-title">' + INFO_SVG + ' ' + (item.name || '未知').toUpperCase() + '</div>';
     h += '<div class="info-desc">';
     if (item.imageUrl) h += '<img src="' + item.imageUrl + '" alt="">';
-    h += '<span>' + (item.description || 'No description available.') + '</span>';
+    h += '<span>' + (item.description || '暂无描述。') + '</span>';
     h += '</div>';
 
     const tags = item.tags || [];
@@ -309,10 +309,10 @@ function showInventoryInfoPopup(item) {
     }
 
     h += '<div class="info-specs">';
-    if (item.tier) h += '<div class="info-spec-item"><div class="info-spec-label">Rarity</div><div class="info-spec-val">' + item.tier + '</div></div>';
-    if (item.sellPrice) h += '<div class="info-spec-item"><div class="info-spec-label">Sell Price</div><div class="info-spec-val">' + item.sellPrice.toLocaleString() + '</div></div>';
-    if (item.canCraft) h += '<div class="info-spec-item"><div class="info-spec-label">Craftable</div><div class="info-spec-val">Yes</div></div>';
-    if (item.canUse) h += '<div class="info-spec-item"><div class="info-spec-label">Usable</div><div class="info-spec-val">Yes</div></div>';
+    if (item.tier) h += '<div class="info-spec-item"><div class="info-spec-label">稀有度</div><div class="info-spec-val">' + item.tier + '</div></div>';
+    if (item.sellPrice) h += '<div class="info-spec-item"><div class="info-spec-label">出售价</div><div class="info-spec-val">' + item.sellPrice.toLocaleString() + '</div></div>';
+    if (item.canCraft) h += '<div class="info-spec-item"><div class="info-spec-label">可制作</div><div class="info-spec-val">是</div></div>';
+    if (item.canUse) h += '<div class="info-spec-item"><div class="info-spec-label">可用</div><div class="info-spec-val">是</div></div>';
     h += '</div>';
 
     _safeSetHtml(popup, h);

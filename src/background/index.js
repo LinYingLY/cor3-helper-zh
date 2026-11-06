@@ -14,7 +14,7 @@ async function keepWorkerAlive() {
             await chrome.tabs.sendMessage(tab.id, { action: "keepWorkerAlive" });
         }
     } catch (e) {
-        console.log('[COR3 Helper] Keep-alive failed:', e);
+        console.log('[COR3 Helper] 保活失败：', e);
         cor3LogError('background.js', e, { action: 'keepWorkerAlive' });
     }
 }

@@ -58,7 +58,7 @@ setInterval(() => {
     _autoUpdateMarketsLastRefresh = now;
     _automationEnqueue('auto-update-markets', () => {
         _marketRefreshInProgress = true;
-        console.log('[COR3 Helper] Auto Update Markets: triggering periodic 10-min refresh');
+        console.log('[COR3 助手] 市场自动更新：触发 10 分钟周期刷新');
         window.postMessage({ type: 'COR3_REFRESH_ALL_MARKETS_SEQ' }, '*');
         setTimeout(() => { _marketRefreshInProgress = false; _automationFinish('auto-update-markets'); }, 30000);
         function onDone(evt) {

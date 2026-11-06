@@ -53,7 +53,7 @@ export function createDelay(abortFlagFn) {
         return new Promise(function (resolve, reject) {
             var target = Date.now() + ms;
             function check() {
-                if (abortFlagFn && abortFlagFn()) { reject(new Error('Aborted')); return; }
+                if (abortFlagFn && abortFlagFn()) { reject(new Error('已中止')); return; }
                 if (Date.now() >= target) { resolve(); return; }
                 var remaining = target - Date.now();
                 if (remaining > 200) {
@@ -87,13 +87,13 @@ export function createWaitForEvent(abortFlagFn) {
                 if (abortFlagFn && abortFlagFn()) {
                     done = true;
                     window.removeEventListener('message', handler);
-                    reject(new Error('Aborted'));
+                    reject(new Error('已中止'));
                     return;
                 }
                 if (Date.now() >= deadline) {
                     done = true;
                     window.removeEventListener('message', handler);
-                    reject(new Error('Timeout waiting for ' + eventType));
+                    reject(new Error('等待超时: ' + eventType));
                     return;
                 }
                 var remaining = deadline - Date.now();

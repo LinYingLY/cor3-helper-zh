@@ -3,8 +3,8 @@ import { MARKET_IDS, LOG_JOB_TYPES } from '../shared/server-constants.js';
 import { FALLBACK_PATH_MAP, FALLBACK_SERVER_PRIORITY } from '../shared/server-map.js';
 
 const SUPPORTED_JOB_TYPES_BG = [
-    'File Decryption', 'IP Injection', 'Data Download', 'Log Deletion',
-    'Log Download', 'Decrypt & Extract', 'File Elimination', 'Data Upload', 'IP Cleanup'
+    '文件解密', 'IP 注入', '数据下载', '日志删除',
+    '日志下载', '解密并提取', '文件清除', '数据上传', 'IP 清理'
 ];
 
 function isJobBuggedBg(job) {
@@ -159,7 +159,7 @@ export async function scheduleAutoFinishAllBg() {
             const diff = new Date(md.nextJobsResetAt).getTime() - now;
             if (diff > 0 && diff < minWaitMs) {
                 minWaitMs = diff;
-                scheduledReason = 'job reset';
+                scheduledReason = '任务已重置';
             }
         }
     }
@@ -174,12 +174,12 @@ export async function scheduleAutoFinishAllBg() {
                 const diff = new Date(s.maintenanceEndsAt).getTime() + 3 * 60 * 1000 - now;
                 if (diff > 0 && diff < minWaitMs) {
                     minWaitMs = diff;
-                    scheduledReason = `${s.blockerName} maintenance end (+3m buffer)`;
+                    scheduledReason = `${s.blockerName} 维护结束（+3 分钟缓冲）`;
                 }
             }
         }
         const blockedPairs = [...new Set(skipped.map(s =>
-            s.blockerName === s.serverName ? s.serverName : `${s.serverName} (blocked by ${s.blockerName})`
+            s.blockerName === s.serverName ? s.serverName : `${s.serverName} (被阻塞:  ${s.blockerName})`
         ))].join(', ');
         bgAutoJobLog(`🔄 Auto Finish All: skipped jobs due to maintenance: ${blockedPairs}`, 'warn');
     }
@@ -193,24 +193,24 @@ export async function scheduleAutoFinishAllBg() {
                 const diff = new Date(sr.maintenanceEndsAt).getTime() + 3 * 60 * 1000 - now;
                 if (diff > 0 && diff < minWaitMs) {
                     minWaitMs = diff;
-                    scheduledReason = `maintenance end (${sr.serverName || 'unknown server'}) (+3m buffer)`;
+                    scheduledReason = `维护结束（${sr.serverName || '未知服务器'}）（+3 分钟缓冲）`;
                 } else if (diff <= 0 && minWaitMs === Infinity) {
                     minWaitMs = 30 * 1000;
-                    scheduledReason = `maintenance ended (${sr.serverName || 'unknown server'}) — rechecking`;
+                    scheduledReason = `维护已结束（${sr.serverName || '未知服务器'}）— 重新检查`;
                 }
             }
         }
         if (!hasEndTimeInfo && minWaitMs === Infinity) {
             minWaitMs = 10 * 60 * 1000;
-            scheduledReason = 'maintenance fallback (no end time known)';
-            bgAutoJobLog(`🔄 Auto Finish All: ${skippedFromResults.length} job(s) skipped (maintenance) with unknown end time — waiting 10m`, 'warn');
+            scheduledReason = '维护兜底（结束时间未知）';
+            bgAutoJobLog(`🔄 Auto Finish All: ${skippedFromResults.length} 个任务因维护跳过（结束时间未知）— 等待 10 分钟`, 'warn');
         }
         for (const sr of skippedFromResults) {
             if (sr.lockExpiresAt) {
                 const diff = new Date(sr.lockExpiresAt).getTime() - now;
                 if (diff > 0 && diff < minWaitMs) {
                     minWaitMs = diff;
-                    scheduledReason = `minigame lock expires (${sr.name || sr.serverName || 'unknown'})`;
+                    scheduledReason = `小游戏锁定到期（${sr.name || sr.serverName || 'unknown'})`;
                 }
             }
         }
@@ -280,7 +280,7 @@ export async function runAutoFinishAllBg() {
         if (expiredMarkets.includes('dark')) refreshOrder.push('dark');
         if (expiredMarkets.includes('home')) refreshOrder.push('home');
 
-        bgAutoJobLog(`🔄 Auto Finish All: refreshing ${refreshOrder.length > 0 ? refreshOrder.join(', ') : 'all'} market data (attempt ${attempt}/3)...`);
+        bgAutoJobLog(`🔄 Auto Finish All: refreshing ${refreshOrder.length > 0 ? refreshOrder.join(', ') : 'all'} 市场数据（尝试  ${attempt}/3)...`);
         try {
             const refreshMsg = { action: "refreshAllMarketsSeq", skipLots: true };
             if (refreshOrder.length > 0) refreshMsg.order = refreshOrder;
@@ -318,9 +318,9 @@ export async function runAutoFinishAllBg() {
             const skippedList = jobsToRun._skippedMaintenance || [];
             if (skippedList.length > 0) {
                 const blockedPairs = [...new Set(skippedList.map(s =>
-                    s.blockerName === s.serverName ? s.serverName : `${s.serverName} (blocked by ${s.blockerName})`
+                    s.blockerName === s.serverName ? s.serverName : `${s.serverName} (被阻塞:  ${s.blockerName})`
                 ))].join(', ');
-                bgAutoJobLog(`🔄 Auto Finish All: skipped ${skippedList.length} job(s) due to maintenance: ${blockedPairs}`, 'warn');
+                bgAutoJobLog(`🔄 Auto Finish All: skipped ${skippedList.length} 因维护待处理任务： ${blockedPairs}`, 'warn');
             }
             bgAutoJobLog(`🔄 Auto Finish All: starting ${jobsToRun.length} job(s)`);
             const { autoJobsTracker: existingTracker } = await chrome.storage.local.get('autoJobsTracker');
@@ -353,9 +353,9 @@ export async function runAutoFinishAllBg() {
             const skipped = jobsToRun._skippedMaintenance || [];
             if (skipped.length > 0) {
                 const blockedPairs = [...new Set(skipped.map(s =>
-                    s.blockerName === s.serverName ? s.serverName : `${s.serverName} (blocked by ${s.blockerName})`
+                    s.blockerName === s.serverName ? s.serverName : `${s.serverName} (被阻塞:  ${s.blockerName})`
                 ))].join(', ');
-                bgAutoJobLog(`🔄 Auto Finish All: remaining jobs blocked by maintenance: ${blockedPairs} — scheduling at maintenance end or reset.`, 'warn');
+                bgAutoJobLog(`🔄 Auto Finish All: remaining jobs blocked by maintenance: ${blockedPairs} — 安排到维护结束或重置时执行。`, 'warn');
             } else {
                 bgAutoJobLog('🔄 Auto Finish All: only bugged/failed jobs remain — waiting for next reset.', 'warn');
             }

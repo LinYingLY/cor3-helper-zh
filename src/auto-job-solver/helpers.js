@@ -78,7 +78,7 @@ export async function fetchMapData(forceRefresh) {
             serverMap.update(fullData);
             var newFingerprint = serverMap.getMaintenanceFingerprint();
             if (oldFingerprint !== null && oldFingerprint !== newFingerprint) {
-                log('Server state changed — path cache refreshed');
+                log('服务器状态已变更 — 路径缓存已刷新');
             }
         }
     }
@@ -145,16 +145,16 @@ export function invalidateLoadoutCache() {
 
 export async function getLoadoutData(forceRefresh) {
     if (!forceRefresh && state._cachedLoadout && (Date.now() - state._cachedLoadoutAt < 60000)) {
-        log('Loadout: using cached data (age: ' + Math.round((Date.now() - state._cachedLoadoutAt) / 1000) + 's)');
+        log('装备栏：使用缓存数据（已存 ' + Math.round((Date.now() - state._cachedLoadoutAt) / 1000) + 's)');
         return state._cachedLoadout;
     }
     var now = Date.now();
     if (now - state._lastLoadoutFetchAt < state.LOADOUT_COOLDOWN_MS) {
-        log('Loadout: fetch cooldown active (' + Math.round(state.LOADOUT_COOLDOWN_MS - (now - state._lastLoadoutFetchAt)) + 'ms remaining) — using cached', 'warn');
+        log('装备栏：获取冷却中（' + Math.round(state.LOADOUT_COOLDOWN_MS - (now - state._lastLoadoutFetchAt)) + '毫秒剩余）— 使用缓存', 'warn');
         return state._cachedLoadout;
     }
     state._lastLoadoutFetchAt = now;
-    log('Loadout: fetching fresh data...');
+    log('装备栏：获取最新数据...');
     sendCmd('loadout.get', {});
     try {
         var data = await waitForEvent('COR3_AUTOJOB_LOADOUT', 10000);
@@ -162,13 +162,13 @@ export async function getLoadoutData(forceRefresh) {
             state._cachedLoadout = data.data;
             state._cachedLoadoutAt = Date.now();
             var eqSw = state._cachedLoadout.equippedSoftware || [];
-            log('Loadout: got ' + ((state._cachedLoadout.ownedSoftware || []).length) + ' owned, ' + eqSw.length + ' equipped software');
+            log('装备栏：获得：' + ((state._cachedLoadout.ownedSoftware || []).length) + ' 已拥有， ' + eqSw.length + ' 已装备软件');
             return state._cachedLoadout;
         }
     } catch (e) {
-        log('Loadout: fetch timed out — ' + e.message, 'warn');
+        log('装备栏：获取超时 —' + e.message, 'warn');
     }
-    log('Loadout: no data available', 'warn');
+    log('装备栏：没有可用数据', 'warn');
     return null;
 }
 
@@ -182,7 +182,7 @@ export async function applyLoadoutChange(loadout, targetHw, targetSwIds) {
         var tgt = targetHw[cat];
         var cur = currentHw[cat];
         if (tgt && (!cur || cur.id !== tgt.id)) {
-            log('Loadout: equipping ' + cat.toUpperCase() + ': ' + tgt.name);
+            log('装备栏：正在装备 ' + cat.toUpperCase() + ': ' + tgt.name);
             sendCmd('loadout.equip.hardware', { moduleConfigId: tgt.id });
             try { await waitForEvent('COR3_AUTOJOB_LOADOUT', 8000); } catch (e) { /* continue */ }
             await delay(humanDelay());
@@ -191,7 +191,7 @@ export async function applyLoadoutChange(loadout, targetHw, targetSwIds) {
 
     for (var ui = 0; ui < currentSw.length; ui++) {
         if (targetSwIds.indexOf(currentSw[ui]) < 0) {
-            log('Loadout: unequipping software: ' + currentSw[ui]);
+            log('装备栏：卸下软件：' + currentSw[ui]);
             sendCmd('loadout.unequip.software', { moduleConfigId: currentSw[ui] });
             try { await waitForEvent('COR3_AUTOJOB_LOADOUT', 5000); } catch (e) { /* continue */ }
             await delay(500);
@@ -200,7 +200,7 @@ export async function applyLoadoutChange(loadout, targetHw, targetSwIds) {
 
     for (var ei = 0; ei < targetSwIds.length; ei++) {
         if (currentSw.indexOf(targetSwIds[ei]) < 0) {
-            log('Loadout: equipping software: ' + targetSwIds[ei]);
+            log('装备栏：装备软件：' + targetSwIds[ei]);
             sendCmd('loadout.equip.software', { moduleConfigId: targetSwIds[ei] });
             try { await waitForEvent('COR3_AUTOJOB_LOADOUT', 5000); } catch (e) { /* continue */ }
             await delay(500);
@@ -214,13 +214,13 @@ export async function applyLoadoutChange(loadout, targetHw, targetSwIds) {
 export async function ensureLoadoutForJob(job) {
     var serverId = job.serverId;
     if (!serverId) {
-        log('Loadout: job has no target server — skipping loadout check');
+        log('装备栏：任务没有目标服务器 — 跳过装备栏检查');
         return true;
     }
 
     var serverTypeName = getServerTypeName(serverId);
     state._lastLoadoutServerType = serverTypeName || state._lastLoadoutServerType;
-    log('Loadout: pre-check for job "' + (job.type || job.name || '?') + '" on server ' + (serverTypeName || serverId));
+    log('装备栏：任务预检：“' + (job.type || job.name || '?') + '"，服务器 ' + (serverTypeName || serverId));
 
     var serverDefenceRate = 0;
     var needsHack = true;
@@ -234,38 +234,38 @@ export async function ensureLoadoutForJob(job) {
             if (preLoginData.data.activeAccesses && preLoginData.data.activeAccesses.length > 0) {
                 var existingAccess = preLoginData.data.activeAccesses[0];
                 var existingType = existingAccess.accessType || existingAccess.type || 'unknown';
-                log('Loadout: already have ' + existingType + ' access on target server — skipping hack loadout');
+                log('装备栏：已拥有：' + existingType + ' 目标服务器已有访问 — 跳过破解配装');
                 needsHack = false;
             }
         }
     } catch (e) {
-        log('Loadout: could not check login status — assuming hack needed', 'warn');
+        log('装备栏：检查登录状态失败 — 默认需要破解', 'warn');
     }
 
     if (!needsHack) {
-        log('Loadout: pre-check complete — no hack needed for "' + (job.type || job.name || '?') + '"');
+        log('装备栏：预检完成 — 无需破解“' + (job.type || job.name || '?') + '"');
         return true;
     }
 
     if (!serverTypeName) {
-        log('Loadout: cannot determine server type — skipping hack loadout');
+        log('装备栏：判断不出服务器类型 — 跳过破解装备栏');
         return true;
     }
 
     invalidateLoadoutCache();
     var loadout = await getLoadoutData(true);
     if (!loadout) {
-        log('Loadout: could not fetch loadout data — proceeding without loadout check', 'warn');
+        log('装备栏：获取装备栏数据失败 — 跳过装备栏检查继续', 'warn');
         return true;
     }
 
     var allSw = loadout.ownedSoftware || [];
     var equippedSwIds = (loadout.equippedSoftware || []).map(function (s) { return s.id; });
     var hackCandidates = findHackSoftwareForServerType(allSw, serverTypeName);
-    log('Loadout: found ' + hackCandidates.length + ' hack candidate(s) for ' + serverTypeName + (hackCandidates.length > 0 ? ' — best: ' + hackCandidates[0].sw.name + ' (power ' + (hackCandidates[0].spec.power || []).join('-') + ')' : ''));
+    log('装备栏：找到 ' + hackCandidates.length + ' 个破解候选: ' + serverTypeName + (hackCandidates.length > 0 ? ' — 最佳: ' + hackCandidates[0].sw.name + ' (算力 ' + (hackCandidates[0].spec.power || []).join('-') + ')' : ''));
 
     if (hackCandidates.length === 0) {
-        log('Loadout: no hack software available for ' + serverTypeName + ' — proceeding (may use existing access)', 'warn');
+        log('装备栏: 没有可用的破解软件: ' + serverTypeName + ' — 继续(可能使用已有访问)', 'warn');
         return true;
     }
 
@@ -277,16 +277,16 @@ export async function ensureLoadoutForJob(job) {
 
     var alreadyBest = equippedSwIds.length === 1 && equippedSwIds[0] === bestHack.sw.id;
     if (alreadyBest) {
-        log('Loadout: best HACK software "' + bestHack.sw.name + '" already equipped alone');
+        log('装备栏：最佳 HACK 软件"' + bestHack.sw.name + '" 已单独装备');
     }
 
     if (!analysis.canBoot) {
-        log('Loadout: current hardware cannot boot hack software — finding compatible hardware');
+        log('装备栏：当前硬件启动不了破解软件 — 查找兼容硬件');
         var betterHw = findBestHardware(loadout, targetSwIds);
         if (betterHw) {
             targetHw = betterHw;
         } else {
-            log('Loadout: cannot boot hack software — skipping loadout change', 'warn');
+            log('装备栏：破解软件启动失败 — 跳过装备栏变更', 'warn');
             return true;
         }
     }
@@ -305,13 +305,13 @@ export async function ensureLoadoutForJob(job) {
         }
     }
     if (serverDefenceRate > 0) {
-        log('Loadout: hack power comparison — hackPower: ' + computedHackPower + ' vs serverDefenceRate: ' + serverDefenceRate + (computedHackPower >= serverDefenceRate ? ' ✓' : ' ✗ INSUFFICIENT'));
+        log('装备栏：破解算力比较 — hackPower：' + computedHackPower + ' vs serverDefenceRate: ' + serverDefenceRate + (computedHackPower >= serverDefenceRate ? ' ✓' : ' ✗ 不足'));
     } else {
-        log('Loadout: computed hack power: ' + computedHackPower + ' (serverDefenceRate unknown)');
+        log('装备栏：计算破解算力：' + computedHackPower + ' (serverDefenceRate 未知)');
     }
 
     if (serverDefenceRate > 0 && computedHackPower < serverDefenceRate) {
-        log('Loadout: hack power insufficient — trying hardware upgrade to boost power');
+        log('装备栏：破解算力不足 — 尝试升级硬件提升算力');
         var hwUpgrade = findBestHardware(loadout, targetSwIds);
         if (hwUpgrade) {
             var upgradeLoadout = JSON.parse(JSON.stringify(loadout));
@@ -330,23 +330,23 @@ export async function ensureLoadoutForJob(job) {
             if (upgradedPower > computedHackPower) {
                 targetHw = hwUpgrade;
                 computedHackPower = upgradedPower;
-                log('Loadout: hardware upgrade found — hack power: ' + upgradedPower + ' vs serverDefenceRate: ' + serverDefenceRate + (upgradedPower >= serverDefenceRate ? ' ✓' : ' ✗ still insufficient'));
+                log('装备栏：找到硬件升级 — 破解算力：' + upgradedPower + ' vs serverDefenceRate: ' + serverDefenceRate + (upgradedPower >= serverDefenceRate ? ' ✓' : ' ✗ 仍然不足'));
                 if (upgradedPower < serverDefenceRate) {
-                    log('Loadout: cannot reach required hack power (' + serverDefenceRate + ') — best achievable: ' + upgradedPower, 'error');
+                    log('装备栏：达不到所需破解算力(' + serverDefenceRate + ') — 可达最佳: ' + upgradedPower, 'error');
                 }
             } else {
-                log('Loadout: no better hardware available — best hack power: ' + computedHackPower, 'warn');
+                log('装备栏：没有更好硬件 — 最佳破解算力：' + computedHackPower, 'warn');
             }
         } else {
-            log('Loadout: no hardware upgrade available', 'warn');
+            log('装备栏：无可用硬件升级', 'warn');
         }
     }
 
     if (!alreadyBest || targetHw !== currentHw) {
-        log('Loadout: equipping HACK-only software "' + bestHack.sw.name + '" (power ' + (bestHack.spec.power || []).join('-') + ') for ' + serverTypeName);
+        log('装备栏：装备纯破解软件“' + bestHack.sw.name + '" (算力 ' + (bestHack.spec.power || []).join('-') + ') 用于 ' + serverTypeName);
         await applyLoadoutChange(loadout, targetHw, targetSwIds);
     }
-    log('Loadout: pre-check complete for "' + (job.type || job.name || '?') + '"');
+    log('装备栏：预检完成：“' + (job.type || job.name || '?') + '"');
     return true;
 }
 
@@ -366,28 +366,28 @@ export async function ensureDecryptOnlyLoadout(job) {
         fileType = job.fileType;
     }
     if (!fileType) {
-        log('Loadout: decrypt job but file type unknown — will rely on error retry', 'warn');
+        log('装备栏：解密任务但文件类型未知 — 依赖报错重试', 'warn');
         return;
     }
 
     invalidateLoadoutCache();
     var loadout = await getLoadoutData(true);
     if (!loadout) {
-        log('Loadout: could not fetch loadout data — proceeding without decrypt loadout', 'warn');
+        log('装备栏：获取装备栏数据失败 — 不带解密装备继续', 'warn');
         return;
     }
 
     var allSw = loadout.ownedSoftware || [];
     var decryptCandidates = findDecryptSoftwareForFileType(allSw, fileType);
     if (decryptCandidates.length === 0) {
-        log('Loadout: no decrypt software available for ' + fileType, 'warn');
+        log('装备栏：无可用解密软件：' + fileType, 'warn');
         return;
     }
 
     var bestDecrypt = decryptCandidates[0];
     var equippedSwIds = (loadout.equippedSoftware || []).map(function (s) { return s.id; });
     if (equippedSwIds.length === 1 && equippedSwIds[0] === bestDecrypt.sw.id) {
-        log('Loadout: best DECRYPT software "' + bestDecrypt.sw.name + '" already equipped alone');
+        log('装备栏：最佳解密软件“' + bestDecrypt.sw.name + '" 已单独装备');
         return;
     }
 
@@ -396,17 +396,17 @@ export async function ensureDecryptOnlyLoadout(job) {
     var analysis = calculateAnalysis(loadout, targetSwIds);
     var targetHw = currentHw;
     if (!analysis.canBoot) {
-        log('Loadout: current hardware cannot boot decrypt software — finding compatible hardware');
+        log('装备栏：当前硬件启动不了解密软件 — 查找兼容硬件');
         var betterHw = findBestHardware(loadout, targetSwIds);
         if (betterHw) {
             targetHw = betterHw;
         } else {
-            log('Loadout: cannot boot decrypt software for ' + fileType + ' — insufficient resources', 'warn');
+            log('装备栏：解密软件启动失败：' + fileType + ' — 资源不足', 'warn');
             return;
         }
     }
 
-    log('Loadout: equipping DECRYPT-only software "' + bestDecrypt.sw.name + '" (power ' + (bestDecrypt.spec.power || []).join('-') + ') for ' + fileType);
+    log('装备栏：装备纯解密软件“' + bestDecrypt.sw.name + '" (算力 ' + (bestDecrypt.spec.power || []).join('-') + ') 用于 ' + fileType);
     await applyLoadoutChange(loadout, targetHw, targetSwIds);
 }
 
@@ -417,25 +417,25 @@ export async function checkDecryptPowerViaAnalysis(fileId, job) {
         if (analysis && analysis.data) {
             var canDecrypt = analysis.data.canDecrypt;
             if (canDecrypt === false) {
-                log('Decrypt power check: insufficient (required: ' + (analysis.data.decryptPower || '?') + ')', 'warn');
+                log('解密算力检查: 分析超时 — 继续执行' + (analysis.data.decryptPower || '?') + ')', 'warn');
                 return false;
             }
-            log('Decrypt power check: OK');
+            log('解密算力检查: 不足 (需要: ');
             return true;
         }
     } catch (e) {
-        log('Decrypt power check: analysis timed out — proceeding anyway', 'warn');
+        log('解密未完成 — 重新打开文件重试解密 (尝试 ', 'warn');
     }
     return true;
 }
 
 export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
     if (!errorMsg) return false;
-    log('Loadout: tryLoadoutSwapForError — error="' + errorMsg + '"');
+    log('装备栏：tryLoadoutSwapForError — 错误=“' + errorMsg + '"');
     invalidateLoadoutCache();
     var loadout = await getLoadoutData(true);
     if (!loadout) {
-        log('Loadout: cannot retry — no loadout data available', 'warn');
+        log('装备栏：重试失败 — 没有装备栏数据', 'warn');
         return false;
     }
 
@@ -446,13 +446,13 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
         var serverId = job.serverId;
         var serverTypeName = getServerTypeName(serverId);
         if (!serverTypeName) {
-            log('Loadout: cannot determine server type for ' + serverId, 'warn');
+            log('装备栏: 未能判断服务器类型: ' + serverId, 'warn');
             return false;
         }
-        log('Loadout: hack failed on ' + serverTypeName + ' — equipping hack-only software');
+        log('装备栏：破解失败：' + serverTypeName + ' — 正在装备纯破解软件');
         var hackCandidates = findHackSoftwareForServerType(allSw, serverTypeName);
         if (hackCandidates.length === 0) {
-            log('Loadout: no hack software available for ' + serverTypeName, 'warn');
+            log('装备栏: 没有可用的破解软件: ' + serverTypeName, 'warn');
             return false;
         }
         var bestHack = hackCandidates[0];
@@ -468,7 +468,7 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
         } catch (e) { }
 
         if (equippedSwIds.length === 1 && equippedSwIds[0] === bestHack.sw.id) {
-            log('Loadout: best hack software "' + bestHack.sw.name + '" already equipped alone — trying hardware upgrade');
+            log('装备栏：最佳破解软件"' + bestHack.sw.name + '" 已单独装备 — 尝试升级硬件');
             var currentAnalysis = calculateAnalysis(loadout, targetSwIds);
             var currentHackPower = 0;
             var curSa = currentAnalysis.swAnalysis[bestHack.sw.id];
@@ -478,18 +478,18 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
                 }
             }
             if (serverDefenceRate > 0) {
-                log('Loadout: current hack power: ' + currentHackPower + ' vs serverDefenceRate: ' + serverDefenceRate);
+                log('装备栏：当前破解算力：' + currentHackPower + ' vs serverDefenceRate: ' + serverDefenceRate);
             }
             var betterHw = findBestHardware(loadout, targetSwIds);
             if (!betterHw) {
-                log('Loadout: no hardware upgrade available — cannot improve hack power' + (serverDefenceRate > 0 ? ' (need ' + serverDefenceRate + ', have ' + currentHackPower + ')' : ''), 'error');
+                log('装备栏：没有可用硬件升级 — 破解算力已到上限' + (serverDefenceRate > 0 ? ' (需要 ' + serverDefenceRate + ', 当前 ' + currentHackPower + ')' : ''), 'error');
                 return false;
             }
             var testLoadout = JSON.parse(JSON.stringify(loadout));
             testLoadout.equippedHardware = betterHw;
             var hwAnalysis = calculateAnalysis(testLoadout, targetSwIds);
             if (!hwAnalysis.canBoot) {
-                log('Loadout: cannot boot with better hardware — giving up', 'error');
+                log('装备栏：换更好硬件也启动失败 — 放弃', 'error');
                 return false;
             }
             var upgradedHackPower = 0;
@@ -499,15 +499,15 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
                     if (hwSa.abilities[uhi].type === 'HACK') { upgradedHackPower = hwSa.abilities[uhi].computedPower; break; }
                 }
             }
-            log('Loadout: with hardware upgrade, hack power: ' + upgradedHackPower + (serverDefenceRate > 0 ? ' vs serverDefenceRate: ' + serverDefenceRate : ''));
+            log('装备栏：硬件升级后破解算力：' + upgradedHackPower + (serverDefenceRate > 0 ? ' vs serverDefenceRate: ' + serverDefenceRate : ''));
             if (upgradedHackPower <= currentHackPower) {
-                log('Loadout: hardware upgrade does not improve hack power — giving up', 'error');
+                log('装备栏：升级硬件也提升不了破解算力 — 放弃', 'error');
                 return false;
             }
             if (serverDefenceRate > 0 && upgradedHackPower < serverDefenceRate) {
-                log('Loadout: hardware upgrade still insufficient — need ' + serverDefenceRate + ', best achievable: ' + upgradedHackPower, 'error');
+                log('装备栏：升级硬件后仍不足 — 需要：' + serverDefenceRate + ', 可达最佳: ' + upgradedHackPower, 'error');
             }
-            log('Loadout: swapping hardware to boost hack power for ' + serverTypeName);
+            log('装备栏：更换硬件以提升破解算力：' + serverTypeName);
             await applyLoadoutChange(loadout, betterHw, targetSwIds);
             return true;
         }
@@ -520,7 +520,7 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
             if (betterHw2) {
                 targetHw = betterHw2;
             } else {
-                log('Loadout: cannot boot hack-only software — giving up', 'warn');
+                log('装备栏：纯破解软件启动失败 — 放弃', 'warn');
                 return false;
             }
         }
@@ -535,7 +535,7 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
                 if (preSa.abilities[phi].type === 'HACK') { projectedPower = preSa.abilities[phi].computedPower; break; }
             }
         }
-        log('Loadout: projected hack power with new loadout: ' + projectedPower + (serverDefenceRate > 0 ? ' vs serverDefenceRate: ' + serverDefenceRate : ''));
+        log('装备栏：新配装预计破解算力：' + projectedPower + (serverDefenceRate > 0 ? ' vs serverDefenceRate: ' + serverDefenceRate : ''));
         if (serverDefenceRate > 0 && projectedPower < serverDefenceRate) {
             var hwRetry = findBestHardware(loadout, targetSwIds);
             if (hwRetry) {
@@ -551,14 +551,14 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
                 }
                 if (retryPower >= serverDefenceRate) {
                     targetHw = hwRetry;
-                    log('Loadout: found better hardware — hack power: ' + retryPower);
+                    log('装备栏：找到更好硬件 — 破解算力：' + retryPower);
                 } else {
-                    log('Loadout: best achievable hack power: ' + retryPower + ' — still below serverDefenceRate (' + serverDefenceRate + ')', 'error');
+                    log('装备栏：可达到的最高破解算力：' + retryPower + ' — 仍低于 serverDefenceRate(' + serverDefenceRate + ')', 'error');
                 }
             }
         }
 
-        log('Loadout: equipping HACK-only "' + bestHack.sw.name + '" for retry');
+        log('装备栏：装备纯 HACK 软件"' + bestHack.sw.name + '" 用于重试');
         await applyLoadoutChange(loadout, targetHw, targetSwIds);
         return true;
     }
@@ -583,7 +583,7 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
             if (extMatch) fileType = extMatch[1];
         }
         if (!fileType) {
-            log('Loadout: decrypt failed but file type unknown — cannot swap software', 'warn');
+            log('装备栏：解密失败但文件类型未知 — 跳过软件更换', 'warn');
             return false;
         }
 
@@ -591,12 +591,12 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
         var availablePower = (errorObj && errorObj.available) || 0;
         var isInsufficientPower = errorMsg.indexOf('insufficient_power') >= 0 || errorMsg.indexOf('insufficient-power') >= 0;
         if (isInsufficientPower && requiredPower > 0) {
-            log('Loadout: insufficient decrypt power — required: ' + requiredPower + ', available: ' + availablePower);
+            log('装备栏：解密算力不足 — 需要：' + requiredPower + '，可用： ' + availablePower);
         }
 
         var candidates = findDecryptSoftwareForFileType(allSw, fileType);
         if (candidates.length === 0) {
-            log('Loadout: no decrypt software available for ' + fileType, 'warn');
+            log('装备栏：无可用解密软件：' + fileType, 'warn');
             return false;
         }
 
@@ -604,17 +604,17 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
         var targetSwIds = [best.sw.id];
 
         if (equippedSwIds.length === 1 && equippedSwIds[0] === best.sw.id && isInsufficientPower) {
-            log('Loadout: best decrypt software "' + best.sw.name + '" already equipped alone — trying hardware upgrade to boost power');
+            log('装备栏：最佳解密软件“' + best.sw.name + '" 已单独装备 — 尝试升级硬件提升算力');
             var betterHw = findBestHardware(loadout, targetSwIds);
             if (!betterHw) {
-                log('Loadout: failed to increase decrypt power to required level (' + requiredPower + ') — no better hardware available', 'error');
+                log('装备栏: 未能将破解算力提升到所需等级 (' + requiredPower + '）— 没有更好的硬件可用', 'error');
                 return false;
             }
             var testLoadout = JSON.parse(JSON.stringify(loadout));
             testLoadout.equippedHardware = betterHw;
             var hwAnalysis = calculateAnalysis(testLoadout, targetSwIds);
             if (!hwAnalysis.canBoot) {
-                log('Loadout: failed to increase decrypt power to required level (' + requiredPower + ') — cannot boot with better hardware', 'error');
+                log('装备栏: 未能将破解算力提升到所需等级 (' + requiredPower + '）— 换更好的硬件也启动不了', 'error');
                 return false;
             }
             var sa = hwAnalysis.swAnalysis[best.sw.id];
@@ -626,19 +626,19 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
                         break;
                     }
                 }
-                log('Loadout: with better hardware, decrypt power would be ' + decryptPower + ' (required: ' + requiredPower + ')');
+                log('装备栏：换更好硬件后解密算力可达 ' + decryptPower + ' (需要: ' + requiredPower + ')');
                 if (decryptPower < requiredPower) {
-                    log('Loadout: failed to increase decrypt power to required level (' + requiredPower + ') — best achievable: ' + decryptPower, 'error');
+                    log('装备栏: 未能将破解算力提升到所需等级 (' + requiredPower + ') — 可达最佳: ' + decryptPower, 'error');
                     return false;
                 }
             }
-            log('Loadout: swapping hardware to boost decrypt power for ' + fileType);
+            log('装备栏：更换硬件以提升解密算力：' + fileType);
             await applyLoadoutChange(loadout, betterHw, targetSwIds);
             return true;
         }
 
         if (equippedSwIds.length === 1 && equippedSwIds[0] === best.sw.id) {
-            log('Loadout: best decrypt software already equipped alone — cannot improve', 'warn');
+            log('装备栏：最佳解密软件已单独装备 — 没有提升空间', 'warn');
             return false;
         }
 
@@ -650,7 +650,7 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
             if (betterHw2) {
                 targetHw = betterHw2;
             } else {
-                log('Loadout: cannot boot decrypt-only software for ' + fileType + ' — insufficient resources', 'warn');
+                log('装备栏：纯解密软件启动失败：' + fileType + ' — 资源不足', 'warn');
                 return false;
             }
         }
@@ -665,7 +665,7 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
                 for (var ai2 = 0; ai2 < sa2.abilities.length; ai2++) {
                     if (sa2.abilities[ai2].type === 'DECRYPT') { dp2 = sa2.abilities[ai2].computedPower; break; }
                 }
-                log('Loadout: projected decrypt power with new loadout: ' + dp2 + ' (required: ' + requiredPower + ')');
+                log('装备栏：新装备栏预计解密算力：' + dp2 + ' (需要: ' + requiredPower + ')');
                 if (dp2 < requiredPower) {
                     var hwRetry = findBestHardware(loadout, targetSwIds);
                     if (hwRetry) {
@@ -680,21 +680,21 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
                             }
                             if (dp3 >= requiredPower) {
                                 targetHw = hwRetry;
-                                log('Loadout: found better hardware — decrypt power: ' + dp3);
+                                log('装备栏：找到更好硬件 — 解密算力：' + dp3);
                             } else {
-                                log('Loadout: failed to increase decrypt power to required level (' + requiredPower + ') — best achievable: ' + dp3, 'error');
+                                log('装备栏: 未能将破解算力提升到所需等级 (' + requiredPower + ') — 可达最佳: ' + dp3, 'error');
                                 return false;
                             }
                         }
                     } else {
-                        log('Loadout: failed to increase decrypt power to required level (' + requiredPower + ') — best achievable: ' + dp2, 'error');
+                        log('装备栏: 未能将破解算力提升到所需等级 (' + requiredPower + ') — 可达最佳: ' + dp2, 'error');
                         return false;
                     }
                 }
             }
         }
 
-        log('Loadout: equipping DECRYPT-only "' + best.sw.name + '" for retry on ' + fileType);
+        log('装备栏：装备纯解密软件“' + best.sw.name + '"，将在此重试： ' + fileType);
         await applyLoadoutChange(loadout, targetHw, targetSwIds);
         return true;
     }
@@ -706,7 +706,7 @@ export async function tryLoadoutSwapForError(errorMsg, job, errorObj) {
 
 export function jobLabel(job) {
     var parts = [job.name || job.type];
-    if (job.serverName && job.serverName !== 'None') parts.push('on ' + job.serverName);
+    if (job.serverName && job.serverName !== 'None') parts.push('开 ' + job.serverName);
     var mkt = MARKET_DISPLAY_NAMES[job.marketKey] || '';
     if (mkt) parts.push('[' + mkt + ']');
     return parts.join(' ');

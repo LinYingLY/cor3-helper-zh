@@ -18,12 +18,12 @@ export async function bgAutoJobLog(msg, level) {
 }
 
 export const BG_ERROR_MAP = {
-    'sai-hack-impossible': 'Not enough hack power',
-    'sai-no-hack-software': 'No hacking software',
-    'no-path-to-server': 'No path to server (unreachable)',
-    'server-in-maintenance': 'Server is in maintenance',
-    'invalid-access-token': 'Access token expired or invalid',
-    'token-expired': 'Session token expired'
+    'sai-hack-impossible': '破解算力不足',
+    'sai-no-hack-software': '无破解软件',
+    'no-path-to-server': '无通往服务器的路径(不可达)',
+    'server-in-maintenance': '服务器维护中',
+    'invalid-access-token': '访问令牌已过期或无效',
+    'token-expired': '会话令牌已过期'
 };
 
-export function bgFriendlyError(msg) { return (msg && BG_ERROR_MAP[msg]) || msg || 'Unknown error'; }
+export function bgFriendlyError(msg) { return (msg && BG_ERROR_MAP[msg]) || msg || '未知错误'; }

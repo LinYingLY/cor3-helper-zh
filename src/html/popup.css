@@ -533,7 +533,7 @@
             cursor: pointer;
         }
         .option-row.confirming .option-label::after {
-            content: ' — Click to confirm';
+            content: ' — 点击确认';
             font-size: 9px;
             color: var(--accent-green);
             font-weight: normal;

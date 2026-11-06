@@ -10,7 +10,7 @@ export function getInspectedTabId() {
 async function runInTab(fn, args) {
     const tabId = getInspectedTabId();
     if (!tabId) {
-        console.log('[COR3 Panel] No inspected tab ID');
+        console.log('[COR3 面板] 没有受检标签页 ID');
         return null;
     }
     try {
@@ -21,7 +21,7 @@ async function runInTab(fn, args) {
         });
         if (results && results[0]) return results[0].result;
     } catch (e) {
-        console.log('[COR3 Panel] executeScript error:', e);
+        console.log('[COR3 面板] executeScript 出错：', e);
     }
     return null;
 }

@@ -33,7 +33,7 @@ window.__cor3DownloadFolderId = null;
 // Joining the expedition room triggers the server to respond with get.active data.
 // We track whether data already arrived to avoid sending a duplicate get.active.
 window.__cor3RequestExpeditions = function () {
-    console.log('[COR3 Helper] Requesting expedition data');
+    console.log('[COR3 Helper] 正在请求远征数据');
     var gotData = false;
     // Listen for the response — if it arrives from room join alone, skip manual send
     var onExpData = function (evt) {
@@ -65,7 +65,7 @@ window.__cor3RespondDecision = function (expeditionId, messageId, selectedOption
         selectedOption: selectedOption
     });
     var msg = '42["event",{"event":{"name":"expeditions","action":"respond.event"},"data":' + payload + '}]';
-    console.log('[COR3 Helper] Sending decision response:', selectedOption);
+    console.log('[COR3 Helper] 正在发送决策响应：', selectedOption);
     var sent = wsSend(msg);
     if (!sent) {
         // Queue for retry if socket is down (token-expired)
@@ -76,7 +76,7 @@ window.__cor3RespondDecision = function (expeditionId, messageId, selectedOption
 
 // Request archived expeditions
 window.__cor3RequestArchivedExpeditions = function () {
-    console.log('[COR3 Helper] Requesting archived expeditions');
+    console.log('[COR3 Helper] 正在请求已归档远征');
     var msg = '42["event",{"event":{"name":"expeditions","action":"get.archived"},"data":{"cursor":null,"limit":20}}]';
     wsSend(msg);
     return true;
@@ -88,11 +88,11 @@ var coreMercAbort = null;
 // Request mercenary data: get.mercenaries → (get.config if needed) → configure each merc sequentially
 window.__cor3RequestMercenaries = function (marketId, callback) {
     if (window.__cor3CoreMercFetchInProgress) {
-        console.log('[COR3 Helper] CORE merc fetch already in progress — aborting previous');
+        console.log('[COR3 Helper] CORE 佣兵获取已在进行中 — 中止上一次');
         if (coreMercAbort) coreMercAbort();
     }
     var mid = marketId || window.__cor3LastMarketId || '019d3ea4-85bd-7389-904d-8f7c85841134';
-    console.log('[COR3 Helper] Starting CORE mercenary data fetch for market:', mid);
+    console.log('[COR3 Helper] 正在为该市场开始获取 CORE 佣兵数据：', mid);
     window.__cor3CoreMercFetchInProgress = true;
 
     var aborted = false;
@@ -145,13 +145,13 @@ window.__cor3RequestMercenaries = function (marketId, callback) {
                 }
             });
         }
-        console.log('[COR3 Helper] Configuring ' + allMercIds.length + ' CORE mercs');
+        console.log('[COR3 Helper] 正在配置 ' + allMercIds.length + ' 个 CORE 佣兵');
         (function configureNext(i) {
             if (aborted || i >= allMercIds.length) {
                 window.__cor3CoreMercFetchInProgress = false;
                 coreMercAbort = null;
                 if (!aborted) {
-                    console.log('[COR3 Helper] CORE merc configure complete');
+                    console.log('[COR3 Helper] CORE 佣兵配置完成');
                     if (callback) callback();
                 }
                 return;
@@ -179,7 +179,7 @@ window.__cor3RequestMercenaries = function (marketId, callback) {
             window.removeEventListener('message', onCoreData);
             window.__cor3CoreMercFetchInProgress = false;
             coreMercAbort = null;
-            console.log('[COR3 Helper] CORE merc data fetch timeout');
+            console.log('[COR3 Helper] CORE 佣兵数据获取超时');
             if (callback) callback();
         }
     }, 30000);
@@ -189,7 +189,7 @@ window.__cor3RequestMercenaries = function (marketId, callback) {
 // Request expedition config (returns location/zone/goal IDs)
 window.__cor3RequestExpeditionConfig = function (marketId) {
     var mid = marketId || window.__cor3LastMarketId || '019d3ea4-85bd-7389-904d-8f7c85841134';
-    console.log('[COR3 Helper] Requesting expedition config for market:', mid);
+    console.log('[COR3 Helper] 正在请求该市场的远征配置：', mid);
     var msg = '42["event",{"event":{"name":"expeditions","action":"get.config"},"data":{"marketId":"' + mid + '"}}]';
     wsSend(msg);
     return true;
@@ -201,7 +201,7 @@ window.__cor3PendingMercConfigures = [];
 // Request mercenary configure details (cost, risk, chances)
 window.__cor3RequestMercConfigure = function (mercenaryId, marketId, locationConfigId, zoneConfigId, goalId) {
     var mid = marketId || window.__cor3LastMarketId || '019d3ea4-85bd-7389-904d-8f7c85841134';
-    console.log('[COR3 Helper] Requesting configure for mercenary:', mercenaryId);
+    console.log('[COR3 Helper] 正在请求配置佣兵：', mercenaryId);
     window.__cor3PendingMercConfigures.push(mercenaryId);
     var data = {
         mercenaryId: mercenaryId,
@@ -223,7 +223,7 @@ var usolMercAbort = null;
 window.__cor3RequestUsolMercenaries = function (callback) {
     var cachedUnreachable = window.__cor3IsMarketUnreachable('usol');
     if (cachedUnreachable) {
-        console.log('[COR3 Helper] USOL market known unreachable (' + cachedUnreachable.blockerName + ' maintenance) — skipping merc fetch');
+        console.log('[COR3 Helper] USOL 市场已知不可达 (' + cachedUnreachable.blockerName + ' 维护中）— 跳过佣兵获取');
         window.postMessage({
             type: 'COR3_WS_USOL_MARKET_UNREACHABLE',
             error: 'no-path-to-server',
@@ -235,10 +235,10 @@ window.__cor3RequestUsolMercenaries = function (callback) {
         return true;
     }
     if (window.__cor3UsolMercFetchInProgress) {
-        console.log('[COR3 Helper] USOL merc fetch already in progress — aborting previous');
+        console.log('[COR3 Helper] USOL 佣兵获取已在进行中 — 中止上一次');
         if (usolMercAbort) usolMercAbort();
     }
-    console.log('[COR3 Helper] Starting USOL mercenary data fetch');
+    console.log('[COR3 Helper] 正在开始获取 USOL 佣兵数据');
     window.__cor3UsolMercFetchInProgress = true;
 
     var aborted = false;
@@ -254,7 +254,7 @@ window.__cor3RequestUsolMercenaries = function (callback) {
     function fetchMercData() {
         setTimeout(function () {
             if (aborted) return;
-            console.log('[COR3 Helper] Requesting USOL mercenaries');
+            console.log('[COR3 Helper] 正在请求 USOL 佣兵');
             var getMercs = '42["event",{"event":{"name":"expeditions","action":"get.mercenaries"},"data":{"marketId":"' + USOL_MARKET_ID + '"}}]';
             wsSend(getMercs);
             setTimeout(function () {
@@ -297,13 +297,13 @@ window.__cor3RequestUsolMercenaries = function (callback) {
                     }
                 });
             }
-            console.log('[COR3 Helper] Configuring ' + allMercIds.length + ' USOL mercs');
+            console.log('[COR3 Helper] 正在配置 ' + allMercIds.length + ' USOL 佣兵');
             (function configureNext(i) {
                 if (aborted || i >= allMercIds.length) {
                     window.__cor3UsolMercFetchInProgress = false;
                     usolMercAbort = null;
                     if (!aborted) {
-                        console.log('[COR3 Helper] USOL merc configure complete');
+                        console.log('[COR3 Helper] USOL 佣兵配置完成');
                         if (callback) callback();
                     }
                     return;
@@ -331,18 +331,18 @@ window.__cor3RequestUsolMercenaries = function (callback) {
                 window.removeEventListener('message', onUsolData);
                 window.__cor3UsolMercFetchInProgress = false;
                 usolMercAbort = null;
-                console.log('[COR3 Helper] USOL merc data fetch timeout');
+                console.log('[COR3 Helper] USOL 佣兵数据获取超时');
                 if (callback) callback();
             }
         }, 30000);
     }
 
     function startPathThroughThenRetry() {
-        console.log('[COR3 Helper] USOL merc: endpoint unreachable — starting dynamic path-through');
+        console.log('[COR3 助手] USOL 佣兵：端点不可达——启动动态穿透');
         __cor3FetchMapData().then(function (mapData) {
             if (aborted) return;
             if (!mapData) {
-                console.log('[COR3 Helper] USOL merc path-through: map data timeout — giving up');
+                console.log('[COR3 助手] USOL 佣兵穿透：地图数据超时——放弃');
                 window.__cor3UsolMercFetchInProgress = false;
                 usolMercAbort = null;
                 __cor3PostUnreachable('usol', null);
@@ -351,19 +351,19 @@ window.__cor3RequestUsolMercenaries = function (callback) {
             }
             var paths = __cor3FindPathsToServer(mapData.servers, mapData.connections, USOL_SERVER_ID);
             if (paths.length === 0) {
-                console.log('[COR3 Helper] USOL merc path-through: no viable paths (maintenance blocked)');
+                console.log('[COR3 助手] USOL 佣兵穿透：无可用路径（维护封锁）');
                 window.__cor3UsolMercFetchInProgress = false;
                 usolMercAbort = null;
                 __cor3PostUnreachable('usol', null);
                 if (callback) callback();
                 return;
             }
-            console.log('[COR3 Helper] USOL merc path-through: found ' + paths.length + ' path(s)');
+            console.log('[COR3 Helper] USOL 佣兵路径穿行：找到 ' + paths.length + ' 条路径');
             var pathIdx = 0;
             function tryNextPath() {
                 if (aborted) return;
                 if (pathIdx >= paths.length) {
-                    console.log('[COR3 Helper] USOL merc path-through: all paths exhausted');
+                    console.log('[COR3 Helper] USOL 佣兵路径穿行：所有路径已用尽');
                     window.__cor3UsolMercFetchInProgress = false;
                     usolMercAbort = null;
                     __cor3PostUnreachable('usol', null);
@@ -375,7 +375,7 @@ window.__cor3RequestUsolMercenaries = function (callback) {
                 var intermediates = currentPath.length > 1 ? currentPath.slice(0, currentPath.length - 1) : [];
                 if (intermediates.length === 0) { retryEndpoint(); return; }
                 var pathNames = currentPath.map(function (s) { return s.name; }).join(' → ');
-                console.log('[COR3 Helper] USOL merc path-through: trying path ' + pathIdx + '/' + paths.length + ': ' + pathNames);
+                console.log('[COR3 助手] USOL 佣兵穿透：尝试路径 ' + pathIdx + '/' + paths.length + ': ' + pathNames);
                 var stepIdx = 0;
                 function nextStep() {
                     if (aborted) return;
@@ -387,7 +387,7 @@ window.__cor3RequestUsolMercenaries = function (callback) {
                     __cor3WaitForMsg('COR3_WS_ENDPOINT_RESULT', 10000).then(function (epData) {
                         if (aborted) return;
                         if (epData.success === false) {
-                            console.log('[COR3 Helper] USOL merc path-through: ' + server.name + ' unreachable — trying next path');
+                            console.log('[COR3 Helper] USOL 佣兵路径穿行： ' + server.name + ' 不可达 — 尝试下一条路径');
                             tryNextPath();
                             return;
                         }
@@ -410,25 +410,25 @@ window.__cor3RequestUsolMercenaries = function (callback) {
             }
             function retryEndpoint() {
                 if (aborted) return;
-                console.log('[COR3 Helper] USOL merc path-through: retrying endpoint');
+                console.log('[COR3 助手] USOL 佣兵穿透：正在重试端点');
                 var setEp2 = '42["event",{"event":{"name":"network-map","action":"set.endpoint"},"data":{"serverId":"' + USOL_SERVER_ID + '"}}]';
                 wsSend(setEp2);
                 __cor3WaitForMsg('COR3_WS_ENDPOINT_RESULT', 10000).then(function (retryData) {
                     if (aborted) return;
                     if (retryData.success === false) {
-                        console.log('[COR3 Helper] USOL merc path-through: endpoint retry failed');
+                        console.log('[COR3 Helper] USOL 佣兵路径穿行：端点重试失败');
                         window.__cor3UsolMercFetchInProgress = false;
                         usolMercAbort = null;
                         __cor3PostUnreachable('usol', null);
                         if (callback) callback();
                         return;
                     }
-                    console.log('[COR3 Helper] USOL merc path-through: endpoint set — fetching merc data');
+                    console.log('[COR3 Helper] USOL 佣兵路径穿行：端点已设置 — 正在获取佣兵数据');
                     fetchMercData();
                 }).catch(function () {
                     window.__cor3UsolMercFetchInProgress = false;
                     usolMercAbort = null;
-                    console.log('[COR3 Helper] USOL merc path-through: retry timeout');
+                    console.log('[COR3 助手] USOL 佣兵穿透：重试超时');
                     if (callback) callback();
                 });
             }
@@ -463,7 +463,7 @@ window.__cor3RequestUsolMercenaries = function (callback) {
             window.removeEventListener('message', onEndpointResult);
             window.__cor3UsolMercFetchInProgress = false;
             usolMercAbort = null;
-            console.log('[COR3 Helper] USOL merc endpoint timeout');
+            console.log('[COR3 Helper] USOL 佣兵端点超时');
             if (callback) callback();
         }
     }, 10000);
@@ -473,7 +473,7 @@ window.__cor3RequestUsolMercenaries = function (callback) {
 // Configure and launch expedition with mercenary
 // For non-HOME markets, set.endpoint to the market server first
 window.__cor3LaunchExpedition = function (configData) {
-    console.log('[COR3 Helper] Launching expedition with config:', configData);
+    console.log('[COR3 Helper] 正在按配置发起远征：', configData);
     var marketId = configData.marketId;
     var needsEndpoint = marketId && marketId !== '019d3ea4-85bd-7389-904d-8f7c85841134'; // not HOME
     var serverId = null;
@@ -486,12 +486,12 @@ window.__cor3LaunchExpedition = function (configData) {
         setTimeout(function () {
             var launchMsg = '42["event",{"event":{"name":"expeditions","action":"launch"},"data":' + JSON.stringify(configData) + '}]';
             wsSend(launchMsg);
-            console.log('[COR3 Helper] Expedition launch sent');
+            console.log('[COR3 Helper] 远征发起请求已发送');
         }, humanDelay() + 500);
     }
 
     if (needsEndpoint && serverId) {
-        console.log('[COR3 Helper] Setting endpoint to market server before launch:', serverId);
+        console.log('[COR3 Helper] 发起前正在将端点设为市场服务器：', serverId);
         var setEp = '42["event",{"event":{"name":"network-map","action":"set.endpoint"},"data":{"serverId":"' + serverId + '"}}]';
         wsSend(setEp);
         var epHandled = false;
@@ -502,7 +502,7 @@ window.__cor3LaunchExpedition = function (configData) {
                 window.removeEventListener('message', onEpResult);
                 clearTimeout(epTimeout);
                 if (evt.data.success === false) {
-                    console.log('[COR3 Helper] Endpoint unreachable for launch, aborting');
+                    console.log('[COR3 Helper] 发起远征时端点不可访问，中止');
                     return;
                 }
                 setTimeout(doConfigureAndLaunch, humanDelay());
@@ -513,7 +513,7 @@ window.__cor3LaunchExpedition = function (configData) {
             if (!epHandled) {
                 epHandled = true;
                 window.removeEventListener('message', onEpResult);
-                console.log('[COR3 Helper] Endpoint timeout for launch, proceeding anyway');
+                console.log('[COR3 Helper] 发起远征时端点超时，仍继续执行');
                 doConfigureAndLaunch();
             }
         }, 8000);
@@ -525,7 +525,7 @@ window.__cor3LaunchExpedition = function (configData) {
 
 // Open reward container for a completed expedition
 window.__cor3OpenContainer = function (expeditionId) {
-    console.log('[COR3 Helper] Opening container for expedition:', expeditionId);
+    console.log('[COR3 Helper] 正在为远征打开容器：', expeditionId);
     var msg = '42["event",{"event":{"name":"expeditions","action":"open.container"},"data":{"expeditionId":"' + expeditionId + '"}}]';
     wsSend(msg);
     return true;
@@ -533,7 +533,7 @@ window.__cor3OpenContainer = function (expeditionId) {
 
 // Collect all contents from an opened container
 window.__cor3CollectAll = function (expeditionId) {
-    console.log('[COR3 Helper] Collecting all from expedition:', expeditionId);
+    console.log('[COR3 Helper] 正在从远征中全部收取：', expeditionId);
     var msg = '42["event",{"event":{"name":"expeditions","action":"collect.all"},"data":{"expeditionId":"' + expeditionId + '"}}]';
     wsSend(msg);
     return true;

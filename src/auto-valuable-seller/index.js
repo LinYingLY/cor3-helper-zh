@@ -11,20 +11,20 @@ window.addEventListener('message', function (event) {
 
     if (event.data && event.data.type === 'COR3_VALUABLE_START_SEARCH') {
         if (running) {
-            log('Already running \u2014 ignoring start request', 'warn');
+            log('已在运行 \u2014 忽略启动请求', 'warn');
             return;
         }
         setRunning(true);
         setMode('search');
         runSearch().catch(function (err) {
-            if (err.message !== 'Stopped') log('Search error: ' + err.message, 'error');
+            if (err.message !== 'Stopped') log('搜索错误：' + err.message, 'error');
             signalDone();
         });
     }
 
     if (event.data && event.data.type === 'COR3_VALUABLE_START_SELLER') {
         if (running) {
-            log('Already running \u2014 ignoring start request', 'warn');
+            log('已在运行 \u2014 忽略启动请求', 'warn');
             return;
         }
         setRunning(true);
@@ -32,14 +32,14 @@ window.addEventListener('message', function (event) {
         var sServers = event.data.selectedServers || [];
         var sDownloads = event.data.selectedDownloads || [];
         runSeller(sServers, sDownloads).catch(function (err) {
-            if (err.message !== 'Stopped') log('Seller error: ' + err.message, 'error');
+            if (err.message !== 'Stopped') log('自动出售错误：' + err.message, 'error');
             signalDone();
         });
     }
 
     if (event.data && event.data.type === 'COR3_VALUABLE_STOP') {
         if (running) {
-            log('Stopping...', 'warn');
+            log('正在停止...', 'warn');
             setRunning(false);
         }
     }
@@ -52,4 +52,4 @@ window.addEventListener('message', function (event) {
     }
 });
 
-log('Auto Valuable Seller engine loaded', 'info');
+log('自动高价出售引擎已加载', 'info');

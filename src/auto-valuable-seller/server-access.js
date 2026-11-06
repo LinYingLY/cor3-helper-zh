@@ -27,7 +27,7 @@ export async function checkPathMaintenance(serverName) {
             mapData = await waitForEvent('COR3_WS_NETWORK_MAP', 10000);
             setCachedMapData(mapData);
         } catch (e) {
-            log('\u26a0\ufe0f Could not fetch network map: ' + e.message, 'warn');
+            log('\u26a0\ufe0f 无法获取网络地图：' + e.message, 'warn');
             return { blocked: false };
         }
     }
@@ -93,12 +93,12 @@ function getPathForServerName(serverName) {
 
 export async function setEndpoint(serverId) {
     var name = getServerName(serverId);
-    log('Setting endpoint to ' + name);
+    log('正在设置端点为 ' + name);
     var raceResult = await _sendSetEndpoint(serverId);
 
     if (raceResult.unreachable) {
         if (raceResult.errorMsg === 'server-in-maintenance') {
-            log(name + ' is in maintenance — skipping', 'error');
+            log(name + ' 维护中 — 跳过', 'error');
             return false;
         }
         // Try path-through: hack intermediate servers on the path
@@ -107,57 +107,57 @@ export async function setEndpoint(serverId) {
             var noPathCheck = await checkPathMaintenance(name);
             if (noPathCheck.blocked) {
                 var nMins = Math.ceil(noPathCheck.remainingMs / 60000);
-                log(name + ' unreachable (' + noPathCheck.blockerName + ' in maintenance, ~' + nMins + 'm remaining)', 'error');
+                log(name + ' 不可达 (' + noPathCheck.blockerName + ' 维护中, ~' + nMins + '分剩余)', 'error');
                 return false;
             }
-            log(name + ' unreachable (no path to server)', 'error');
+            log(name + ' 不可达 (无通往服务器的路径)', 'error');
             return false;
         }
-        log('\u26a1 Server unreachable \u2014 attempting path-through hack (' + path.length + ' servers on path)');
+        log('\u26a1 服务器不可达——尝试穿透破解（' + path.length + ' 个路径上的服务器)');
         // Walk through each intermediate server (excluding the target itself which is the last)
         for (var pi = 0; pi < path.length - 1; pi++) {
             var intermediate = path[pi];
-            log('\u26a1 Path-through: setting endpoint to ' + intermediate.name + ' (' + (pi + 1) + '/' + (path.length - 1) + ')');
+            log('\u26a1 穿透：设置端点为 ' + intermediate.name + ' (' + (pi + 1) + '/' + (path.length - 1) + ')');
             var intResult = await _sendSetEndpoint(intermediate.id);
             if (intResult.unreachable) {
                 var intCheck = await checkPathMaintenance(intermediate.name);
-                var intMsg = intermediate.name + ' unreachable';
+                var intMsg = intermediate.name + ' 不可达';
                 if (intCheck.blocked) {
                     var iMins = Math.ceil(intCheck.remainingMs / 60000);
-                    intMsg += ' (' + intCheck.blockerName + ' in maintenance, ~' + iMins + 'm remaining)';
+                    intMsg += ' (' + intCheck.blockerName + ' 维护中, ~' + iMins + '分剩余)';
                 }
-                log('\u26a1 Path-through: ' + intMsg, 'warn');
+                log('\u26a1 穿透：' + intMsg, 'warn');
                 return false;
             }
             await delay(humanDelay());
             // Login/hack to this intermediate server
             if (!await loginOrHack(intermediate.id)) {
-                log('\u26a1 Path-through: login/hack failed on ' + intermediate.name, 'warn');
+                log('\u26a1 穿透：登录/破解在以下节点失败 ' + intermediate.name, 'warn');
                 return false;
             }
             await delay(humanDelay());
         }
         // Retry the original endpoint
-        log('\u26a1 Path-through complete \u2014 retrying endpoint to target server');
+        log('\u26a1 穿透完成——重试端点以连接目标服务器');
         raceResult = await _sendSetEndpoint(serverId);
         if (raceResult.unreachable) {
             if (raceResult.errorMsg === 'server-in-maintenance') {
-                log(name + ' is in maintenance — aborting path-through', 'error');
+                log(name + ' 维护中 — 放弃穿透', 'error');
                 return false;
             }
             var finalCheck = await checkPathMaintenance(name);
             if (finalCheck.blocked) {
                 var fMins = Math.ceil(finalCheck.remainingMs / 60000);
-                log(name + ' still unreachable after path-through (' + finalCheck.blockerName + ' in maintenance, ~' + fMins + 'm remaining)', 'error');
+                log(name + ' 穿透后仍不可达（' + finalCheck.blockerName + ' 维护中, ~' + fMins + '分剩余)', 'error');
             } else {
-                log(name + ' still unreachable after path-through hack', 'error');
+                log(name + ' 穿透破解后仍不可达', 'error');
             }
             return false;
         }
     }
 
     if (raceResult.timeout) {
-        log('Endpoint set timeout (may already be set)', 'warn');
+        log('端点设置超时(可能已设置)', 'warn');
     }
     await delay(humanDelay());
     return true;
@@ -187,7 +187,7 @@ export async function getLoginStatus(serverId, forceRefresh) {
 // ---- Internal: attempt a hack ----
 
 async function _attemptHack(serverId, name) {
-    log('Starting hack on ' + name);
+    log('开始破解 ' + name);
     ensureSolversEnabled();
     await delay(300);
     sendCmd('hack.start', { serverId: serverId });
@@ -197,7 +197,7 @@ async function _attemptHack(serverId, name) {
         hackResult = await new Promise(function (resolve, reject) {
             var done = false;
             var timer = setTimeout(function () {
-                if (!done) { done = true; window.removeEventListener('message', onMsg); reject(new Error('Timeout')); }
+                if (!done) { done = true; window.removeEventListener('message', onMsg); reject(new Error('超时')); }
             }, 30000);
             function onMsg(evt) {
                 if (!evt.data) return;
@@ -210,27 +210,27 @@ async function _attemptHack(serverId, name) {
             window.addEventListener('message', onMsg);
         });
     } catch (e) {
-        log('Hack start event timed out \u2014 checking if hack already completed...', 'warn');
+        log('破解开始事件超时 — 检查破解是否已完成...', 'warn');
         var fallbackLogin = await getLoginStatus(serverId, true);
         if (fallbackLogin && fallbackLogin.activeAccesses && fallbackLogin.activeAccesses.length > 0) {
             var fbAccess = fallbackLogin.activeAccesses[0];
-            log('Hack already completed (found ' + (fbAccess.accessType || fbAccess.type || 'unknown') + ' access after timeout) \u2014 logging in', 'success');
+            log('破解已完成(发现 ' + (fbAccess.accessType || fbAccess.type || 'unknown') + ' 超时后访问) \u2014 正在登录', 'success');
             sendCmd('login.with-access', { serverId: serverId, accessGrantId: fbAccess.id });
             try { await waitForEvent('COR3_AUTOJOB_SAI_LOGIN_RESULT', 10000); } catch (e2) { /* proceed */ }
             await delay(humanDelay());
             return true;
         }
-        log(name + ': hack start timed out', 'error');
+        log(name + '：破解启动超时', 'error');
         return false;
     }
 
     if (hackResult.error) {
         var errMsg = hackResult.error.message || JSON.stringify(hackResult.error);
-        log('Hack returned error: ' + errMsg + ' \u2014 checking access...', 'warn');
+        log('破解返回错误：' + errMsg + ' \u2014 正在检查访问权限...', 'warn');
         var errLogin = await getLoginStatus(serverId, true);
         if (errLogin && errLogin.activeAccesses && errLogin.activeAccesses.length > 0) {
             var errAccess = errLogin.activeAccesses[0];
-            log('Already have ' + (errAccess.accessType || errAccess.type || 'unknown') + ' access despite hack error \u2014 logging in', 'success');
+            log('已拥有 ' + (errAccess.accessType || errAccess.type || 'unknown') + ' 破解出错但已有访问 \u2014 正在登录', 'success');
             sendCmd('login.with-access', { serverId: serverId, accessGrantId: errAccess.id });
             try { await waitForEvent('COR3_AUTOJOB_SAI_LOGIN_RESULT', 10000); } catch (e2) { /* proceed */ }
             await delay(humanDelay());
@@ -239,14 +239,14 @@ async function _attemptHack(serverId, name) {
         if (errMsg.indexOf('sai-hack-impossible') >= 0 || errMsg.indexOf('sai-no-hack-software') >= 0) {
             return 'retry-loadout';
         }
-        log(name + ': hack failed: ' + errMsg, 'error');
+        log(name + '：破解失败： ' + errMsg, 'error');
         return false;
     }
 
     if (hackResult.data && hackResult.data.autoHacked) {
-        log('Server auto-hacked (no minigame) \u2014 skipping solver wait', 'success');
+        log('服务器已自动破解（无小游戏）\u2014 跳过等待求解器', 'success');
     } else if (hackResult.data && hackResult.data.minigameStarted) {
-        log('Hack minigame detected via minigame event');
+        log('通过小游戏事件检测到破解小游戏');
         await waitForHackToBeDone();
     } else {
         await waitForHackToBeDone();
@@ -263,14 +263,14 @@ async function _attemptHack(serverId, name) {
             try {
                 await waitForEvent('COR3_AUTOJOB_SAI_LOGIN_RESULT', 10000);
             } catch (e) { /* proceed anyway */ }
-            log('Logged in to ' + name + ' (' + postHackType + ')', 'success');
+            log('已登录：' + name + ' (' + postHackType + ')', 'success');
             return true;
         } else {
-            log('No active access after hack (attempt ' + (attempt + 1) + '/' + maxRetries + '), retrying...', 'warn');
+            log('破解后没有有效访问（尝试 ' + (attempt + 1) + '/' + maxRetries + '), 正在重试...', 'warn');
             await delay(5000);
         }
     }
-    log(name + ': no active access after hack (' + maxRetries + ' attempts) \u2014 hack may have failed', 'error');
+    log(name + '：破解后无有效访问权限（' + maxRetries + ' 次尝试) \u2014 破解可能已失败', 'error');
     return false;
 }
 
@@ -278,7 +278,7 @@ async function _attemptHack(serverId, name) {
 
 export async function loginOrHack(serverId) {
     var name = getServerName(serverId);
-    log('Checking login status for ' + name);
+    log('正在检查登录状态 ' + name);
     var loginData = await getLoginStatus(serverId);
 
     // Check for active access
@@ -286,19 +286,19 @@ export async function loginOrHack(serverId) {
         var accessObj = loginData.activeAccesses[0];
         var accessId = accessObj.id;
         var accessType = accessObj.accessType || accessObj.type || 'unknown';
-        log('Using existing access on ' + name + ' (' + accessType + ')');
+        log('使用已有访问：' + name + ' (' + accessType + ')');
         sendCmd('login.with-access', { serverId: serverId, accessGrantId: accessId });
         try {
             var loginResult = await waitForEvent('COR3_AUTOJOB_SAI_LOGIN_RESULT', 10000);
             if (loginResult.error || !(loginResult.data && loginResult.data.success)) {
-                log(name + ': login with access failed', 'warn');
+                log(name + '：带权限登录失败', 'warn');
                 return false;
             }
         } catch (e) {
-            log(name + ': login with access timed out', 'warn');
+            log(name + '：带权限登录超时', 'warn');
             return false;
         }
-        log('Logged in via existing access to ' + name, 'success');
+        log('通过已有访问登录：' + name, 'success');
         return true;
     }
 
@@ -306,15 +306,15 @@ export async function loginOrHack(serverId) {
     var loginHackPower = 0;
     if (loginData && loginData.hackTools && loginData.hackTools.length > 0) {
         loginHackPower = loginData.hackTools[0].hackPower || 0;
-        log('Hack info \u2014 serverDefenceRate: ' + loginDefenceRate + ', equipped hackPower: ' + loginHackPower + ' (' + (loginData.hackTools[0].name || 'unknown') + ')' + (loginDefenceRate > 0 ? (loginHackPower >= loginDefenceRate ? ' \u2713' : ' \u2717 INSUFFICIENT') : ''));
+        log('破解信息 \u2014 serverDefenceRate: ' + loginDefenceRate + ', 已装备破解算力: ' + loginHackPower + ' (' + (loginData.hackTools[0].name || 'unknown') + ')' + (loginDefenceRate > 0 ? (loginHackPower >= loginDefenceRate ? ' \u2713' : ' \u2717 不足') : ''));
     } else if (loginDefenceRate > 0) {
-        log('Hack info \u2014 serverDefenceRate: ' + loginDefenceRate + ', no hack tools equipped', 'warn');
+        log('破解信息 \u2014 serverDefenceRate: ' + loginDefenceRate + ', 未装备破解工具', 'warn');
     }
 
-    log('No active access to ' + name + ' \u2014 equipping hack loadout');
+    log('无有效访问：' + name + ' \u2014 正在装备破解配装');
     var loadoutResult = await ensureHackOnlyLoadout(serverId, getLoginStatus);
     if (loadoutResult && !loadoutResult.ok && loadoutResult.reason === 'insufficient-power') {
-        log(name + ': skipping (hack power ' + loadoutResult.hackPower + ' < serverDefenceRate ' + loadoutResult.defenceRate + ')', 'error');
+        log(name + '：跳过（破解算力 ' + loadoutResult.hackPower + ' < serverDefenceRate ' + loadoutResult.defenceRate + ')', 'error');
         return false;
     }
     await delay(humanDelay());
@@ -323,17 +323,17 @@ export async function loginOrHack(serverId) {
     for (var hackAttempt = 1; hackAttempt <= MAX_HACK_ATTEMPTS; hackAttempt++) {
         if (!running) { return false; }
         if (hackAttempt > 1) {
-            log('Hack attempt ' + hackAttempt + '/' + MAX_HACK_ATTEMPTS + ' on ' + name, 'warn');
+            log('破解尝试 ' + hackAttempt + '/' + MAX_HACK_ATTEMPTS + ' 在 ' + name, 'warn');
         }
 
         var hackAttemptResult = await _attemptHack(serverId, name);
         if (hackAttemptResult === true) return true;
 
         if (hackAttemptResult === 'retry-loadout') {
-            log(name + ': hack failed with sai-hack-impossible \u2014 trying loadout swap and retry');
+            log(name + '：破解失败 sai-hack-impossible — 尝试切换装备栏后重试');
             var swapResult = await tryHackLoadoutSwap(serverId, getLoginStatus);
             if (!swapResult) {
-                log(name + ': loadout swap failed \u2014 skipping (no access)', 'error');
+                log(name + '：切换装备栏失败 — 跳过（无访问权限）', 'error');
                 return false;
             }
             await delay(humanDelay());
@@ -341,13 +341,13 @@ export async function loginOrHack(serverId) {
         }
 
         if (hackAttempt < MAX_HACK_ATTEMPTS) {
-            log(name + ': hack failed \u2014 will retry (' + hackAttempt + '/' + MAX_HACK_ATTEMPTS + ')', 'warn');
+            log(name + '：破解失败 — 将重试（' + hackAttempt + '/' + MAX_HACK_ATTEMPTS + ')', 'warn');
             await delay(2000);
             continue;
         }
     }
 
-    log(name + ': hack failed after ' + MAX_HACK_ATTEMPTS + ' attempts \u2014 no access granted', 'error');
+    log(name + '：破解失败，已重试 ' + MAX_HACK_ATTEMPTS + ' 次尝试 \u2014 未获得访问权限', 'error');
     return false;
 }
 
@@ -355,13 +355,13 @@ export async function loginOrHack(serverId) {
 
 export async function ensureServerAccess(serverId) {
     var name = getServerName(serverId);
-    log('Ensuring access to ' + name);
+    log('正在确保访问 ' + name);
 
     // Check maintenance
     if (SERVER_PATH_MAP[name]) {
         var maint = await checkPathMaintenance(name);
         if (maint.blocked) {
-            log('\u26a0\ufe0f ' + name + ' unreachable \u2014 ' + maint.blockerName + ' in maintenance', 'warn');
+            log('\u26a0\ufe0f ' + name + ' 不可达 \u2014 ' + maint.blockerName + ' 维护中', 'warn');
             return false;
         }
     }

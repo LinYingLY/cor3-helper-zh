@@ -13,20 +13,20 @@ const refreshDailyBtn = document.getElementById('refreshDailyBtn');
 
 export function updateDailyTimer() {
     if (!state.dailyNextTaskTime) {
-        dailyTimerLine.textContent = '⏳ Next Task: --:--:--';
+        dailyTimerLine.textContent = '⏳ 下一任务：--:--:--';
         return;
     }
     const now = Date.now();
     const diff = state.dailyNextTaskTime - now;
     if (diff <= 0) {
-        dailyTimerLine.textContent = '⏳ Next Task: 0h:0m:0s';
+        dailyTimerLine.textContent = '⏳ 下个任务：0h:0m:0s';
         return;
     }
     const totalSec = Math.floor(diff / 1000);
     const h = Math.floor(totalSec / 3600);
     const m = Math.floor((totalSec % 3600) / 60);
     const s = totalSec % 60;
-    dailyTimerLine.textContent = `⏳ Next Task: ${h}h:${m}m:${s}s`;
+    dailyTimerLine.textContent = `⏳ 下个任务： ${h}时:${m}分:${s}秒`;
 }
 
 function calcStreakBonus(streak, rewardsData) {
@@ -41,7 +41,7 @@ function calcStreakBonus(streak, rewardsData) {
 export async function displayDailyOpsData(data) {
     if (!data) return;
     state.dailyNextTaskTime = data.nextTaskTime ? new Date(data.nextTaskTime).getTime() : null;
-    dailyClaimed.textContent = data.hasClaimedToday ? 'Yes' : 'No';
+    dailyClaimed.textContent = data.hasClaimedToday ? '是' : '否';
     dailyStreak.textContent = data.currentStreak ?? '--';
     dailyDifficulty.textContent = data.difficulty ? ((data.difficulty).charAt(0).toUpperCase() + (data.difficulty).slice(1)) : '--';
     const { dailyRewardsData } = await chrome.storage.local.get('dailyRewardsData');
@@ -62,7 +62,7 @@ export async function fetchDailyOps() {
             return;
         }
 
-        console.log('[COR3 Helper] Sending fetchDailyOps message to content script');
+        console.log('[COR3 Helper] 正在向内容脚本发送 fetchDailyOps 消息');
         const response = await chrome.tabs.sendMessage(tab.id, { action: "fetchDailyOps" });
 
         if (response && response.error && (response.error === 'token_expired' || response.error.includes('Invalid access token'))) {
@@ -72,12 +72,12 @@ export async function fetchDailyOps() {
         }
 
         if (response && response.data) {
-            console.log('[COR3 Helper] Daily ops data received:', response.data);
+            console.log('[COR3 Helper] 已收到每日行动数据：', response.data);
             await displayDailyOpsData(response.data);
             dailyStatusLine.style.display = 'none';
             refreshAllTimestamps();
         } else if (response === undefined) {
-            console.log('[COR3 Helper] No response from content script, trying cached data');
+            console.log('[COR3 Helper] 内容脚本无响应，尝试使用缓存数据');
             const { dailyOpsData } = await chrome.storage.local.get('dailyOpsData');
             if (dailyOpsData) {
                 await displayDailyOpsData(dailyOpsData);
@@ -92,7 +92,7 @@ export async function fetchDailyOps() {
             if (dailyOpsData) await displayDailyOpsData(dailyOpsData);
         }
     } catch (e) {
-        console.log('[COR3 Helper] Daily ops fetch error:', e);
+        console.log('[COR3 Helper] 每日行动数据获取出错：', e);
         cor3LogError('popup.js', e, { action: 'fetchDailyOps' });
         try {
             const { dailyOpsData } = await chrome.storage.local.get('dailyOpsData');

@@ -396,7 +396,7 @@ function selectMessage(index) {
         const action = msgData ? extractAction(msgData) : '\u2014';
         const server = msgData ? resolveServer(msgData) : '\u2014';
         const dirClass = m.direction === 'sent' ? 'dir-sent' : 'dir-received';
-        const dirLabel = m.direction === 'sent' ? '\u25B2 SENT' : '\u25BC RECEIVED';
+        const dirLabel = m.direction === 'sent' ? '\u25B2 已发送' : '\u25BC 已接收';
         safeSetHtml(detailMeta, `<span class="${dirClass}">${dirLabel}</span>`
             + `<span>Time: ${formatTime(m.timestamp)}</span>`
             + `<span>Event: <strong>${escapeHtml(parsed.event)}</strong></span>`
@@ -470,7 +470,7 @@ importFileInput.addEventListener('change', async (e) => {
         const text = await file.text();
         const parsed = detectAndParse(text);
         if (!parsed) {
-            alert('Could not parse the imported file. Supported formats: JSON (Export or Copy-All-Logs), MD table, Discord clipboard format.');
+            alert('解析导入的文件失败。支持的格式：JSON（导出或复制全部日志）、MD 表格、Discord 剪贴板格式。');
             return;
         }
         importedData = parsed;
@@ -482,7 +482,7 @@ importFileInput.addEventListener('change', async (e) => {
         filterReceived.parentElement.style.display = logMode ? 'none' : '';
         loadImportedData();
     } catch (err) {
-        alert('Error reading file: ' + err.message);
+        alert('读取文件出错：' + err.message);
     }
     importFileInput.value = '';
 });

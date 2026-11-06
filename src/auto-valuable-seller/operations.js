@@ -16,15 +16,15 @@ export async function getServerFiles(serverId) {
         if (resp.error) {
             var errMsg = resp.error.message || resp.error.kind || JSON.stringify(resp.error);
             if (errMsg.indexOf('sai-files-not-available') >= 0) {
-                log('Files not available on this server (sai-files-not-available)', 'warn');
+                log('此服务器上无可用文件 (sai-files-not-available)', 'warn');
                 return [];
             }
-            log('Get files error: ' + errMsg, 'error');
+            log('获取文件错误: ' + errMsg, 'error');
             return [];
         }
         return (resp.data && resp.data.files) || [];
     } catch (e) {
-        log('Get files timeout', 'warn');
+        log('获取文件超时', 'warn');
         return [];
     }
 }
@@ -40,12 +40,12 @@ export async function getServerLogs(serverId) {
             if (errMsg.indexOf('sai-logs-not-available') >= 0) {
                 return [];
             }
-            log('Get logs error: ' + errMsg, 'error');
+            log('获取日志错误: ' + errMsg, 'error');
             return [];
         }
         return (resp.data && resp.data.logs) || [];
     } catch (e) {
-        log('Get logs timeout', 'warn');
+        log('获取日志超时', 'warn');
         return [];
     }
 }
@@ -65,7 +65,7 @@ export function filterValuableLogs(logs) {
 export async function getDownloadsFolder() {
     var folderId = window.__cor3DownloadFolderId;
     if (!folderId) {
-        log('Downloads folder ID not cached \u2014 requesting desktop options');
+        log('下载文件夹 ID 未缓存 — 正在请求桌面选项');
         sendCmd('desktop.get.options', {});
         try {
             var optResp = await waitForEvent('COR3_AUTOJOB_DESKTOP_OPTIONS', 10000);
@@ -79,7 +79,7 @@ export async function getDownloadsFolder() {
         } catch (e) {}
     }
     if (!folderId) {
-        log('Could not find Downloads folder ID', 'error');
+        log('未找到下载文件夹 ID', 'error');
         return [];
     }
 
@@ -87,12 +87,12 @@ export async function getDownloadsFolder() {
     try {
         var resp = await waitForEvent('COR3_AUTOJOB_DESKTOP_FOLDER', 15000);
         if (resp.error) {
-            log('Open folder error: ' + JSON.stringify(resp.error), 'error');
+            log('打开文件夹错误：' + JSON.stringify(resp.error), 'error');
             return [];
         }
         return (resp.data && resp.data.files) || [];
     } catch (e) {
-        log('Open folder timeout', 'warn');
+        log('打开文件夹超时', 'warn');
         return [];
     }
 }
@@ -122,12 +122,12 @@ export async function searchValuableFiles(serverId) {
     try {
         var resp = await waitForEvent('COR3_VALUABLE_FILE_SEARCH', 30000);
         if (resp.error) {
-            log('File search-valuable error: ' + JSON.stringify(resp.error), 'error');
+            log('文件高价搜寻错误: ' + JSON.stringify(resp.error), 'error');
             return null;
         }
         return resp.data || null;
     } catch (e) {
-        log('File search-valuable timeout', 'warn');
+        log('文件高价搜寻超时', 'warn');
         return null;
     }
 }
@@ -143,12 +143,12 @@ export async function searchValuableLogs(serverId) {
             if (errMsg.indexOf('sai-logs-not-available') >= 0) {
                 return null;
             }
-            log('Log search-valuable error: ' + errMsg, 'error');
+            log('日志高价搜寻出错：' + errMsg, 'error');
             return null;
         }
         return resp.data || null;
     } catch (e) {
-        log('Log search-valuable timeout', 'warn');
+        log('日志高价搜寻超时', 'warn');
         return null;
     }
 }
@@ -168,7 +168,7 @@ export async function downloadFile(serverId, fileId) {
         var resp = await waitForEvent('COR3_AUTOJOB_SAI_FILE_DOWNLOAD', 30000);
         window.removeEventListener('message', onUpdateFile);
         if (resp.error) {
-            log('File download error: ' + JSON.stringify(resp.error), 'error');
+            log('文件下载错误: ' + JSON.stringify(resp.error), 'error');
             return false;
         }
         if (desktopFileId) {
@@ -177,7 +177,7 @@ export async function downloadFile(serverId, fileId) {
         return true;
     } catch (e) {
         window.removeEventListener('message', onUpdateFile);
-        log('File download timeout', 'warn');
+        log('文件下载超时', 'warn');
         return false;
     }
 }
@@ -197,7 +197,7 @@ export async function downloadLog(serverId, logSeq) {
         var resp = await waitForEvent('COR3_AUTOJOB_SAI_LOG_DOWNLOAD', 30000);
         window.removeEventListener('message', onUpdateFile);
         if (resp.error) {
-            log('Log download error: ' + JSON.stringify(resp.error), 'error');
+            log('日志下载出错：' + JSON.stringify(resp.error), 'error');
             return false;
         }
         if (desktopFileId) {
@@ -206,7 +206,7 @@ export async function downloadLog(serverId, logSeq) {
         return true;
     } catch (e) {
         window.removeEventListener('message', onUpdateFile);
-        log('Log download timeout', 'warn');
+        log('日志下载超时', 'warn');
         return false;
     }
 }
@@ -218,7 +218,7 @@ export async function getSellableItems(marketId) {
     try {
         var resp = await waitForEvent('COR3_VALUABLE_SELLABLE_ITEMS', 15000);
         if (resp.error) {
-            log('Get sellable items error: ' + JSON.stringify(resp.error), 'error');
+            log('获取可出售物品错误: ' + JSON.stringify(resp.error), 'error');
             return { items: [], totalPrice: 0, totalRepGain: 0 };
         }
         var d = resp.data || {};
@@ -228,7 +228,7 @@ export async function getSellableItems(marketId) {
             totalRepGain: d.totalRepGain || 0
         };
     } catch (e) {
-        log('Get sellable items timeout', 'warn');
+        log('获取可出售物品超时', 'warn');
         return { items: [], totalPrice: 0, totalRepGain: 0 };
     }
 }
@@ -243,13 +243,13 @@ export async function sellItems(marketId, items, onSold) {
         try {
             var resp = await waitForEvent('COR3_VALUABLE_SELL_RESULT', 15000);
             if (resp.error) {
-                log('Sell item error (' + item.itemId + '): ' + JSON.stringify(resp.error), 'error');
+                log('出售物品错误（' + item.itemId + '): ' + JSON.stringify(resp.error), 'error');
                 continue;
             }
             sold++;
             if (onSold) onSold(item);
         } catch (e) {
-            log('Sell item timeout (' + item.itemId + ')', 'warn');
+            log('出售物品超时（' + item.itemId + ')', 'warn');
             continue;
         }
         if (i < items.length - 1) await delay(humanDelay());

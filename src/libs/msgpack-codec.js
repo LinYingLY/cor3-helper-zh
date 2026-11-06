@@ -16,20 +16,20 @@
         notepackLib = root.notepack || null;
         notepackReady = !!notepackLib;
         if (notepackLib) { cb(notepackLib); return; }
-        console.log('[COR3 Codec] notepack.io not available — check that notepack.min.js is loaded before msgpack-codec.js in manifest');
+        console.log('[COR3 编解码] notepack.io 不可用 — 请确认 manifest 中 notepack.min.js 先于 msgpack-codec.js 加载');
     }
 
     if (notepackReady) {
-        console.log('[COR3 Codec] notepack.io loaded');
+        console.log('[COR3 编解码] notepack.io 已加载');
     }
 
     function decodeRaw(buf) {
-        if (!notepackLib) throw new Error('notepack not loaded');
+        if (!notepackLib) throw new Error('notepack 未加载');
         return notepackLib.decode(buf instanceof ArrayBuffer ? new Uint8Array(buf) : buf);
     }
 
     function encodeRaw(obj) {
-        if (!notepackLib) throw new Error('notepack not loaded');
+        if (!notepackLib) throw new Error('notepack 未加载');
         return notepackLib.encode(obj);
     }
 
@@ -43,7 +43,7 @@
         if (rawData instanceof Uint8Array) {
             return decodeRaw(rawData);
         }
-        throw new Error('Unsupported binary type');
+        throw new Error('不支持的二进制类型');
     }
 
     // Async version that handles Blob

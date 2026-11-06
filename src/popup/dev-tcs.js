@@ -39,10 +39,10 @@ if (reachPullBtn) {
         reachPullBtn.disabled = true;
         reachPullBtn.textContent = '...';
         clearReachLog();
-        reachLogMsg('Sending get.map...');
+        reachLogMsg('正在发送 get.map...');
         const tab = await getCor3Tab();
         if (!tab) {
-            reachLogMsg('No cor3.gg tab found', 'var(--accent-red)');
+            reachLogMsg('未找到 cor3.gg 标签页', 'var(--accent-red)');
             reachPullBtn.disabled = false;
             reachPullBtn.textContent = '\uD83D\uDD04';
             return;
@@ -55,12 +55,12 @@ if (reachPullBtn) {
                 clearInterval(poll);
                 _reachMapCache = data.serverMaintenanceMap;
                 populateReachSelect(data.serverMaintenanceMap);
-                reachLogMsg('Map loaded: ' + Object.keys(data.serverMaintenanceMap).length + ' servers', 'var(--accent-green)');
+                reachLogMsg('地图已加载：' + Object.keys(data.serverMaintenanceMap).length + ' 台服务器', 'var(--accent-green)');
                 reachPullBtn.disabled = false;
                 reachPullBtn.textContent = '\uD83D\uDD04';
             } else if (Date.now() - waitStart > 10000) {
                 clearInterval(poll);
-                reachLogMsg('Timeout waiting for map data', 'var(--accent-red)');
+                reachLogMsg('等待地图数据超时', 'var(--accent-red)');
                 reachPullBtn.disabled = false;
                 reachPullBtn.textContent = '\uD83D\uDD04';
             }
@@ -73,7 +73,7 @@ function populateReachSelect(servers) {
     reachSelect.innerHTML = '';
     const defaultOpt = document.createElement('option');
     defaultOpt.value = '';
-    defaultOpt.textContent = '\u2014 select server \u2014';
+    defaultOpt.textContent = '\u2014 选择服务器 \u2014';
     reachSelect.appendChild(defaultOpt);
     const sorted = Object.entries(servers).sort((a, b) => (a[1].serverName || '').localeCompare(b[1].serverName || ''));
     for (const [id, info] of sorted) {
@@ -92,24 +92,24 @@ if (reachToggle) {
         reachToggle.disabled = true;
         const serverId = reachSelect ? reachSelect.value : '';
         if (!serverId) {
-            reachLogMsg('No server selected', 'var(--accent-red)');
+            reachLogMsg('未选择服务器', 'var(--accent-red)');
             reachToggle.checked = false;
             reachToggle.disabled = false;
             return;
         }
         const serverName = (_reachMapCache && _reachMapCache[serverId]) ? _reachMapCache[serverId].serverName : serverId.substring(0, 8);
         clearReachLog();
-        reachLogMsg('Testing reachability to ' + serverName + '...');
+        reachLogMsg('正在测试可达性：' + serverName + '...');
 
         const tab = await getCor3Tab();
         if (!tab) {
-            reachLogMsg('No cor3.gg tab found', 'var(--accent-red)');
+            reachLogMsg('未找到 cor3.gg 标签页', 'var(--accent-red)');
             reachToggle.checked = false;
             reachToggle.disabled = false;
             return;
         }
 
-        reachLogMsg('Connecting to ' + serverName + '...');
+        reachLogMsg('正在连接到 ' + serverName + '...');
         chrome.tabs.sendMessage(tab.id, { action: 'devTcTestReachability', serverId: serverId });
 
         const resultKey = '_devTcReachResult';
@@ -138,16 +138,16 @@ if (reachToggle) {
                     reachLogMsg(result.log[i].msg, result.log[i].color || null);
                 }
                 if (result.reachable) {
-                    reachLogMsg('Reachable: YES', 'var(--accent-green)');
+                    reachLogMsg('可达：是', 'var(--accent-green)');
                 } else {
-                    reachLogMsg('Reachable: NO \u2014 ' + (result.reason || 'unknown'), 'var(--accent-red)');
+                    reachLogMsg('可达：否 \u2014 ' + (result.reason || 'unknown'), 'var(--accent-red)');
                 }
                 chrome.storage.local.remove([resultKey, progressKey]);
                 reachToggle.checked = false;
                 reachToggle.disabled = false;
             } else if (Date.now() - waitStart > 300000) {
                 clearInterval(poll);
-                reachLogMsg('Timeout waiting for reachability result (5m)', 'var(--accent-red)');
+                reachLogMsg('等待可达性结果超时（5 分钟）', 'var(--accent-red)');
                 chrome.storage.local.remove([resultKey, progressKey]);
                 reachToggle.checked = false;
                 reachToggle.disabled = false;

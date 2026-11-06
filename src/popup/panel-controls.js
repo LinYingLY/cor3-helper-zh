@@ -53,7 +53,7 @@ const sidePanelBtn = document.getElementById('sidePanelBtn');
     const allSections = mainView.querySelectorAll(':scope > .section');
 
     for (const s of allSections) {
-        if (s.textContent.includes('Daily Ops') && !s.querySelector('#marketContainer')) {
+        if (s.querySelector('#refreshDailyBtn') && !s.querySelector('#marketContainer')) {
             addCard([s]);
             break;
         }
@@ -97,11 +97,11 @@ const sidePanelBtn = document.getElementById('sidePanelBtn');
         wrappedEls.add(expeditionsSection);
         const expChildren = Array.from(expeditionsSection.children);
         const splitPoints = [
-            { id: 'personalDroneSectionToggle', label: 'Personal Drone' },
-            { id: 'decisionsSectionToggle', label: 'Decisions' },
-            { id: 'inventorySectionToggle', label: 'Inventory' },
-            { id: 'mercenariesSectionToggle', label: 'Mercenaries' },
-            { id: 'archivedExpSectionToggle', label: 'Archived' }
+            { id: 'personalDroneSectionToggle', label: '个人无人机' },
+            { id: 'decisionsSectionToggle', label: '判定:' },
+            { id: 'inventorySectionToggle', label: '物品栏' },
+            { id: 'mercenariesSectionToggle', label: '佣兵' },
+            { id: 'archivedExpSectionToggle', label: '已归档' }
         ];
         const splitIndices = [];
         for (const sp of splitPoints) {
@@ -201,11 +201,11 @@ if (sidePanelBtn) {
     sidePanelBtn.addEventListener('click', async () => {
         try {
             const tab = await getCor3Tab();
-            if (!tab) { statusDiv.textContent = 'No cor3.gg tab found.'; return; }
+            if (!tab) { statusDiv.textContent = '未找到 cor3.gg 标签页。'; return; }
             await chrome.sidePanel.open({ tabId: tab.id });
             window.close();
         } catch (e) {
-            statusDiv.textContent = 'Side panel not supported in this browser.';
+            statusDiv.textContent = '此浏览器不支持侧边栏。';
         }
     });
 }

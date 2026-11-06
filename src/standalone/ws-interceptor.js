@@ -99,7 +99,7 @@
                             expeditionId: expedition.id,
                             mercenaryCallsign: expedition.mercenary
                                 ? expedition.mercenary.callsign
-                                : 'Unknown',
+                                : '未知',
                             locationName: expedition.locationName || '',
                             zoneName: expedition.zoneName || '',
                             messageId: msg.id,

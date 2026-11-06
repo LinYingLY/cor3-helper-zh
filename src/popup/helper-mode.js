@@ -14,8 +14,8 @@ let oldValues = {};
 const helperModeToggle = document.getElementById('helperModeToggle');
 export async function applyHelperMode(helper, mode) {
     state.isHelper = helper;
-    if (state.isHelper) {console.log("Enabling helper mode!!");}
-    else {console.log("Disabling helper mode!!");}
+    if (state.isHelper) {console.log("正在启用仅助手模式!!");}
+    else {console.log("正在禁用仅助手模式!!");}
 
     const automationKeys = [
         'autoRefresh', 'autoJobSolverEnabled', 'autoFinishAllJobsEnabled',
@@ -61,7 +61,7 @@ export async function applyHelperMode(helper, mode) {
         try {
             toggles = await chrome.storage.sync.get(['autoRefresh', 'autoJobSolverEnabled', 'autoUpdateMarkets', 'autoFinishAllJobsEnabled', 'autoJobsDebugConsoleEnabled', 'decisionModifiers', 'autoSendMerc', 'autoSellCheapest']);
         } catch (err) {
-            console.log("Couldn't find the related item on storage -> " + err);
+            console.log("在存储中未找到相关物品 -> " + err);
         }
 
         // --- Update Toggles ---
@@ -78,10 +78,10 @@ export async function applyHelperMode(helper, mode) {
         // Auto Jobs and Auto Update Markets
 
         (document.getElementById('autoJobSolverToggle')).checked = !!toggles.autoJobSolverEnabled ?? false;
-        (document.getElementById('autoJobSolverStatus')).textContent = !!toggles.autoJobSolverEnabled ? 'Active' : 'Off';
+        (document.getElementById('autoJobSolverStatus')).textContent = !!toggles.autoJobSolverEnabled ? '活跃' : '关';
         (document.getElementById('autoJobSolverStatus')).style.color = !!toggles.autoJobSolverEnabled ? 'var(--accent-green)' : 'var(--text-dim)';
         (document.getElementById('autoUpdateMarketsToggle')).checked = !!toggles.autoUpdateMarkets ?? false;
-        (document.getElementById('autoUpdateMarketsStatus')).textContent = !!toggles.autoUpdateMarkets ? 'Active' : 'Off';
+        (document.getElementById('autoUpdateMarketsStatus')).textContent = !!toggles.autoUpdateMarkets ? '活跃' : '关';
         (document.getElementById('autoUpdateMarketsStatus')).style.color = !!toggles.autoUpdateMarkets ? 'var(--accent-green)' : 'var(--text-dim)';
 
         (document.getElementById('autoJobSolverSection')).style.display = !!toggles.autoJobSolverEnabled ? '' : 'none';

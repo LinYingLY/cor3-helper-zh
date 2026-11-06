@@ -22,4 +22,4 @@ import './refresh-all.js';
 import './auto-refresh.js';
 import './storage-listeners.js';
 
-console.log('[COR3 Helper] popup modules loaded');
+console.log('[COR3 Helper] 弹窗模块已加载');

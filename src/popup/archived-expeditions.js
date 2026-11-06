@@ -13,7 +13,7 @@ archivedExpSectionToggle.addEventListener('click', () => {
 });
 
 async function requestArchivedExpeditions() {
-    archivedExpContainer.replaceChildren(_noData('Loading archived expeditions...'));
+    archivedExpContainer.replaceChildren(_noData('正在加载已归档远征...'));
     try {
         const tab = await getCor3Tab();
         if (tab) await chrome.tabs.sendMessage(tab.id, { action: "requestArchivedExpeditions" });
@@ -40,7 +40,7 @@ function renderArchivedExpeditions(data) {
     if (data && !Array.isArray(data) && data.data) items = data.data;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
-        archivedExpContainer.replaceChildren(_noData('No archived expeditions found.'));
+        archivedExpContainer.replaceChildren(_noData('未找到已归档远征。'));
         return;
     }
     for (const exp of items) {
@@ -48,7 +48,7 @@ function renderArchivedExpeditions(data) {
         card.className = 'archived-exp-card';
 
         const factionDisplay = (exp.mercenary && exp.mercenary.faction) ? ((exp.mercenary.faction.name || '').replace('factions.', '').replace(/([A-Z])/g, ' $1').trim().split(" ")[0].toUpperCase()) : 'UNEMPLOYED';
-        const mercName = exp.mercenary ? exp.mercenary.callsign : 'Unknown';
+        const mercName = exp.mercenary ? exp.mercenary.callsign : '未知';
         const outcome = (exp.outcome || exp.status || 'COMPLETED').toUpperCase();
         let outcomeClass = 'outcome-full';
         if (outcome.includes('PARTIAL')) outcomeClass = 'outcome-partial';
@@ -60,7 +60,7 @@ function renderArchivedExpeditions(data) {
         html += `<span class="outcome-tag ${outcomeClass}">${outcome}</span>`;
         html += `</div>`;
         html += `<div class="archived-exp-info">`;
-        html += `Faction: <b>${factionDisplay}</b>`;
+        html += `阵营: <b>${factionDisplay}</b>`;
         html += `<br>`;
         if ((exp.locationName && exp.zoneName) && (exp.locationName.length + exp.zoneName.length) > 30) {
             html += `📍 ${exp.locationName || '--'} /`;
@@ -71,8 +71,8 @@ function renderArchivedExpeditions(data) {
         }
         if (exp.objectiveName) html += ` — ${exp.objectiveName}`;
         html += `<br>`;
-        if (exp.totalCost !== undefined) html += `💰 Cost: ${exp.totalCost.toLocaleString()} · `;
-        if (exp.riskScore !== undefined) html += `⚠️ Risk: ${exp.riskScore}`;
+        if (exp.totalCost !== undefined) html += `💰 成本: ${exp.totalCost.toLocaleString()} · `;
+        if (exp.riskScore !== undefined) html += `⚠️ 风险: ${exp.riskScore}`;
         html += `</div>`;
 
         const rawContainer = exp.containerData || exp.container;
@@ -81,7 +81,7 @@ function renderArchivedExpeditions(data) {
         if (containerItems && containerItems.length > 0) {
             const uid = 'archived_' + exp.id;
             html += `<div class="container-items">`;
-            html += `<div class="expandable-header" data-expand="${uid}"><span class="expand-arrow">▶</span><span class="expand-label">Loot (${containerItems.length} items)</span></div>`;
+            html += `<div class="expandable-header" data-expand="${uid}"><span class="expand-arrow">▶</span><span class="expand-label">战利品 (${containerItems.length} 项)</span></div>`;
             html += `<div class="expandable-body" id="${uid}">`;
             for (const ci of containerItems) {
                 const det = ci.item || ci;
@@ -89,8 +89,8 @@ function renderArchivedExpeditions(data) {
                 const imgTag = imgSrc ? `<img src="${imgSrc}" style="width:24px;height:24px;border-radius:4px;vertical-align:middle;margin-right:4px;" loading="lazy">` : '';
                 const tierTag = det.tier ? ` <span class="tier-tag tier-tag-${det.tier.toLowerCase()}">${det.tier}</span>` : '';
                 let statusTag = '';
-                if (det.isCollected) statusTag = ' <span style="color:var(--accent-green);font-size:9px;">✓ Collected</span>';
-                else if (det.isDeleted) statusTag = ' <span style="color:var(--accent-red);font-size:9px;">✗ Deleted</span>';
+                if (det.isCollected) statusTag = ' <span style="color:var(--accent-green);font-size:9px;">✓ 已收集</span>';
+                else if (det.isDeleted) statusTag = ' <span style="color:var(--accent-red);font-size:9px;">✗ 已删除</span>';
                 html += `<div style="font-size:10px;margin:2px 0;">${imgTag}${det.name || det.id || '?'}${tierTag}${statusTag}</div>`;
             }
             html += `</div></div>`;
@@ -98,11 +98,11 @@ function renderArchivedExpeditions(data) {
         if (exp.completedAt) {
             const agoMs = Date.now() - new Date(exp.completedAt).getTime();
             let agoText = '';
-            if (agoMs < 60000) agoText = 'just now';
-            else if (agoMs < 3600000) agoText = Math.floor(agoMs / 60000) + 'm ago';
-            else if (agoMs < 86400000) { const h = Math.floor(agoMs / 3600000); const m = Math.floor((agoMs % 3600000) / 60000); agoText = h + 'h' + (m > 0 ? ' ' + m + 'm' : '') + ' ago'; }
-            else { const d = Math.floor(agoMs / 86400000); const h = Math.floor((agoMs % 86400000) / 3600000); agoText = d + 'd' + (h > 0 ? ' ' + h + 'h' : '') + ' ago'; }
-            html += `<span style="font-size:9px;color:var(--text-dim);display:flex;flex-direction:row-reverse;">🕐 Completed ${agoText}</span>`;
+            if (agoMs < 60000) agoText = '刚刚';
+            else if (agoMs < 3600000) agoText = Math.floor(agoMs / 60000) + '分前';
+            else if (agoMs < 86400000) { const h = Math.floor(agoMs / 3600000); const m = Math.floor((agoMs % 3600000) / 60000); agoText = h + 'h' + (m > 0 ? ' ' + m + 'm' : '') + '前'; }
+            else { const d = Math.floor(agoMs / 86400000); const h = Math.floor((agoMs % 86400000) / 3600000); agoText = d + 'd' + (h > 0 ? ' ' + h + 'h' : '') + '前'; }
+            html += `<span style="font-size:9px;color:var(--text-dim);display:flex;flex-direction:row-reverse;">🕐 已完成 ${agoText}</span>`;
         }
 
         _safeSetHtml(card, html);
@@ -119,7 +119,7 @@ function renderArchivedExpeditions(data) {
 }
 
 export async function refreshArchivedOnly() {
-    archivedExpContainer.replaceChildren(_noData('Loading archived expeditions...'));
+    archivedExpContainer.replaceChildren(_noData('正在加载已归档远征...'));
     try {
         const tab = await getCor3Tab();
         if (tab) await chrome.tabs.sendMessage(tab.id, { action: "requestArchivedExpeditions" });

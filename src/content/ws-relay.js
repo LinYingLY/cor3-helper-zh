@@ -46,7 +46,7 @@ export function setupWsRelay() {
             if (!hasActive) {
                 chrome.storage.local.get('expeditionLaunchError', function (result) {
                     if (result.expeditionLaunchError && !result.expeditionLaunchError.noRetry) {
-                        console.log('[COR3 Helper] No active expeditions — clearing expedition launch error');
+                        console.log('[COR3 Helper] 没有进行中的远征 — 清除远征发起错误');
                         chrome.storage.local.remove('expeditionLaunchError');
                     }
                 });
@@ -78,7 +78,7 @@ export function setupWsRelay() {
                     }
 
                     if (hasSpace) {
-                        console.log('[COR3 Helper] Stash has space again, re-enabling auto-send mercenary');
+                        console.log('[COR3 Helper] 藏匿点又有空间了，重新启用自动派遣佣兵');
                         chrome.storage.sync.set({
                             autoSendMerc: {
                                 ...settings.autoSendMerc,
@@ -88,7 +88,7 @@ export function setupWsRelay() {
                         });
                         window.postMessage({
                             type: 'COR3_AUTO_SEND_REENABLED',
-                            message: 'Stash space available. Auto-send mercenary re-enabled.'
+                            message: '藏匿点有空位。自动派遣佣兵已重新启用。'
                         }, '*');
                     }
                 }
@@ -174,9 +174,9 @@ export function setupWsRelay() {
         if (event.data && event.data.type === 'COR3_CORE_MERCS_DONE' && autoSendAwaitingUsolMercs) {
             setAutoSendAwaitingUsolMercs(false);
             if (!autoSendInProgress || (getAutomationActive() && getAutomationActive().type !== 'auto-send')) {
-                console.log('[COR3 Helper] Auto-send: USOL merc refresh skipped (no longer active)');
+                console.log('[COR3 Helper] 自动派遣：跳过 USOL 佣兵刷新（已不再活跃）');
             } else {
-            console.log('[COR3 Helper] Auto-send: CORE mercs refreshed, now fetching USOL mercs...');
+            console.log('[COR3 Helper] 自动派遣：CORE 佣兵已刷新，正在获取 USOL 佣兵...');
             setTimeout(() => {
                 if (!autoSendInProgress) return;
                 window.postMessage({ type: 'COR3_REQUEST_USOL_MERCENARIES' }, '*');
@@ -188,7 +188,7 @@ export function setupWsRelay() {
                     _usolMercHandled = true;
                     window.removeEventListener('message', onUsolMercsDoneForAutoSend);
                     clearTimeout(usolMercsTimeout);
-                    console.log('[COR3 Helper] Auto-send: USOL mercs refreshed, proceeding to select merc');
+                    console.log('[COR3 Helper] 自动派遣：USOL 佣兵已刷新，继续选择佣兵');
                     setAutoSendAwaitingMercenaries(true);
                     window.postMessage({ type: 'COR3_CORE_MERCS_DONE' }, '*');
                 }
@@ -196,7 +196,7 @@ export function setupWsRelay() {
                     _usolMercHandled = true;
                     window.removeEventListener('message', onUsolMercsDoneForAutoSend);
                     clearTimeout(usolMercsTimeout);
-                    console.log('[COR3 Helper] Auto-send: USOL market unreachable — proceeding with CORE mercs only');
+                    console.log('[COR3 Helper] 自动派遣：USOL 市场不可访问 — 仅用 CORE 佣兵继续');
                     setAutoSendUsolSkipped(true);
                     setAutoSendAwaitingMercenaries(true);
                     window.postMessage({ type: 'COR3_CORE_MERCS_DONE' }, '*');
@@ -207,7 +207,7 @@ export function setupWsRelay() {
                 if (_usolMercHandled) return;
                 _usolMercHandled = true;
                 window.removeEventListener('message', onUsolMercsDoneForAutoSend);
-                console.log('[COR3 Helper] Auto-send: USOL mercs timeout — proceeding with CORE mercs only');
+                console.log('[COR3 Helper] 自动派遣：USOL 佣兵超时 — 仅用 CORE 佣兵继续');
                 setAutoSendAwaitingMercenaries(true);
                 window.postMessage({ type: 'COR3_CORE_MERCS_DONE' }, '*');
             }, 30000);
@@ -218,7 +218,7 @@ export function setupWsRelay() {
             setAutoSendAwaitingMercenaries(false);
             chrome.storage.sync.get('autoSendMerc', (settings) => {
                 if (!settings.autoSendMerc || !settings.autoSendMerc.enabled) {
-                    console.log('[COR3 Helper] Auto-send: disabled, aborting');
+                    console.log('[COR3 Helper] 自动派遣：已禁用，中止');
                     setAutoSendInProgress(false);
                     _automationFinish('auto-send');
                     return;
@@ -253,7 +253,7 @@ export function setupWsRelay() {
                             }
                         });
                     } else if (_autoSendUsolSkipped) {
-                        console.log('[COR3 Helper] Auto-send: USOL mercs skipped (market unreachable)');
+                        console.log('[COR3 Helper] 自动派遣：跳过 USOL 佣兵（市场不可访问）');
                     }
 
                     const allMercs = [...coreMercs, ...usolMercs];
@@ -292,10 +292,10 @@ export function setupWsRelay() {
                                 return 0;
                             });
                             mercId = available[0].id;
-                            console.log('[COR3 Helper] Auto-choose merc: selected', available[0].callsign, '(' + available[0]._market + ') cost:', configs[available[0].id].totalCost);
+                            console.log('[COR3 助手] 自动选择佣兵：已选中', available[0].callsign, '(' + available[0]._market + '）花费：', configs[available[0].id].totalCost);
                         } else {
-                            console.log('[COR3 Helper] Auto-send: no fitting merc available after filtering');
-                            chrome.storage.local.set({ mercWarning: 'No fitting merc available — all mercs filtered out or unavailable.' + (_autoSendUsolSkipped ? ' (USOL market unreachable)' : '') });
+                            console.log('[COR3 Helper] 自动派遣：筛选后没有合适的佣兵');
+                            chrome.storage.local.set({ mercWarning: '没有合适的佣兵 — 所有佣兵已被筛掉或不可用。' + (_autoSendUsolSkipped ? ' (USOL 市场不可达)' : '') });
                             setAutoSendUsolSkipped(false);
                             setAutoSendMercRetryCount(0);
                             setAutoSendInProgress(false);
@@ -326,16 +326,16 @@ export function setupWsRelay() {
         }
         if (event.data && event.data.type === 'COR3_WS_CONTAINER_OPENED') {
             if (autoSendInProgress && autoSendExpeditionId) {
-                console.log('[COR3 Helper] Auto-send: Container opened, checking inventory space...');
+                console.log('[COR3 Helper] 自动派遣：容器已打开，正在检查物品栏空间...');
                 const containerData = event.data.data;
 
                 let spaceNeeded = 2;
                 if (containerData && containerData.items && Array.isArray(containerData.items)) {
                     spaceNeeded = containerData.items.length;
-                    console.log('[COR3 Helper] Container contains', spaceNeeded, 'items');
+                    console.log('[COR3 Helper] 容器包含', spaceNeeded, 'items');
                 } else if (containerData && containerData.containerItems && Array.isArray(containerData.containerItems)) {
                     spaceNeeded = containerData.containerItems.length;
-                    console.log('[COR3 Helper] Container contains', spaceNeeded, 'items (containerItems)');
+                    console.log('[COR3 Helper] 容器包含', spaceNeeded, '物品（containerItems）');
                 }
 
                 chrome.storage.local.get('stashData', (result) => {
@@ -345,11 +345,11 @@ export function setupWsRelay() {
                     if (stash && stash.maxCapacity && stash.currentUsage !== undefined) {
                         const availableSpace = stash.maxCapacity - stash.currentUsage;
                         hasSpace = availableSpace >= spaceNeeded;
-                        console.log('[COR3 Helper] Inventory check:', availableSpace, 'available, need', spaceNeeded);
+                        console.log('[COR3 Helper] 物品栏检查：', availableSpace, '可用，需要', spaceNeeded);
                     }
 
                     if (hasSpace) {
-                        console.log('[COR3 Helper] Auto-send: Sufficient space, collecting all in 10s...');
+                        console.log('[COR3 Helper] 自动派遣：空间充足，10 秒后全部收取...');
                         setTimeout(() => {
                             window.postMessage({ type: 'COR3_COLLECT_ALL', expeditionId: autoSendExpeditionId }, '*');
                         }, 10000 + Math.floor(Math.random() * 500));
@@ -358,18 +358,18 @@ export function setupWsRelay() {
                             if (sellData.autoSellCheapest && stash && stash.items) {
                                 const availableSpace2 = stash.maxCapacity - stash.currentUsage;
                                 const shortfall = spaceNeeded - availableSpace2;
-                                console.log('[COR3 Helper] Auto-sell: need', shortfall, 'more slot(s), selling cheapest items');
+                                console.log('[COR3 Helper] 自动出售：需要', shortfall, '个空位，出售最便宜物品');
                                 autoSellCheapestItems(stash.items, shortfall, () => {
                                     window.postMessage({ type: 'COR3_REQUEST_STASH' }, '*');
                                     setTimeout(() => {
-                                        console.log('[COR3 Helper] Auto-sell done, collecting all in 10s...');
+                                        console.log('[COR3 Helper] 自动出售完成，10 秒后开始全部收取...');
                                         setTimeout(() => {
                                             window.postMessage({ type: 'COR3_COLLECT_ALL', expeditionId: autoSendExpeditionId }, '*');
                                         }, 10000 + Math.floor(Math.random() * 500));
                                     }, 3000);
                                 });
                             } else {
-                                console.log('[COR3 Helper] Auto-send: Insufficient space, disabling auto-container-claim');
+                                console.log('[COR3 Helper] 自动派遣：空间不足，禁用自动领取容器');
                                 chrome.storage.sync.get('autoSendMerc', (settings) => {
                                     if (settings.autoSendMerc) {
                                         chrome.storage.sync.set({
@@ -391,9 +391,9 @@ export function setupWsRelay() {
         }
         if (event.data && event.data.type === 'COR3_WS_STASH_FULL') {
             setAutoSendCollectRetries(autoSendCollectRetries + 1);
-            console.log('[COR3 Helper] Stash full error detected (attempt', autoSendCollectRetries, '/', MAX_COLLECT_RETRIES, ')');
+            console.log('[COR3 Helper] 检测到藏匿点已满错误（第', autoSendCollectRetries, '/', MAX_COLLECT_RETRIES, ')');
             if (autoSendCollectRetries > MAX_COLLECT_RETRIES) {
-                console.log('[COR3 Helper] Max collect retries reached, giving up');
+                console.log('[COR3 Helper] 已达最大收取重试次数，放弃');
                 setAutoSendCollectRetries(0);
                 disableAutoSendDueToStashFull();
                 return;
@@ -403,12 +403,12 @@ export function setupWsRelay() {
                     chrome.storage.local.get('stashData', (result) => {
                         const stash = result.stashData;
                         if (stash && stash.items) {
-                            console.log('[COR3 Helper] Auto-sell: selling cheapest items to free space after collect.all stash-full');
+                            console.log('[COR3 Helper] 自动出售：collect.all 后藏匿点已满，出售最便宜的物品腾出空间');
                             autoSellCheapestItems(stash.items, 2, () => {
                                 window.postMessage({ type: 'COR3_REQUEST_STASH' }, '*');
                                 setTimeout(() => {
                                     if (autoSendExpeditionId) {
-                                        console.log('[COR3 Helper] Auto-sell done, retrying collect all in 10s...');
+                                        console.log('[COR3 Helper] 自动出售完成，10 秒后重试全部收取...');
                                         setTimeout(() => {
                                             window.postMessage({ type: 'COR3_COLLECT_ALL', expeditionId: autoSendExpeditionId }, '*');
                                         }, 10000 + Math.floor(Math.random() * 500));
@@ -427,7 +427,7 @@ export function setupWsRelay() {
             });
         }
         if (event.data && event.data.type === 'COR3_WS_INSUFFICIENT_CREDITS') {
-            console.log('[COR3 Helper] Insufficient credits for expedition launch, disabling auto-send mercenary');
+            console.log('[COR3 Helper] 发起远征信用点不足，禁用自动派遣佣兵');
             chrome.storage.sync.get('autoSendMerc', (settings) => {
                 if (settings.autoSendMerc) {
                     chrome.storage.sync.set({
@@ -441,7 +441,7 @@ export function setupWsRelay() {
             });
             chrome.storage.local.set({
                 expeditionLaunchError: {
-                    error: 'Insufficient credits to launch expedition',
+                    error: '信用点不足，启动远征失败',
                     retryAfter: 0,
                     timestamp: Date.now(),
                     noRetry: true
@@ -452,7 +452,7 @@ export function setupWsRelay() {
             setAutoSendExpeditionId(null);
         }
         if (event.data && event.data.type === 'COR3_WS_COLLECT_INSUFFICIENT_CREDITS') {
-            console.log('[COR3 Helper] Insufficient credits for collect.all, disabling auto-send mercenary');
+            console.log('[COR3 Helper] collect.all 信用点不足，禁用自动派遣佣兵');
             chrome.storage.sync.get('autoSendMerc', (settings) => {
                 if (settings.autoSendMerc) {
                     chrome.storage.sync.set({
@@ -466,7 +466,7 @@ export function setupWsRelay() {
             });
             chrome.storage.local.set({
                 expeditionLaunchError: {
-                    error: 'Insufficient credits to open reward container. Auto-send disabled.',
+                    error: '信用点不足，开启奖励箱失败。已禁用自动发送。',
                     retryAfter: 0,
                     timestamp: Date.now(),
                     noRetry: true
@@ -487,7 +487,7 @@ export function setupWsRelay() {
                 });
             }
             if (autoSendInProgress && autoSendExpeditionId) {
-                console.log('[COR3 Helper] Auto-send: All collected, refreshing mercenaries (CORE + USOL)...');
+                console.log('[COR3 Helper] 自动派遣：已全部收取，正在刷新佣兵（CORE + USOL）...');
                 setAutoSendExpeditionId(null);
                 setTimeout(() => {
                     window.postMessage({ type: 'COR3_REQUEST_STASH' }, '*');
@@ -495,7 +495,7 @@ export function setupWsRelay() {
                 var mercDelay = 2500 + Math.floor(Math.random() * 1000);
                 setTimeout(() => {
                     if (!autoSendInProgress || (getAutomationActive() && getAutomationActive().type !== 'auto-send')) {
-                        console.log('[COR3 Helper] Auto-send: merc refresh skipped (no longer active or another automation took over)');
+                        console.log('[COR3 Helper] 自动发送: 已跳过佣兵刷新 (不再活跃或已被其他自动化接管)');
                         return;
                     }
                     window.postMessage({ type: 'COR3_REQUEST_MERCENARIES' }, '*');
@@ -507,7 +507,7 @@ export function setupWsRelay() {
         if (event.data && event.data.type === 'COR3_WS_MERC_NOT_AVAILABLE') {
             setAutoSendMercRetryCount(_autoSendMercRetryCount + 1);
             if (_autoSendMercRetryCount <= MAX_MERC_RETRIES) {
-                console.log('[COR3 Helper] Auto-send: Mercenary not available — retry ' + _autoSendMercRetryCount + '/' + MAX_MERC_RETRIES + ', refreshing merc data...');
+                console.log('[COR3 Helper] 自动派遣：佣兵不可用 — 重试 ' + _autoSendMercRetryCount + '/' + MAX_MERC_RETRIES + '，正在刷新佣兵数据...');
                 setAutoSendExpeditionBlocked(false);
                 chrome.storage.local.remove('autoSendExpeditionBlocked');
                 setAutoSendInProgress(true);
@@ -520,21 +520,21 @@ export function setupWsRelay() {
                     window.postMessage({ type: 'COR3_REQUEST_MERCENARIES' }, '*');
                 }, 2000 + Math.floor(Math.random() * 1000));
             } else {
-                console.log('[COR3 Helper] Auto-send: Mercenary not available after ' + MAX_MERC_RETRIES + ' retries — aborting');
-                chrome.storage.local.set({ mercWarning: 'Mercenary not available after ' + MAX_MERC_RETRIES + ' retries. Merc data may be stale.' });
+                console.log('[COR3 Helper] 自动派遣：重试后佣兵仍不可用 ' + MAX_MERC_RETRIES + ' 次重试 — 放弃');
+                chrome.storage.local.set({ mercWarning: '此操作后佣兵不可用：' + MAX_MERC_RETRIES + ' 次重试。佣兵数据可能已过期。' });
                 setAutoSendMercRetryCount(0);
                 setAutoSendInProgress(false);
                 _automationFinish('auto-send');
             }
         }
         if (event.data && event.data.type === 'COR3_WS_EXPEDITION_LAUNCHED') {
-            console.log('[COR3 Helper] Expedition launched successfully');
+            console.log('[COR3 Helper] 远征发起成功');
             setAutoSendMercRetryCount(0);
         }
         if (event.data && event.data.type === 'COR3_WS_EXPEDITION_LAUNCH_ERROR') {
-            console.log('[COR3 Helper] Expedition launch error:', event.data.error);
+            console.log('[COR3 Helper] 远征发起出错：', event.data.error);
             if (event.data.error === 'Maximum 1 active expedition allowed') {
-                console.log('[COR3 Helper] Active expedition detected — blocking auto-send until it completes');
+                console.log('[COR3 助手] 检测到进行中的远征 — 在其完成前阻止自动发送');
                 setAutoSendExpeditionBlocked(true);
                 chrome.storage.local.set({ autoSendExpeditionBlocked: true });
                 setAutoSendInProgress(false);
@@ -552,7 +552,7 @@ export function setupWsRelay() {
             }
         }
         if (event.data && event.data.type === 'COR3_WS_EXPEDITION_ELITE_REQUIRED') {
-            console.log('[COR3 Helper] Elite merc required — retrying with default location');
+            console.log('[COR3 Helper] 需要精英佣兵 — 正在用默认地点重试');
             chrome.storage.local.get('lastExpeditionLaunchData', (result) => {
                 const launch = result.lastExpeditionLaunchData;
                 if (!launch) return;
@@ -567,12 +567,12 @@ export function setupWsRelay() {
                     const goal = zone && zone.goals && zone.goals[0] ? zone.goals[0] : null;
                     if (!zone || !goal) return;
                     if (loc.id === launch.locationConfigId) {
-                        console.log('[COR3 Helper] Already using default location — no alternative available');
+                        console.log('[COR3 助手] 已在默认位置 — 没有其他可选位置');
                         return;
                     }
                     const retryConfig = { ...launch, locationConfigId: loc.id, zoneConfigId: zone.id, goalId: goal.id };
                     chrome.storage.local.set({ lastExpeditionLaunchData: retryConfig });
-                    console.log('[COR3 Helper] Retrying expedition with location:', loc.name || loc.id);
+                    console.log('[COR3 Helper] 正在用地点重试远征：', loc.name || loc.id);
                     setTimeout(() => {
                         window.postMessage({ type: 'COR3_LAUNCH_EXPEDITION', config: retryConfig }, '*');
                     }, 2000 + Math.floor(Math.random() * 1000));
@@ -580,7 +580,7 @@ export function setupWsRelay() {
             });
         }
         if (event.data && event.data.type === 'COR3_WS_EXPEDITION_RETRY_LAUNCH') {
-            console.log('[COR3 Helper] Retrying expedition launch');
+            console.log('[COR3 Helper] 正在重试发起远征');
             chrome.storage.local.get('lastExpeditionLaunchData', (result) => {
                 if (result.lastExpeditionLaunchData) {
                     window.postMessage({
@@ -603,7 +603,7 @@ export function setupWsRelay() {
         }
         // Auto-fetch daily ops on page load
         if (event.data && event.data.type === 'COR3_FETCH_DAILY_OPS') {
-            console.log('[COR3 Helper] Requesting daily ops data');
+            console.log('[COR3 Helper] 正在请求每日行动数据');
             chrome.storage.local.get('bearerToken', (result) => {
                 const token = result.bearerToken;
                 if (!token) return;

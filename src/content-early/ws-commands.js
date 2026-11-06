@@ -3,7 +3,7 @@ import { wsSend, enterRooms } from './ws-send.js';
 
 // Send stash request: leave if in room, delay, then re-join
 window.__cor3RequestStash = function () {
-    console.log('[COR3 Helper] Requesting stash data');
+    console.log('[COR3 Helper] 正在请求藏匿点数据');
     enterRooms(['stash']);
     return true;
 };
@@ -11,7 +11,7 @@ window.__cor3RequestStash = function () {
 // Sell an item from stash
 window.__cor3SellItem = function (itemId, quantity, skipStashRefresh) {
     quantity = quantity || 1;
-    console.log('[COR3 Helper] Selling item:', itemId, 'qty:', quantity);
+    console.log('[COR3 Helper] 正在出售物品：', itemId, 'qty:', quantity);
     var msg = '42["event",{"event":{"name":"stash","action":"sell.item"},"data":{"itemId":"' + itemId + '","quantity":' + quantity + '}}]';
     wsSend(msg);
     if (!skipStashRefresh) {
@@ -24,13 +24,13 @@ window.__cor3SellItem = function (itemId, quantity, skipStashRefresh) {
 
 // --- Specialists WS send functions ---
 window.__cor3RequestSpecialists = function () {
-    console.log('[COR3 Helper] Requesting specialists data');
+    console.log('[COR3 Helper] 正在请求专家数据');
     var msg = '42["event",{"event":{"name":"specialists","action":"get.state"},"data":{}}]';
     wsSend(msg);
     return true;
 };
 window.__cor3PurchaseSpecialist = function (specialistType, kind, level, priceId) {
-    console.log('[COR3 Helper] Purchasing specialist service:', specialistType, kind, level, priceId);
+    console.log('[COR3 Helper] 正在购买专家服务：', specialistType, kind, level, priceId);
     var msg = '42["event",{"event":{"name":"specialists","action":"purchase"},"data":{"specialistType":"' + specialistType + '","kind":"' + kind + '","level":' + level + ',"priceId":"' + priceId + '"}}]';
     wsSend(msg);
     return true;
@@ -38,23 +38,23 @@ window.__cor3PurchaseSpecialist = function (specialistType, kind, level, priceId
 
 // --- Loadout WS send functions ---
 window.__cor3RequestLoadout = function () {
-    console.log('[COR3 Helper] Requesting loadout data');
+    console.log('[COR3 Helper] 正在请求装备栏数据');
     var msg = '42["event",{"event":{"name":"loadout","action":"get.options"}}]';
     wsSend(msg);
     return true;
 };
 window.__cor3EquipHardware = function (moduleConfigId) {
-    console.log('[COR3 Helper] Equipping hardware:', moduleConfigId);
+    console.log('[COR3 Helper] 正在装备硬件：', moduleConfigId);
     var msg = '42["event",{"event":{"name":"loadout","action":"equip.hardware"},"data":{"moduleConfigId":"' + moduleConfigId + '"}}]';
     wsSend(msg);
 };
 window.__cor3EquipSoftware = function (moduleConfigId) {
-    console.log('[COR3 Helper] Equipping software:', moduleConfigId);
+    console.log('[COR3 Helper] 正在装备软件：', moduleConfigId);
     var msg = '42["event",{"event":{"name":"loadout","action":"equip.software"},"data":{"moduleConfigId":"' + moduleConfigId + '"}}]';
     wsSend(msg);
 };
 window.__cor3UnequipSoftware = function (moduleConfigId) {
-    console.log('[COR3 Helper] Unequipping software:', moduleConfigId);
+    console.log('[COR3 Helper] 正在卸下软件：', moduleConfigId);
     var msg = '42["event",{"event":{"name":"loadout","action":"unequip.software"},"data":{"moduleConfigId":"' + moduleConfigId + '"}}]';
     wsSend(msg);
 };
@@ -191,7 +191,7 @@ window.__cor3ValuableSellItems = function (marketId, items) {
 };
 
 window.__cor3RequestUpdater = function () {
-    console.log('[COR3 Helper] Requesting updater data');
+    console.log('[COR3 Helper] 正在请求更新器数据');
     var msg = '42["event",{"event":{"name":"updater","action":"get.patches"},"data":{}}]';
     wsSend(msg);
 };

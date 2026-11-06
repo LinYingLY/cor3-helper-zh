@@ -38,14 +38,14 @@ function compareVersions(v1, v2) {
 }
 
 checkUpdateBtn.addEventListener('click', async () => {
-    updateResult.textContent = 'Checking...';
+    updateResult.textContent = '检查中…';
     updateResult.style.color = 'var(--text-dim)';
     try {
         const localManifest = chrome.runtime.getManifest();
         const localExtVersion = localManifest.version;
 
         const versionsResp = await fetch('https://raw.githubusercontent.com/Femtoce11/cor3-helper/main/versions.json', { cache: 'no-store' });
-        if (!versionsResp.ok) throw new Error('Failed to fetch remote versions');
+        if (!versionsResp.ok) throw new Error('获取远程版本失败');
         const remote = await versionsResp.json();
 
         let remoteExtVersion = null;
@@ -63,27 +63,27 @@ checkUpdateBtn.addEventListener('click', async () => {
         let extBehind = false;
 
         if (remoteExtVersion && compareVersions(localExtVersion, remoteExtVersion) < 0) {
-            messages.push(`Extension: <b>v${localExtVersion}</b> → <b>v${remoteExtVersion}</b>`);
+            messages.push(`扩展: <b>v${localExtVersion}</b> → <b>v${remoteExtVersion}</b>`);
             extBehind = true;
         }
 
         if (messages.length > 0) {
-            let html = `Updates detected:<br>${messages.join('<br>')}`;
+            let html = `检测到更新：<br>${messages.join('<br>')}`;
             if (extBehind) {
-                html += `<br><a href="https://github.com/Femtoce11/cor3-helper/releases" target="_blank" style="color:var(--accent-cyan);">Download from GitHub</a><br><span style="font-size:9px;color:var(--text-muted);">Download ZIP, extract, and reload on chrome://extensions</span>`;
+                html += `<br><a href="https://github.com/Femtoce11/cor3-helper/releases" target="_blank" style="color:var(--accent-cyan);">从 GitHub 下载</a><br><span style="font-size:9px;color:var(--text-muted);">下载 ZIP，解压后在 chrome://extensions 重新加载</span>`;
             }
             _safeSetHtml(updateResult, html);
             updateResult.style.color = 'var(--accent-orange)';
         } else {
             const localWeb = webVersion || null;
             const localSys = systemVersion || null;
-            updateResult.textContent = `You're up to date!`;
+            updateResult.textContent = `已是最新版本！`;
             updateResult.style.color = 'var(--accent-green)';
         }
     } catch (e) {
-        console.log('[COR3 Helper] Check for updates error:', e);
+        console.log('[COR3 Helper] 检查更新出错：', e);
         cor3LogError('popup.js', e, { action: 'checkForUpdates' });
-        updateResult.textContent = 'Could not check for updates. Check your connection.';
+        updateResult.textContent = '未能检查更新，请检查网络连接。';
         updateResult.style.color = 'var(--accent-red)';
     }
 });
@@ -120,14 +120,14 @@ async function displayVersionInfo(retryCount) {
                 }
             }
         } catch (e) {
-            console.log('[COR3 Helper] Could not get version fallbacks:', e);
+            console.log('[COR3 Helper] 获取版本回退值出错：', e);
         }
     }
 
-    let parts = [`Extension: v${extVersion}`];
-    if (finalWebVersion) parts.push(`Web: ${finalWebVersion}`);
-    if (finalSystemVersion) parts.push(`System: ${finalSystemVersion}`);
-    if (finalPatchVersion) parts.push(`Patch: ${finalPatchVersion}`);
+    let parts = [`扩展: v${extVersion}`];
+    if (finalWebVersion) parts.push(`网页： ${finalWebVersion}`);
+    if (finalSystemVersion) parts.push(`系统： ${finalSystemVersion}`);
+    if (finalPatchVersion) parts.push(`补丁： ${finalPatchVersion}`);
     versionSection.textContent = parts.join(' · ');
     versionSection.style.display = 'block';
 
@@ -154,9 +154,9 @@ async function autoCheckWebsiteUpdated() {
         if (webVersion && remote.web) {
             const comparison = compareVersions(webVersion, remote.web);
             if (comparison > 0) {
-                webVersionNotice.textContent = '⚠️ Website is recently updated';
+                webVersionNotice.textContent = '⚠️ 网站最近有更新';
                 webVersionNotice.style.display = 'block';
-                webVersionData.textContent = 'Detected: ' + webVersion + ' · Old: ' + remote.web;
+                webVersionData.textContent = '检测到：' + webVersion + ' · 旧值: ' + remote.web;
                 webVersionData.style.display = 'block';
             }
         }
@@ -164,9 +164,9 @@ async function autoCheckWebsiteUpdated() {
         if (systemVersion && remote.system) {
             const comparison = compareVersions(systemVersion, remote.system);
             if (comparison < 0) {
-                systemVersionNotice.textContent = '⚠️ You are lagging behind in progress!';
+                systemVersionNotice.textContent = '⚠️ 你的进度落后了！';
                 systemVersionNotice.style.display = 'block';
-                webVersionData.textContent = 'Aim for ' + remote.system + ' system version!';
+                webVersionData.textContent = '目标为 ' + remote.system + ' 系统版本！';
                 webVersionData.style.display = 'block';
             }
         }
@@ -174,9 +174,9 @@ async function autoCheckWebsiteUpdated() {
         if (patchVersion && remote.patch && patchVersionNotice && patchVersionData) {
             const comparison = compareVersions(patchVersion, remote.patch);
             if (comparison > 0) {
-                patchVersionNotice.textContent = '⚠️ Patch version is changed. Check patch notes!';
+                patchVersionNotice.textContent = '⚠️ 补丁版本已变更，请查看补丁说明！';
                 patchVersionNotice.style.display = 'block';
-                patchVersionData.textContent = 'Detected: ' + patchVersion + ' · Old: ' + remote.patch;
+                patchVersionData.textContent = '检测到：' + patchVersion + ' · 旧值: ' + remote.patch;
                 patchVersionData.style.display = 'block';
             }
         }

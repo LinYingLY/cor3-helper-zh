@@ -37,7 +37,7 @@ export var serverMap = new ServerMap();
 export var sendCmd = createSendCmd('COR3_AUTOJOB_CMD');
 export var delay = createDelay(function () { return state.abortFlag; });
 export var waitForEvent = createWaitForEvent(function () { return state.abortFlag; });
-export var log = createLogger('[COR3 Auto-Jobs]', 'COR3_AUTOJOB_LOG');
+export var log = createLogger('[COR3 自动任务]', 'COR3_AUTOJOB_LOG');
 export var waitForHackToBeDone = createWaitForHackToBeDone(log, function () { return state.abortFlag; });
 
 export var SERVER_PRIORITY = FALLBACK_SERVER_PRIORITY;

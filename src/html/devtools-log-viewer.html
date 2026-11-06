@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>COR3 Helper — Log Viewer</title>
+    <title>COR3 Helper — 日志查看器</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -366,22 +366,22 @@
 <body>
 <!-- Toolbar -->
 <div class="toolbar">
-    <label><input type="checkbox" id="filterSent" checked> Sent</label>
-    <label><input type="checkbox" id="filterReceived" checked> Received</label>
+    <label><input type="checkbox" id="filterSent" checked> 已发送</label>
+    <label><input type="checkbox" id="filterReceived" checked> 已接收</label>
     <div class="separator"></div>
-    <select id="categorySelect" title="Log category">
-        <option value="ws-messages">WS Messages</option>
-        <option value="auto-jobs">Auto Job Solver</option>
-        <option value="auto-valuable">Auto Valuable Seller</option>
-        <option value="error-logs">Error Logs</option>
-        <option value="page-console">Page Console Logs</option>
-        <option value="ext-console">Extension Console Logs</option>
+    <select id="categorySelect" title="日志类别">
+        <option value="ws-messages">WS 消息</option>
+        <option value="auto-jobs">自动任务求解器</option>
+        <option value="auto-valuable">自动高价出售</option>
+        <option value="error-logs">错误日志</option>
+        <option value="page-console">页面控制台日志</option>
+        <option value="ext-console">扩展控制台日志</option>
     </select>
-    <input type="text" id="searchInput" placeholder="Filter by event or content..." style="min-width:120px;">
+    <input type="text" id="searchInput" placeholder="按事件或内容筛选…" style="min-width:120px;">
     <div class="separator"></div>
-    <button id="btnImport" title="Import log file (JSON, MD, or Discord clipboard format)">📂 Import</button>
+    <button id="btnImport" title="导入日志文件（JSON、MD 或 Discord 剪贴板格式）">📂 导入</button>
     <input type="file" id="importFileInput" accept=".json,.md,.txt,.log">
-    <select id="pageSelector" title="Log section"></select>
+    <select id="pageSelector" title="日志分区"></select>
     <span class="stats" id="statsLabel">(▲0 ▼0)</span>
 </div>
 
@@ -390,21 +390,21 @@
     <div class="message-list-container">
         <div class="message-list-header" id="listHeader">
             <span class="col-header" data-col="dir"></span>
-            <span class="col-header" data-col="time">Time<span class="col-resize" data-col="time"></span></span>
-            <span class="col-header" data-col="event">Event<span class="col-resize" data-col="event"></span></span>
-            <span class="col-header" data-col="action">Action<span class="col-resize" data-col="action"></span></span>
-            <span class="col-header" data-col="server">Server<span class="col-resize" data-col="server"></span></span>
-            <span class="col-header">Preview</span>
-            <span class="col-header" style="text-align:right">Size</span>
+            <span class="col-header" data-col="time">时间<span class="col-resize" data-col="time"></span></span>
+            <span class="col-header" data-col="event">事件<span class="col-resize" data-col="event"></span></span>
+            <span class="col-header" data-col="action">操作<span class="col-resize" data-col="action"></span></span>
+            <span class="col-header" data-col="server">服务器<span class="col-resize" data-col="server"></span></span>
+            <span class="col-header">预览</span>
+            <span class="col-header" style="text-align:right">大小</span>
         </div>
         <div class="log-header" id="logHeader">
-            <span>Time</span>
-            <span>Level</span>
-            <span>Message</span>
+            <span>时间</span>
+            <span>级别</span>
+            <span>消息</span>
         </div>
         <div class="message-list" id="messageList">
             <div class="empty-state" id="emptyState">
-                No logs loaded.<br>Click "📂 Import" to load an exported log file.
+                未加载日志。<br>点击“📂 导入”以载入导出的日志文件。
             </div>
         </div>
     </div>
@@ -412,18 +412,18 @@
         <div class="detail-resize-handle" id="detailResizeHandle"></div>
         <div class="detail-header">
             <div class="detail-header-actions" style="gap:6px;">
-                <span style="font-weight:bold;font-size:11px;">Message Detail</span>
-                <select class="detail-format-select" id="detailFormatSelect" title="Display format">
-                    <option value="raw">Raw</option>
-                    <option value="pretty" selected>JSON-pretty</option>
-                    <option value="tree">Tree View</option>
+                <span style="font-weight:bold;font-size:11px;">消息详情</span>
+                <select class="detail-format-select" id="detailFormatSelect" title="显示格式">
+                    <option value="raw">原始</option>
+                    <option value="pretty" selected>JSON 美化</option>
+                    <option value="tree">树形视图</option>
                 </select>
             </div>
             <button class="detail-close" id="detailClose">✕</button>
         </div>
         <div class="detail-search-bar">
-            <input type="text" id="detailSearchInput" placeholder="Search in message...">
-            <button id="detailSearchBtn" title="Find next (Enter)">🔍</button>
+            <input type="text" id="detailSearchInput" placeholder="在消息中搜索…">
+            <button id="detailSearchBtn" title="查找下一个（Enter）">🔍</button>
             <span class="search-count" id="detailSearchCount"></span>
         </div>
         <div class="detail-meta" id="detailMeta"></div>

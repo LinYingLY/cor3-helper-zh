@@ -49,11 +49,11 @@ function _wsOpenDb() {
             _wsDbInstance.onclose = () => { _wsInvalidateDb(); };
             _wsDbInstance.onerror = () => { _wsInvalidateDb(); };
             _wsDbInstance.onversionchange = () => { _wsDbInstance.close(); _wsInvalidateDb(); };
-            console.log('[COR3 WS-Log] IndexedDB opened successfully');
+            console.log('[COR3 WS 日志] IndexedDB 打开成功');
             resolve(_wsDbInstance);
         };
         req.onerror = (e) => {
-            console.log('[COR3 WS-Log] IndexedDB open failed:', e.target.error);
+            console.log('[COR3 WS 日志] IndexedDB 打开失败：', e.target.error);
             reject(e.target.error);
         };
     });
@@ -76,7 +76,7 @@ async function _wsPurgeOld() {
             if (cursor) { cursor.delete(); purged++; cursor.continue(); }
         };
         await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
-        if (purged > 0) console.log('[COR3 WS-Log] Purged', purged, 'WS entries older than 24h');
+        if (purged > 0) console.log('[COR3 WS-Log] 已清空', purged, '超过 24 小时的 WS 条目');
         const tx2 = db.transaction(COR3_WS_LOGS_STORE, 'readwrite');
         const idx2 = tx2.objectStore(COR3_WS_LOGS_STORE).index('timestamp');
         const range2 = IDBKeyRange.upperBound(cutoff, true);
@@ -87,13 +87,13 @@ async function _wsPurgeOld() {
             if (cursor) { cursor.delete(); purged2++; cursor.continue(); }
         };
         await new Promise((resolve, reject) => { tx2.oncomplete = resolve; tx2.onerror = () => reject(tx2.error); });
-        if (purged2 > 0) console.log('[COR3 WS-Log] Purged', purged2, 'log entries older than 24h');
+        if (purged2 > 0) console.log('[COR3 WS-Log] 已清空', purged2, '超过 24 小时的日志条目');
         // Count-based trim: keep at most COR3_WS_MAX_ENTRIES in messages store
         await _wsTrimByCount(db, COR3_WS_STORE, COR3_WS_MAX_ENTRIES);
         // Count-based trim: keep at most COR3_WS_LOGS_MAX_ENTRIES in logs store
         await _wsTrimByCount(db, COR3_WS_LOGS_STORE, COR3_WS_LOGS_MAX_ENTRIES);
     } catch (e) {
-        console.log('[COR3 WS-Log] Purge failed:', e);
+        console.log('[COR3 WS 日志] 清除失败：', e);
     }
 }
 
@@ -113,7 +113,7 @@ async function _wsTrimByCount(db, storeName, maxEntries) {
         if (cursor && deleted < excess) { cursor.delete(); deleted++; cursor.continue(); }
     };
     await new Promise((resolve, reject) => { tx2.oncomplete = resolve; tx2.onerror = () => reject(tx2.error); });
-    if (deleted > 0) console.log('[COR3 WS-Log] Trimmed', deleted, 'entries from', storeName, '(limit:', maxEntries, ')');
+    if (deleted > 0) console.log('[COR3 WS 日志] 已裁剪', deleted, '条记录，来自 ', storeName, '（上限：', maxEntries, ')');
 }
 
 async function _wsWriteEntry(entry) {
@@ -123,7 +123,7 @@ async function _wsWriteEntry(entry) {
     await new Promise((resolve, reject) => {
         tx.oncomplete = resolve;
         tx.onerror = () => {
-            console.log('[COR3 WS-Log] Write failed:', tx.error);
+            console.log('[COR3 WS 日志] 写入失败：', tx.error);
             reject(tx.error);
         };
     });
@@ -145,7 +145,7 @@ async function cor3LogWsMessage(direction, message) {
         } catch (e) {
             // Retry once on stale connection (NotFoundError / InvalidStateError)
             if (e && (e.name === 'NotFoundError' || e.name === 'InvalidStateError')) {
-                console.log('[COR3 WS-Log] Stale DB connection (' + e.name + ') — reopening and retrying');
+                console.log('[COR3 WS 日志] 数据库连接已失效（' + e.name + '）— 重新打开并重试');
                 _wsInvalidateDb();
                 await _wsWriteEntry(entry);
             } else {
@@ -154,7 +154,7 @@ async function cor3LogWsMessage(direction, message) {
         }
         _wsPurgeOld();
     } catch (e) {
-        console.log('[COR3 WS-Log] cor3LogWsMessage error:', e);
+        console.log('[COR3 WS 日志] cor3LogWsMessage 出错：', e);
     }
 }
 
@@ -164,9 +164,9 @@ async function cor3ClearWsMessages() {
         const tx = db.transaction(COR3_WS_STORE, 'readwrite');
         tx.objectStore(COR3_WS_STORE).clear();
         await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
-        console.log('[COR3 WS-Log] All messages cleared');
+        console.log('[COR3 WS 日志] 所有消息已清空');
     } catch (e) {
-        console.log('[COR3 WS-Log] Clear failed:', e);
+        console.log('[COR3 WS 日志] 清空失败：', e);
     }
 }
 
@@ -196,7 +196,7 @@ async function cor3LogEntry(category, message, level) {
                 });
                 await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
             } catch (e2) {
-                console.log('[COR3 WS-Log] cor3LogEntry retry failed:', e2);
+                console.log('[COR3 WS 日志] cor3LogEntry 重试失败：', e2);
             }
         }
     }
@@ -214,8 +214,8 @@ async function cor3ClearLogsByCategory(category) {
             if (cursor) { cursor.delete(); cursor.continue(); }
         };
         await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
-        console.log('[COR3 WS-Log] Cleared logs for category:', category);
+        console.log('[COR3 WS 日志] 已清空该分类的日志：', category);
     } catch (e) {
-        console.log('[COR3 WS-Log] Clear logs failed:', e);
+        console.log('[COR3 WS 日志] 清空日志失败：', e);
     }
 }

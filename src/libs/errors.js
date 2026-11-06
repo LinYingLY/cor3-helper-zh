@@ -35,7 +35,7 @@ async function cor3LogError(source, error, context) {
         await chrome.storage.local.set({ [COR3_ERRORS_KEY]: errors });
     } catch (e) {
         // Last resort: console only
-        console.log('[COR3 Helper] Failed to log error to storage:', e);
+        console.log('[COR3 Helper] 向存储写入错误日志失败：', e);
     }
 }
 

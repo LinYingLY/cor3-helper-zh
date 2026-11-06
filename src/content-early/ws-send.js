@@ -7,7 +7,7 @@ import {
 } from './state.js';
 
 // Send a WS message on the active socket (most recently received messages)
-// Throttled: minimum 250ms between sends to avoid "Too many requests" errors.
+// Throttled: minimum 250ms between sends to avoid "请求过于频繁" errors.
 // Uses timestamp-based approach: if last send was <250ms ago, delay this send.
 var WS_THROTTLE_MS = 250;
 var wsSendLastTime = 0;
@@ -76,13 +76,13 @@ export function wsSendRaw(msg) {
         return true;
     }
 
-    console.log('[COR3 Helper] No active WebSocket found — re-queuing message for retry');
+    console.log('[COR3 Helper] 未找到活跃的 WebSocket — 重新排队等待重试');
     // Re-queue message and retry after a short delay
     if (wsSendQueue.length < WS_QUEUE_MAX) {
         wsSendQueue.unshift(msg);
         scheduleFlush(2000);
     } else {
-        console.log('[COR3 Helper] No active WebSocket and queue full — message dropped');
+        console.log('[COR3 Helper] 没有活跃的 WebSocket 且队列已满 — 消息已丢弃');
     }
     return false;
 }
@@ -116,7 +116,7 @@ export function wsSend(msg) {
         if (wsSendQueue.length > WS_QUEUE_MAX) {
             var dropped = wsSendQueue.length - WS_QUEUE_MAX;
             wsSendQueue = wsSendQueue.slice(dropped);
-            console.log('[COR3 Helper] WS send queue overflow — dropped ' + dropped + ' oldest message(s)');
+            console.log('[COR3 助手] WS 发送队列溢出——已丢弃 ' + dropped + ' 条最旧消息');
         }
         if (!wsSendFlushTimer) {
             scheduleFlush(Math.max(0, WS_THROTTLE_MS - elapsed));

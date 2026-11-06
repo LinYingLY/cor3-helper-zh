@@ -23,11 +23,11 @@ let alarms = [];
 let editingAlarmId = null;
 
 export const TIMER_LABELS = {
-    daily: 'Daily Ops',
-    home_jobs: 'Market-1 Jobs Reset',
-    dark_jobs: 'Market-2 Jobs Reset',
-    soyuz_jobs: 'Market-3 Jobs Reset',
-    usol_jobs: 'Market-4 Jobs Reset'
+    daily: '每日行动',
+    home_jobs: 'Market-1 任务重置',
+    dark_jobs: 'Market-2 任务重置',
+    soyuz_jobs: 'Market-3 任务重置',
+    usol_jobs: 'Market-4 任务重置'
 };
 
 const alarmExpeditionGroup = document.getElementById('alarmExpeditionGroup');
@@ -40,7 +40,7 @@ export function updateExpeditionAlarmOptions(expeditions) {
         if (!exp.endTime) continue;
         const opt = document.createElement('option');
         opt.value = 'exp_' + exp.id;
-        const label = (exp.locationName || 'Expedition') + ' — ' + (exp.zoneName || '');
+        const label = (exp.locationName || '远征') + ' — ' + (exp.zoneName || '');
         opt.textContent = label;
         TIMER_LABELS['exp_' + exp.id] = label;
         alarmExpeditionGroup.appendChild(opt);
@@ -81,7 +81,7 @@ async function sendAlarmsToContent() {
 
 export function renderAlarmList() {
     if (alarms.length === 0) {
-        alarmList.replaceChildren(el('div', { className: 'no-alarms' }, 'No alarms configured. Click ➕ to add one.'));
+        alarmList.replaceChildren(el('div', { className: 'no-alarms' }, '未配置警报。点 ➕ 添加一个。'));
         return;
     }
     const frag = document.createDocumentFragment();
@@ -100,13 +100,13 @@ export function renderAlarmList() {
             }
         });
 
-        const editBtn = el('button', { dataset: { action: 'edit', id: a.id }, title: 'Edit' }, '✏️');
+        const editBtn = el('button', { dataset: { action: 'edit', id: a.id }, title: '编辑' }, '✏️');
         editBtn.addEventListener('click', (e) => {
             const alarm = alarms.find(x => x.id === e.target.dataset.id);
             if (alarm) openAlarmForm(alarm);
         });
 
-        const deleteBtn = el('button', { dataset: { action: 'delete', id: a.id }, title: 'Delete' }, '🗑️');
+        const deleteBtn = el('button', { dataset: { action: 'delete', id: a.id }, title: '解密超过 2 分钟超时' }, '🗑️');
         deleteBtn.addEventListener('click', async (e) => {
             alarms = alarms.filter(x => x.id !== e.target.dataset.id);
             await saveAlarms();
@@ -131,7 +131,7 @@ export function renderAlarmList() {
 function openAlarmForm(alarm = null) {
     if (alarm) {
         editingAlarmId = alarm.id;
-        alarmFormTitle.textContent = 'Edit Alarm';
+        alarmFormTitle.textContent = '编辑警报';
         alarmTimerSelect.value = alarm.timerSource;
         alarmMinutes.value = Math.floor(alarm.thresholdSeconds / 60);
         alarmSeconds.value = alarm.thresholdSeconds % 60;
@@ -140,7 +140,7 @@ function openAlarmForm(alarm = null) {
         alarmVolumeLabel.textContent = alarm.volume + '%';
     } else {
         editingAlarmId = null;
-        alarmFormTitle.textContent = 'New Alarm';
+        alarmFormTitle.textContent = '新建警报';
         alarmTimerSelect.value = 'daily';
         alarmMinutes.value = 1;
         alarmSeconds.value = 0;
@@ -215,7 +215,7 @@ stopAllAlarmsBtn.addEventListener('click', async () => {
 chrome.runtime.onMessage.addListener((request) => {
     if (request.action === "alarmActiveStatus") {
         stopAllAlarmsBtn.style.display = request.isActive ? '' : 'none';
-        statusDiv.textContent = request.isActive ? 'Alarm sounding...' : 'Ready';
+        statusDiv.textContent = request.isActive ? '警报响起...' : '就绪';
     }
 });
 

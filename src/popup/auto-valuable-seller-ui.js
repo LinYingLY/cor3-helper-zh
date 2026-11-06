@@ -23,7 +23,7 @@ let valuableDebugLogs = [];
 const VALUABLE_MAX_LOGS = 200;
 
 function updateValuableStatus(enabled) {
-    valuableStatus.textContent = enabled ? 'Active' : 'Off';
+    valuableStatus.textContent = enabled ? '活跃' : '关';
     valuableStatus.style.color = enabled ? 'var(--accent-green)' : 'var(--text-dim)';
     valuableSection.style.display = enabled ? '' : 'none';
     var card = valuableSection.closest('.popout-card');
@@ -69,7 +69,7 @@ async function renderValuableTabs() {
 function renderValuableServers(data) {
     _clearEl(valuableContentServers);
     if (!data || !data.servers || data.servers.length === 0) {
-        valuableContentServers.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, 'No valuable data yet. Click "Start Valuable Search" to scan servers.'));
+        valuableContentServers.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, '暂无高价物品数据。点击 "开始高价搜寻" 扫描服务器。'));
         return;
     }
 
@@ -82,10 +82,10 @@ function renderValuableServers(data) {
     const selectAllLabel = document.createElement('label');
     selectAllLabel.className = 'job-type-label';
     selectAllLabel.setAttribute('for', selectAllCb.id);
-    selectAllLabel.textContent = 'Select All';
+    selectAllLabel.textContent = '全选';
     const selectAllCount = document.createElement('span');
     selectAllCount.className = 'job-type-count';
-    selectAllCount.textContent = `(${data.servers.length} servers)`;
+    selectAllCount.textContent = `(${data.servers.length} 台服务器)`;
     selectAllDiv.appendChild(selectAllLabel);
     selectAllDiv.appendChild(selectAllCount);
     selectAllDiv.appendChild(selectAllCb);
@@ -138,14 +138,14 @@ function renderValuableServers(data) {
 
         // Build table for files and logs
         if (totalValuables > 0) {
-            let tableHtml = '<table><tr><th>Type</th><th>Name</th><th>Tags</th><th>Base Price</th><th>Detect Rate</th></tr>';
+            let tableHtml = '<table><tr><th>类型</th><th>名称</th><th>标签</th><th>基础价格</th><th>检测率</th></tr>';
             for (const f of (server.files || [])) {
                 const tags = (f.tags || []).map(t => t.label || t.key || t).join(', ');
-                tableHtml += `<tr><td>📄 File</td><td>${f.name || '—'}</td><td>${tags || '—'}</td><td>${f.basePrice || 0}</td><td>${f.detectRate || 0}</td></tr>`;
+                tableHtml += `<tr><td>📄 文件</td><td>${f.name || '—'}</td><td>${tags || '—'}</td><td>${f.basePrice || 0}</td><td>${f.detectRate || 0}</td></tr>`;
             }
             for (const l of (server.logs || [])) {
                 const tags = (l.tags || []).map(t => t.label || t.key || t).join(', ');
-                tableHtml += `<tr><td>📋 Log</td><td>${l.message || '—'}</td><td>${tags || '—'}</td><td>${l.basePrice || 0}</td><td>${l.detectRate || 0}</td></tr>`;
+                tableHtml += `<tr><td>📋 日志</td><td>${l.message || '—'}</td><td>${tags || '—'}</td><td>${l.basePrice || 0}</td><td>${l.detectRate || 0}</td></tr>`;
             }
             tableHtml += '</table>';
             _safeSetHtml(detailDiv, tableHtml);
@@ -186,7 +186,7 @@ const VALUABLE_SERVER_PATH_LENGTHS = {
 function renderValuableDownloads(data) {
     _clearEl(valuableContentDownloads);
     if (!data || !data.files || data.files.length === 0) {
-        valuableContentDownloads.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, 'No download data yet. Click "Start Valuable Search" to scan.'));
+        valuableContentDownloads.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, '暂无下载数据。点击 "开始高价搜寻" 进行扫描。'));
         return;
     }
 
@@ -199,10 +199,10 @@ function renderValuableDownloads(data) {
     const selectAllLabel = document.createElement('label');
     selectAllLabel.className = 'job-type-label';
     selectAllLabel.setAttribute('for', selectAllCb.id);
-    selectAllLabel.textContent = 'Select All';
+    selectAllLabel.textContent = '全选';
     const selectAllCount = document.createElement('span');
     selectAllCount.className = 'job-type-count';
-    selectAllCount.textContent = `(${data.files.length} files)`;
+    selectAllCount.textContent = `(${data.files.length} 个文件)`;
     selectAllDiv.appendChild(selectAllLabel);
     selectAllDiv.appendChild(selectAllCount);
     selectAllDiv.appendChild(selectAllCb);
@@ -298,7 +298,7 @@ function renderValuableMaintenance(data) {
     if (_maintTimerInterval) { clearInterval(_maintTimerInterval); _maintTimerInterval = null; }
 
     if (!data || !data.servers || data.servers.length === 0) {
-        valuableContentMaintenance.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, 'Run "Start Valuable Search" to see the maintenance status of servers. If no servers are shown after the search, there is no upcoming or active maintenance.'));
+        valuableContentMaintenance.replaceChildren(_h('div', {className: 'auto-jobs-no-jobs'}, '运行 "开始高价搜寻" 以查看服务器的维护状态。若搜索后未显示任何服务器，说明没有即将进行或正在进行的维护。'));
         return;
     }
 
@@ -324,10 +324,10 @@ function renderValuableMaintenance(data) {
         statusEl.dataset.serverId = srv.id;
         if (srv.maintenanceEndsAt) {
             statusEl.classList.add('in-maintenance');
-            statusEl.textContent = 'IN MAINTENANCE';
+            statusEl.textContent = '维护中';
         } else {
             statusEl.classList.add('upcoming');
-            statusEl.textContent = 'UPCOMING';
+            statusEl.textContent = '即将开始';
         }
 
         row.appendChild(nameEl);
@@ -356,8 +356,8 @@ function renderValuableMaintenance(data) {
         const batchBtn = document.createElement('button');
         batchBtn.className = 'maint-force-selected-btn';
         batchBtn.id = 'maintForceSelectedBtn';
-        batchBtn.textContent = 'Force selected!';
-        batchBtn.title = 'Force maintenance on all checked servers (furthest first)';
+        batchBtn.textContent = '强制选中项！';
+        batchBtn.title = '对所有勾选的服务器强制维护（最远的优先）';
         batchBtn.addEventListener('click', () => handleForceMaintenanceBatch());
         bottomRow.appendChild(batchBtn);
         valuableContentMaintenance.appendChild(bottomRow);
@@ -384,7 +384,7 @@ function renderValuableMaintenance(data) {
         const batchBtn = document.getElementById('maintForceSelectedBtn');
         if (fm && fm.batch) {
             allCbs.forEach(cb => { cb.disabled = true; });
-            if (batchBtn) { batchBtn.disabled = true; batchBtn.classList.add('in-progress'); batchBtn.textContent = 'In-progress...'; }
+            if (batchBtn) { batchBtn.disabled = true; batchBtn.classList.add('in-progress'); batchBtn.textContent = '进行中...'; }
             const batchIds = fm.serverIds || [];
             const currentId = fm.currentServerId || null;
             batchIds.forEach(sid => {
@@ -397,7 +397,7 @@ function renderValuableMaintenance(data) {
                     statusEl.style.textAlign = 'center';
                     statusEl.style.justifySelf = 'end';
                     statusEl.style.width = '80px';
-                    statusEl.textContent = sid === currentId ? 'FORCING...' : 'QUEUED';
+                    statusEl.textContent = sid === currentId ? '强制中...' : '排队中';
                 }
             });
         }
@@ -424,7 +424,7 @@ async function handleForceMaintenanceBatch() {
     const allCbs = valuableContentMaintenance.querySelectorAll('.maint-checkbox');
     const batchBtn = document.getElementById('maintForceSelectedBtn');
     allCbs.forEach(cb => { cb.disabled = true; });
-    if (batchBtn) { batchBtn.disabled = true; batchBtn.classList.add('in-progress'); batchBtn.textContent = 'In-progress...'; }
+    if (batchBtn) { batchBtn.disabled = true; batchBtn.classList.add('in-progress'); batchBtn.textContent = '进行中...'; }
 
     serverIds.forEach(sid => {
         const statusEl = valuableContentMaintenance.querySelector(`.maint-status[data-server-id="${sid}"]`);
@@ -436,13 +436,13 @@ async function handleForceMaintenanceBatch() {
             statusEl.style.textAlign = 'center';
             statusEl.style.justifySelf = 'end';
             statusEl.style.width = '80px';
-            statusEl.textContent = 'QUEUED';
+            statusEl.textContent = '排队中';
         }
     });
 
     await chrome.storage.local.set({ forceMaintenanceInProgress: { batch: true, serverIds, servers: selected, startedAt: Date.now() } });
 
-    addValuableLog(`🔧 Batch force maintenance: ${selected.length} server(s) selected — starting...`, 'info');
+    addValuableLog(`🔧 Batch force maintenance: ${selected.length} 台服务器已选择 — 开始执行...`, 'info');
 
     try {
         const tab = await getCor3Tab();
@@ -455,7 +455,7 @@ async function handleForceMaintenanceBatch() {
     } catch (e) {
         addValuableLog(`🔧 Batch force maintenance failed: ${e.message}`, 'error');
         allCbs.forEach(cb => { cb.disabled = false; });
-        if (batchBtn) { batchBtn.disabled = false; batchBtn.classList.remove('in-progress'); batchBtn.textContent = 'Force selected!'; }
+        if (batchBtn) { batchBtn.disabled = false; batchBtn.classList.remove('in-progress'); batchBtn.textContent = '强制选中项！'; }
         await chrome.storage.local.remove('forceMaintenanceInProgress');
     }
 }
@@ -477,18 +477,18 @@ async function updateValuableDownloadSelection() {
 // Button mutual exclusion
 function updateValuableButtons() {
     if (valuableSearchRunning) {
-        valuableSearchBtn.textContent = '■ Stop Valuable Search';
+        valuableSearchBtn.textContent = '■ 停止高价搜寻';
         valuableSearchBtn.className = 'valuable-btn stop';
         valuableSellerBtn.disabled = true;
     } else if (valuableSellerRunning) {
-        valuableSellerBtn.textContent = '■ Stop Valuable Seller';
+        valuableSellerBtn.textContent = '■ 停止高价出售';
         valuableSellerBtn.className = 'valuable-btn stop';
         valuableSearchBtn.disabled = true;
     } else {
-        valuableSearchBtn.textContent = '▶ Start Valuable Search';
+        valuableSearchBtn.textContent = '▶ 开始高价搜寻';
         valuableSearchBtn.className = 'valuable-btn start';
         valuableSearchBtn.disabled = false;
-        valuableSellerBtn.textContent = '▶ Start Valuable Seller';
+        valuableSellerBtn.textContent = '▶ 开始高价出售';
         valuableSellerBtn.className = 'valuable-btn start';
         valuableSellerBtn.disabled = false;
     }
@@ -499,7 +499,7 @@ valuableSearchBtn.addEventListener('click', async () => {
     if (valuableSearchRunning) {
         valuableSearchRunning = false;
         updateValuableButtons();
-        addValuableLog('Valuable Search stopped by user.', 'warn');
+        addValuableLog('高价搜寻已被用户停止。', 'warn');
         try {
             const tab = await getCor3Tab();
             if (tab) await chrome.tabs.sendMessage(tab.id, { action: "stopValuable" });
@@ -508,7 +508,7 @@ valuableSearchBtn.addEventListener('click', async () => {
     } else {
         valuableSearchRunning = true;
         updateValuableButtons();
-        addValuableLog('Starting Valuable Search...', 'info');
+        addValuableLog('开始高价搜寻...', 'info');
         await chrome.storage.local.set({ valuableSearchRunning: true, valuableSellerRunning: false });
         try {
             const tab = await getCor3Tab();
@@ -518,7 +518,7 @@ valuableSearchBtn.addEventListener('click', async () => {
                 });
             }
         } catch (e) {
-            addValuableLog('Failed to start Valuable Search: ' + e.message, 'error');
+            addValuableLog('启动自动高价搜寻失败: ' + e.message, 'error');
         }
     }
 });
@@ -528,7 +528,7 @@ valuableSellerBtn.addEventListener('click', async () => {
     if (valuableSellerRunning) {
         valuableSellerRunning = false;
         updateValuableButtons();
-        addValuableLog('Valuable Seller stopped by user.', 'warn');
+        addValuableLog('高价出售已被用户停止。', 'warn');
         try {
             const tab = await getCor3Tab();
             if (tab) await chrome.tabs.sendMessage(tab.id, { action: "stopValuable" });
@@ -540,12 +540,12 @@ valuableSellerBtn.addEventListener('click', async () => {
         const selectedServers = valuableSelectedServers || [];
         const selectedDownloads = valuableSelectedDownloads || [];
         if (selectedServers.length === 0 && selectedDownloads.length === 0) {
-            addValuableLog('No servers or downloads selected for selling.', 'warn');
+            addValuableLog('未选择要出售的服务器或下载项。', 'warn');
             return;
         }
         valuableSellerRunning = true;
         updateValuableButtons();
-        addValuableLog(`Starting Valuable Seller: ${selectedServers.length} server(s), ${selectedDownloads.length} download(s) selected.`, 'info');
+        addValuableLog(`开始高价出售： ${selectedServers.length} server(s), ${selectedDownloads.length} 个下载已选中。`, 'info');
         await chrome.storage.local.set({ valuableSellerRunning: true, valuableSearchRunning: false });
         try {
             const tab = await getCor3Tab();
@@ -557,7 +557,7 @@ valuableSellerBtn.addEventListener('click', async () => {
                 });
             }
         } catch (e) {
-            addValuableLog('Failed to start Valuable Seller: ' + e.message, 'error');
+            addValuableLog('启动自动高价出售失败: ' + e.message, 'error');
         }
     }
 });
@@ -585,7 +585,7 @@ function addValuableLog(msg, level = 'info') {
 
 function renderValuableDebugLogs() {
     if (valuableDebugLogs.length === 0) {
-        valuableDebugLogsBody.replaceChildren(_h('div', {style: 'color:var(--text-dim);'}, 'No logs yet.'));
+        valuableDebugLogsBody.replaceChildren(_h('div', {style: 'color:var(--text-dim);'}, '暂无日志。'));
         return;
     }
     const frag = document.createDocumentFragment();
@@ -630,7 +630,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
                     statusEl.style.textAlign = 'center';
                     statusEl.style.justifySelf = 'end';
                     statusEl.style.width = '80px';
-                    statusEl.textContent = sid === fm.currentServerId ? 'FORCING...' : 'QUEUED';
+                    statusEl.textContent = sid === fm.currentServerId ? '强制中...' : '排队中';
                 }
             });
         }
@@ -646,7 +646,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
             statusEl.style.textAlign = '';
             statusEl.style.justifySelf = '';
             statusEl.style.width = '';
-            statusEl.textContent = 'IN MAINTENANCE';
+            statusEl.textContent = '维护中';
         }
     }
     if (changes.valuableForceMaintenanceDone) {
@@ -654,7 +654,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
         const allCbs = valuableContentMaintenance.querySelectorAll('.maint-checkbox');
         const batchBtn = document.getElementById('maintForceSelectedBtn');
         allCbs.forEach(cb => { cb.disabled = false; cb.checked = false; });
-        if (batchBtn) { batchBtn.disabled = false; batchBtn.classList.remove('in-progress'); batchBtn.textContent = 'Force selected!'; }
+        if (batchBtn) { batchBtn.disabled = false; batchBtn.classList.remove('in-progress'); batchBtn.textContent = '强制选中项！'; }
     }
     if (changes.valuableSearchRunning) {
         valuableSearchRunning = !!changes.valuableSearchRunning.newValue;
@@ -698,13 +698,13 @@ chrome.storage.local.get(['valuableDebugLogs', 'valuableSearchRunning', 'valuabl
                     statusEl.style.textAlign = 'center';
                     statusEl.style.justifySelf = 'end';
                     statusEl.style.width = '80px';
-                    statusEl.textContent = sid === fm.currentServerId ? 'FORCING...' : 'QUEUED';
+                    statusEl.textContent = sid === fm.currentServerId ? '强制中...' : '排队中';
                 }
             });
             const allCbs = valuableContentMaintenance.querySelectorAll('.maint-checkbox');
             const batchBtn = document.getElementById('maintForceSelectedBtn');
             allCbs.forEach(cb => { cb.disabled = true; });
-            if (batchBtn) { batchBtn.disabled = true; batchBtn.classList.add('in-progress'); batchBtn.textContent = 'Forcing...'; }
+            if (batchBtn) { batchBtn.disabled = true; batchBtn.classList.add('in-progress'); batchBtn.textContent = '强制中...'; }
         }, 100);
     }
 });

@@ -48,7 +48,7 @@ export function performDetailSearch(query) {
     }
 
     if (detailSearchMatches.length === 0) {
-        _detailSearchCount.textContent = '0 matches';
+        _detailSearchCount.textContent = '0 个匹配';
         return;
     }
 
@@ -67,7 +67,7 @@ function performTreeSearch(query) {
         }
     });
     if (detailSearchMatches.length === 0) {
-        _detailSearchCount.textContent = '0 matches';
+        _detailSearchCount.textContent = '0 个匹配';
         return;
     }
     detailSearchCurrent = 0;

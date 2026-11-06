@@ -23,7 +23,7 @@ const personalDroneContainer = document.getElementById('personalDroneContainer')
 personalDroneSectionToggle.addEventListener('click', async () => {
     personalDroneSectionToggle.classList.toggle('open');
     personalDroneSectionBody.classList.toggle('open');
-    personalDroneContainer.replaceChildren(_h('div', null, _h('div', {className: 'no-decisions'}, 'Soon\u2122')));
+    personalDroneContainer.replaceChildren(_h('div', null, _h('div', {className: 'no-decisions'}, '敬请期待™')));
 });
 
 decisionsSectionToggle.addEventListener('click', () => {
@@ -82,7 +82,7 @@ function renderExpeditionError(error) {
         return el('div', { className: 'warning-banner', style: 'background:rgba(255,80,80,0.15);border-color:var(--accent-red);color:var(--accent-red);' },
             el('div', { style: { fontWeight: 'bold', marginBottom: '4px' } }, '❌ Expedition Error'),
             el('div', { style: { fontSize: '10px' } }, error.error),
-            el('div', { style: { fontSize: '10px', marginTop: '4px' } }, 'Re-enable auto-send mercenary to retry.')
+            el('div', { style: { fontSize: '10px', marginTop: '4px' } }, '重新启用自动派遣佣兵后可重试。')
         );
     }
     const retryAfter = error.retryAfter || 120000;
@@ -92,7 +92,7 @@ function renderExpeditionError(error) {
         return el('div', { className: 'warning-banner', style: 'background:rgba(255,165,0,0.15);border-color:var(--accent-orange);color:var(--accent-orange);' },
             el('div', { style: { fontWeight: 'bold', marginBottom: '4px' } }, '⚠️ Expedition Launch Failed'),
             el('div', { style: { fontSize: '10px' } }, error.error),
-            el('div', { style: { fontSize: '10px', marginTop: '4px' } }, `Retrying in ${retryMinutes} minute${retryMinutes !== 1 ? 's' : ''}...`)
+            el('div', { style: { fontSize: '10px', marginTop: '4px' } }, `重试倒计时 ${retryMinutes} minute${retryMinutes !== 1 ? 's' : ''}...`)
         );
     }
     chrome.storage.local.remove('expeditionLaunchError');
@@ -101,7 +101,7 @@ function renderExpeditionError(error) {
 
 function buildContainerItems(containerData) {
     const frag = document.createDocumentFragment();
-    frag.appendChild(el('div', { className: 'detail-row', style: 'color:var(--accent-green);font-weight:bold;' }, 'Items Found:'));
+    frag.appendChild(el('div', { className: 'detail-row', style: 'color:var(--accent-green);font-weight:bold;' }, '已找到物品：'));
     for (const item of containerData) {
         const tierColor = item.tier === 'RARE' ? 'var(--accent-blue)' : item.tier === 'EPIC' ? 'var(--accent-purple,#a855f7)' : item.tier === 'LEGENDARY' ? 'var(--accent-orange)' : 'var(--text-dim)';
         const img = el('img', { src: item.imageUrl, style: 'width:32px;height:32px;border-radius:4px;background:rgba(255,255,255,0.05);' });
@@ -131,7 +131,7 @@ export function renderExpeditionInfo(expeditions) {
 
     if (!expeditions || expeditions.length === 0) {
         if (!expeditionInfoContainer.hasChildNodes()) {
-            expeditionInfoContainer.appendChild(noDataMsg('No active expeditions.'));
+            expeditionInfoContainer.appendChild(noDataMsg('无进行中的远征。'));
         }
         return;
     }
@@ -145,12 +145,12 @@ export function renderExpeditionInfo(expeditions) {
         card.className = 'expedition-card';
 
         const statusClass = exp.status === 'RUNNING' ? ' running' : '';
-        const mercName = exp.mercenary ? exp.mercenary.callsign : 'Unknown';
-        const insurance = exp.hasInsurance ? 'Yes' : 'No';
+        const mercName = exp.mercenary ? exp.mercenary.callsign : '未知';
+        const insurance = exp.hasInsurance ? '是' : '否';
 
         // Header
         const header = el('div', { className: 'exp-header' },
-            el('span', { className: 'exp-title' }, `📍 ${exp.locationName || 'Unknown'} — ${exp.zoneName || 'Unknown'}`),
+            el('span', { className: 'exp-title' }, `📍 ${exp.locationName || '未知'} — ${exp.zoneName || '未知'}`),
             el('span', { className: 'exp-status' + statusClass }, exp.status || 'UNKNOWN')
         );
         card.appendChild(header);
@@ -165,10 +165,10 @@ export function renderExpeditionInfo(expeditions) {
             const row = el('div', { style: 'display:flex;align-items:center;gap:10px;' },
                 el('div', { style: 'flex:1;' },
                     el('div', { className: 'detail-row' },
-                        el('span', { className: 'label' }, 'Open Cost:'), ` 💰 ${(ad.cost || 0).toLocaleString()}`
+                        el('span', { className: 'label' }, '开启费用：'), ` 💰 ${(ad.cost || 0).toLocaleString()}`
                     ),
                     el('div', { className: 'detail-row' },
-                        el('span', { className: 'label' }, 'Items Inside:'), ` 📦 ${ad.itemCount || '?'}`
+                        el('span', { className: 'label' }, '内含物品：'), ` 📦 ${ad.itemCount || '?'}`
                     )
                 )
             );
@@ -180,25 +180,25 @@ export function renderExpeditionInfo(expeditions) {
             card.appendChild(row);
         } else {
             const mercRow = el('div', { className: 'detail-row' },
-                el('span', { className: 'label' }, 'Mercenary:'), ` 🧑 ${mercName}`
+                el('span', { className: 'label' }, '佣兵：'), ` 🧑 ${mercName}`
             );
             if (exp.specialization === "PROSPECTOR") {
                 mercRow.appendChild(el('span', { className: 'merc-elite-badge' }, 'ELITE'));
             }
             card.appendChild(mercRow);
             card.appendChild(el('div', { className: 'detail-row' },
-                el('span', { className: 'label' }, 'Total Cost:'), ` 💰 ${exp.totalCost ? exp.totalCost.toLocaleString() : '--'}`
+                el('span', { className: 'label' }, '总费用：'), ` 💰 ${exp.totalCost ? exp.totalCost.toLocaleString() : '--'}`
             ));
             card.appendChild(el('div', { className: 'detail-row' },
-                el('span', { className: 'label' }, 'Insurance:'), ` ${insurance}`
+                el('span', { className: 'label' }, '保险：'), ` ${insurance}`
             ));
             card.appendChild(el('div', { className: 'detail-row' },
-                el('span', { className: 'label' }, 'Risk Score:'), ` ${exp.riskScore ?? '--'}`
+                el('span', { className: 'label' }, '风险评分：'), ` ${exp.riskScore ?? '--'}`
             ));
 
             if (exp.endTime) {
                 const timerSpan = el('span', { className: 'exp-timer', dataset: { expId: exp.id } }, formatTimeRemaining(exp.endTime));
-                const pinBtn = el('button', { className: 'refresh-btn-small pin-btn pin-exp-btn', dataset: { expId: exp.id }, title: 'Pin Expedition Timer' }, '📌');
+                const pinBtn = el('button', { className: 'refresh-btn-small pin-btn pin-exp-btn', dataset: { expId: exp.id }, title: '置顶远征计时器' }, '📌');
                 card.appendChild(el('div', { className: 'exp-timer-row' },
                     el('span', { style: 'font-size:11px;color:var(--accent-orange);' }, '⏳ ', timerSpan),
                     pinBtn
@@ -228,7 +228,7 @@ export function renderDecisions(decisions) {
     const countEl = document.getElementById('decisionsCount');
 
     if (!decisions || decisions.length === 0) {
-        decisionsContainer.appendChild(noDataMsg('No pending decisions found.'));
+        decisionsContainer.appendChild(noDataMsg('未发现待处理决策。'));
         if (countEl) countEl.textContent = '';
         return;
     }
@@ -246,7 +246,7 @@ export function renderDecisions(decisions) {
 
         let statusTag;
         if (d.isResolved && d.isAutoResolved) {
-            statusTag = el('span', { className: 'auto-resolved-tag' }, 'AUTO-RESOLVED');
+            statusTag = el('span', { className: 'auto-resolved-tag' }, '自动解决');
         } else if (d.isResolved) {
             statusTag = el('span', { className: 'resolved-tag' }, 'RESOLVED');
         } else {
@@ -268,7 +268,7 @@ export function renderDecisions(decisions) {
                 const mins = Math.floor(diffMs / 60000);
                 const hrs = Math.floor(mins / 60);
                 const remMins = mins % 60;
-                card.appendChild(el('div', { className: 'deadline' }, `⏳ Deadline: ${hrs}h ${remMins}m remaining`));
+                card.appendChild(el('div', { className: 'deadline' }, `⏳ Deadline: ${hrs}h ${remMins}分剩余`));
             } else {
                 card.appendChild(el('div', { className: 'deadline' }, '⏳ Deadline: Expired'));
             }
@@ -289,7 +289,7 @@ export function renderDecisions(decisions) {
                 const lootSign = opt.lootModifier > 0 ? '+' : '';
                 const vetOverride = isVeteranExpedition(d.expeditionId);
                 const score = calcOptionScore(opt, d.isResolved ? baseRisk : d.riskScore, vetOverride);
-                const selectedLabel = isSelected ? (isDefault ? " (⏳Expired⏳)" : ' ✓') : '';
+                const selectedLabel = isSelected ? (isDefault ? " (⏳已过期⏳)" : ' ✓') : '';
 
                 const optRow = el('div', {
                     className: 'option-row' + (isSelected ? ' option-selected' : '') + (canClick ? ' clickable' : ''),
@@ -297,9 +297,9 @@ export function renderDecisions(decisions) {
                 },
                     el('span', { className: 'option-label' }, opt.label + selectedLabel),
                     el('span', { className: 'option-stats' },
-                        el('span', { className: 'stat-risk' }, `Risk: ${riskSign}${opt.riskModifier}`),
-                        el('span', { className: 'stat-loot' }, `Loot: ${lootSign}${opt.lootModifier}`),
-                        el('span', { className: 'option-score' }, `${vetOverride ? '🎖️ ' : ''}Score: ${score >= 0 ? '+' : ''}${score}`)
+                        el('span', { className: 'stat-risk' }, `风险： ${riskSign}${opt.riskModifier}`),
+                        el('span', { className: 'stat-loot' }, `战利品： ${lootSign}${opt.lootModifier}`),
+                        el('span', { className: 'option-score' }, `${vetOverride ? '🎖️ ' : ''}评分： ${score >= 0 ? '+' : ''}${score}`)
                     )
                 );
 
@@ -363,7 +363,7 @@ export async function checkAutoChoose(decisions) {
         if (autoChosenDecisions.has(d.messageId)) continue;
         const dl = new Date(d.decisionDeadline);
         const remaining = dl - Date.now();
-        chrome.storage.local.set({ popupConsoleLog: "remaining time for decision -> " + remaining + " Counter: " + counter });
+        chrome.storage.local.set({ popupConsoleLog: "决策剩余时间 -> " + remaining + " 计数器：" + counter });
         if (remaining <= 0) continue;
         const noWaitCb = document.getElementById('noWaitAutoChooseCheckbox');
         const noWait = noWaitCb && noWaitCb.checked;
@@ -390,7 +390,7 @@ export async function checkAutoChoose(decisions) {
                         messageId: d.messageId,
                         selectedOption: bestOpt.id
                     });
-                    console.log(`[COR3 Helper] Auto-chose "${bestOpt.label}" (score: ${bestScore})`);
+                    console.log(`[COR3 Helper] 已自动选择 "${bestOpt.label}" (评分: ${bestScore})`);
                 }
             } catch (e) { /* silent */ }
         }
@@ -422,7 +422,7 @@ export async function loadExpeditions() {
 }
 
 export async function requestExpeditions() {
-    expeditionInfoContainer.replaceChildren(noDataMsg('Loading expedition data...'));
+    expeditionInfoContainer.replaceChildren(noDataMsg('正在加载远征数据...'));
     await chrome.storage.local.remove(['expeditionsData', 'expeditionDecisions']);
     try {
         const tab = await getCor3Tab();
@@ -442,8 +442,8 @@ export async function requestExpeditions() {
         clearInterval(poll);
         if (!loaded) {
             loaded = true;
-            expeditionInfoContainer.replaceChildren(noDataMsg('No active expeditions.'));
-            decisionsContainer.replaceChildren(noDataMsg('No pending decisions found.'));
+            expeditionInfoContainer.replaceChildren(noDataMsg('无进行中的远征。'));
+            decisionsContainer.replaceChildren(noDataMsg('未发现待处理决策。'));
         }
     }, 5000);
 }

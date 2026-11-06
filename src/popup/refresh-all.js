@@ -23,7 +23,7 @@ let isRefreshing = false;
 refreshExpeditionsBtn.addEventListener('click', () => requestExpeditions());
 
 async function refreshExpeditionsOnly() {
-    expeditionInfoContainer.replaceChildren(_noData('Loading expedition data...'));
+    expeditionInfoContainer.replaceChildren(_noData('正在加载远征数据...'));
     await chrome.storage.local.remove(['expeditionsData', 'expeditionDecisions']);
     try {
         const tab = await getCor3Tab();
@@ -36,7 +36,7 @@ async function refreshExpeditionsOnly() {
 }
 
 async function refreshInventoryOnly() {
-    inventoryContainer.replaceChildren(_noData('Requesting inventory...'));
+    inventoryContainer.replaceChildren(_noData('正在请求物品栏...'));
     spaceInfo.textContent = '-- / --';
     try {
         const tab = await getCor3Tab();
@@ -48,7 +48,7 @@ async function refreshInventoryOnly() {
 }
 
 async function refreshMercenariesOnly() {
-    mercenariesContainer.replaceChildren(_noData('Loading mercenaries...'));
+    mercenariesContainer.replaceChildren(_noData('正在加载佣兵...'));
     try {
         const tab = await getCor3Tab();
         if (tab) {
@@ -118,7 +118,7 @@ refreshAllBtn.addEventListener('click', async () => {
         await executeRefreshStep('loadout', refreshLoadoutOnly);
 
     } catch (e) {
-        console.log('[COR3 Helper] Refresh All error:', e);
+        console.log('[COR3 Helper] 全部刷新出错：', e);
         cor3LogError('popup.js', e, { action: 'refreshAll' });
     }
 
@@ -129,11 +129,11 @@ refreshAllBtn.addEventListener('click', async () => {
 
 async function executeRefreshStep(name, operation) {
     try {
-        console.log(`[COR3 Helper] Refresh All: Starting ${name}`);
+        console.log(`[COR3 Helper] 全部刷新：开始 ${name}`);
         await operation();
-        console.log(`[COR3 Helper] Refresh All: Completed ${name}`);
+        console.log(`[COR3 Helper] 全部刷新：已完成 ${name}`);
     } catch (error) {
-        console.log(`[COR3 Helper] Refresh All: Failed ${name}:`, error);
+        console.log(`[COR3 Helper] 全部刷新：失败 ${name}:`, error);
         cor3LogError('popup.js', error, { action: 'refreshStep-' + name });
     }
 }
@@ -141,5 +141,5 @@ async function executeRefreshStep(name, operation) {
 export function resetExpeditionUpdateTimer() {
     const now = Date.now();
     chrome.storage.local.set({ expeditionsDataUpdatedAt: now });
-    console.log('[COR3 Helper] Expedition update timer reset');
+    console.log('[COR3 Helper] 远征更新计时器已重置');
 }

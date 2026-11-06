@@ -14,7 +14,7 @@ export function deleteBackgroundElements() {
             const element = document.querySelector(selector);
             if (element) {
                 element.remove();
-                console.log('[COR3 Helper] Deleted background element:', selector);
+                console.log('[COR3 Helper] 已删除后台元素：', selector);
             }
         } catch (e) {
             // Ignore errors for elements that might not exist
@@ -117,7 +117,7 @@ export function applyNotificationsLeft() {
             position: relative;
         }
         [data-component-name="NotificationsHistory"] .sticker-content::before {
-            content: "Notifications";         /* duplicate the word */
+            content: "通知";         /* duplicate the word */
             position: absolute;
             left: 0;
             transform: scaleX(-1);

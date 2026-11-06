@@ -16,7 +16,7 @@ import { getServerFiles, getServerLogs, filterValuableFiles, filterValuableLogs,
 import { fetchMaintenanceData } from './maintenance.js';
 
 export async function runSearch() {
-    log('=== Valuable Search Started ===', 'info');
+    log('=== 高价搜寻已开始 ===', 'info');
     setCachedMapData(null);
 
     var serversData = { servers: [] };
@@ -24,7 +24,7 @@ export async function runSearch() {
     var downloadsData = { files: [] };
 
     // Step 1: Get network map to discover all hackable servers
-    log('Fetching network map...');
+    log('正在获取网络地图...');
     sendCmd('get.map', {});
     var mapServers = [];
     try {
@@ -40,7 +40,7 @@ export async function runSearch() {
             }
         }
     } catch (e) {
-        log('Network map timeout \u2014 using hardcoded server list', 'warn');
+        log('网络地图超时 \u2014 使用内置服务器列表', 'warn');
         for (var sId in ALL_SERVERS) {
             mapServers.push({ id: sId, name: ALL_SERVERS[sId], isAccessible: false });
         }
@@ -53,14 +53,14 @@ export async function runSearch() {
         return pathB.length - pathA.length;
     });
 
-    log('Found ' + mapServers.length + ' reachable servers to scan (furthest first)');
+    log('找到 ' + mapServers.length + ' 个可达服务器待扫描（最远优先）');
 
     // Step 2: Scan each server for valuable files/logs
     for (var i = 0; i < mapServers.length; i++) {
-        if (!running) { log('Search stopped by user.', 'warn'); break; }
+        if (!running) { log('搜索已被用户停止。', 'warn'); break; }
 
         var server = mapServers[i];
-        log('Scanning server ' + (i + 1) + '/' + mapServers.length + ': ' + server.name);
+        log('正在扫描服务器 ' + (i + 1) + '/' + mapServers.length + ': ' + server.name);
 
         var serverEntry = {
             id: server.id,
@@ -73,7 +73,7 @@ export async function runSearch() {
 
         // Ensure access
         if (!await ensureServerAccess(server.id)) {
-            log(server.name + ': skipping (no access)', 'warn');
+            log(server.name + ': 跳过 (无访问权限)', 'warn');
             serverEntry.status = 'SKIPPED';
             serversData.servers.push(serverEntry);
             updateServersUI(serversData);
@@ -121,10 +121,10 @@ export async function runSearch() {
         var total = serverEntry.files.length + serverEntry.logs.length;
         if (total > 0) {
             serverEntry.status = 'OPEN';
-            log(server.name + ': found ' + serverEntry.files.length + ' valuable file(s), ' + serverEntry.logs.length + ' valuable log(s)', 'success');
+            log(server.name + ': 找到 ' + serverEntry.files.length + ' 个高价值文件， ' + serverEntry.logs.length + ' 条高价值日志', 'success');
         } else {
             serverEntry.status = 'DONE';
-            log(server.name + ': no valuables found');
+            log(server.name + '：未发现高价值物品');
             serverEntry.selected = false;
         }
 
@@ -135,14 +135,14 @@ export async function runSearch() {
 
     // Step 3: Scan downloads folder for valuable files
     if (running) {
-        log('Scanning downloads folder...');
+        log('正在扫描下载文件夹...');
         var dlFiles = await getDownloadsFolder();
         var valuableDlFiles = dlFiles.filter(function (f) { return f.isValuable; });
 
         for (var di = 0; di < valuableDlFiles.length; di++) {
             if (!running) break;
             var dlFile = valuableDlFiles[di];
-            log('Analyzing download: ' + dlFile.name);
+            log('正在分析下载内容：' + dlFile.name);
 
             var analysis = await getFileAnalysis(dlFile.id);
             var dlTags = [];
@@ -171,10 +171,10 @@ export async function runSearch() {
             await delay(humanDelay());
         }
 
-        log('Downloads folder: found ' + downloadsData.files.length + ' valuable file(s)', 'success');
+        log('下载文件夹: 已找到 ' + downloadsData.files.length + ' 个高价文件', 'success');
     }
 
     await fetchMaintenanceData();
-    log('=== Valuable Search Complete ===', 'success');
+    log('=== 高价搜寻完成 ===', 'success');
     signalDone();
 }

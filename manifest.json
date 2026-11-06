@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "COR3 Helper",
+  "name": "COR3 助手",
   "version": "1.7.0",
-  "_version_note": "Kept for backward-compat: older extension versions fetch this file for update checks. Will be removed in a future release. Canonical version is in package.json.",
-  "description": "Monitor markets, expeditions, daily ops, and get timer alerts for cor3.gg.",
+  "_version_note": "保留用于向后兼容：旧版本扩展会拉取此文件做更新检查，未来版本会移除。正式版本号以 package.json 为准。",
+  "description": "监控 cor3.gg 的市场、远征、每日行动，并提供计时提醒。",
   "permissions": [
     "storage",
     "scripting",
@@ -62,7 +62,7 @@
   "action": {
     "default_icon": "icon/favicon128.png",
     "default_popup": "popup.html",
-    "default_title": "COR3 Helper"
+    "default_title": "COR3 助手"
   },
   "web_accessible_resources": [
     {

@@ -28,7 +28,7 @@ const togglesShowMoreBtn = document.getElementById('togglesShowMoreBtn');
 
 function statusLabel(el, enabled) {
     if (!el) return;
-    el.textContent = enabled ? 'Active' : 'Off';
+    el.textContent = enabled ? '活跃' : '关';
     el.style.color = enabled ? 'var(--accent-green)' : 'var(--text-dim)';
 }
 
@@ -120,7 +120,7 @@ function initAutoDailyHack() {
         updateDailyHackStatusLabel(enabled);
 
         if (enabled && dailyHackLogEl) {
-            dailyHackLogEl.textContent = 'Starting daily hack solver...';
+            dailyHackLogEl.textContent = '正在启动每日破解求解器...';
             dailyHackLogEl.style.display = '';
         }
 
@@ -201,7 +201,7 @@ function initSecretFinder() {
         updateSecretFinderStatusLabel(enabled);
         if (enabled) {
             if (secretFinderLogEl) {
-                secretFinderLogEl.replaceChildren(_h('span', {style: 'color:var(--accent-cyan);'}, 'Starting search...'));
+                secretFinderLogEl.replaceChildren(_h('span', {style: 'color:var(--accent-cyan);'}, '开始搜索...'));
                 secretFinderLogEl.style.display = '';
             }
             try {
@@ -209,13 +209,13 @@ function initSecretFinder() {
                 if (tab) {
                     await chrome.tabs.sendMessage(tab.id, { action: "startIpSearch" });
                 } else {
-                    if (secretFinderLogEl) secretFinderLogEl.replaceChildren(_h('span', {style: 'color:var(--accent-red);'}, 'No cor3.gg tab found'));
+                    if (secretFinderLogEl) secretFinderLogEl.replaceChildren(_h('span', {style: 'color:var(--accent-red);'}, '未找到 cor3.gg 标签页'));
                     secretFinderToggle.checked = false;
                     await chrome.storage.sync.set({ secretFinderEnabled: false });
                     updateSecretFinderStatusLabel(false);
                 }
             } catch (e) {
-                if (secretFinderLogEl) secretFinderLogEl.replaceChildren(_h('span', {style: 'color:var(--accent-red);'}, 'Error: ' + e.message));
+                if (secretFinderLogEl) secretFinderLogEl.replaceChildren(_h('span', {style: 'color:var(--accent-red);'}, '错误：' + e.message));
                 secretFinderToggle.checked = false;
                 await chrome.storage.sync.set({ secretFinderEnabled: false });
                 updateSecretFinderStatusLabel(false);
@@ -229,7 +229,7 @@ function initTogglesShowMore() {
         togglesShowMoreBtn.addEventListener('click', () => {
             const isHidden = togglesExtra.style.display === 'none';
             togglesExtra.style.display = isHidden ? '' : 'none';
-            togglesShowMoreBtn.textContent = isHidden ? 'Show Less ▲' : 'Show More ▼';
+            togglesShowMoreBtn.textContent = isHidden ? '收起 ▲' : '显示更多 ▼';
         });
     }
 }

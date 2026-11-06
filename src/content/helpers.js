@@ -27,7 +27,7 @@ export function _broadcastQueueStatus() {
 
 export function _automationFinish(type) {
     if (_automationActive && _automationActive.type === type) {
-        console.log('[COR3 Helper] Automation finished:', type);
+        console.log('[COR3 Helper] 自动化完成：', type);
         _automationActive = null;
         _broadcastQueueStatus();
         _automationProcessNext();
@@ -51,7 +51,7 @@ export function _automationProcessNext() {
     }
     var next = _automationQueue.shift();
     _automationActive = { type: next.type, startedAt: Date.now() };
-    console.log('[COR3 Helper] Automation starting:', next.type);
+    console.log('[COR3 Helper] 自动化启动:', next.type);
     _broadcastQueueStatus();
     next.run();
 }
@@ -61,13 +61,13 @@ export function _automationEnqueue(type, runFn) {
     if (_automationQueue.some(q => q.type === type)) return 'already-queued';
     if (!_automationActive) {
         _automationActive = { type: type, startedAt: Date.now() };
-        console.log('[COR3 Helper] Automation starting:', type);
+        console.log('[COR3 Helper] 自动化启动:', type);
         _broadcastQueueStatus();
         runFn();
         return 'started';
     }
     _automationQueue.push({ type: type, run: runFn });
-    console.log('[COR3 Helper] Automation queued:', type, '(waiting for', _automationActive.type, ')');
+    console.log('[COR3 Helper] 自动化已排队：', type, '（等待', _automationActive.type, ')');
     _broadcastQueueStatus();
     return 'queued';
 }

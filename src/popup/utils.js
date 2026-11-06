@@ -10,12 +10,12 @@ export async function getCor3Tab() {
 export function formatTimeAgo(ts) {
     if (!ts) return '';
     const diff = Date.now() - ts;
-    if (diff < 60000) return 'Updated just now';
+    if (diff < 60000) return '刚刚更新';
     const mins = Math.floor(diff / 60000);
-    if (mins < 60) return `Updated ${mins}m ago`;
+    if (mins < 60) return `已更新 ${mins}分前`;
     const hrs = Math.floor(mins / 60);
     const remMins = mins % 60;
-    return `Updated ${hrs}h ${remMins}m ago`;
+    return `已更新 ${hrs}h ${remMins}分前`;
 }
 
 export function showLastUpdated(el, tsKey) {

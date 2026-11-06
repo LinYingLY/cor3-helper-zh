@@ -42,7 +42,7 @@ export function renderPinnedTimers() {
 
     if (state.pinnedTimers.daily) {
         const row = _h('div', {className: 'pinned-timer-row'},
-            _h('div', null, _h('span', {className: 'pinned-timer-symbol-daily'}, '📅 '), _h('span', {className: 'pinned-timer-label'}, 'Daily Ops')),
+            _h('div', null, _h('span', {className: 'pinned-timer-symbol-daily'}, '📅 '), _h('span', {className: 'pinned-timer-label'}, '每日行动')),
             _h('span', {className: 'pinned-timer-value', id: 'pinnedDailyValue'}, '--:--:--')
         );
         pinnedTimersContainer.appendChild(row);
@@ -50,13 +50,13 @@ export function renderPinnedTimers() {
 
     function _buildJobRow(pinKey, symbolCls, symbol, name, valueId, autoRefreshId) {
         const row = _h('div', {className: 'pinned-timer-row'},
-            _h('div', {style: 'width: 200%;'}, _h('span', {className: symbolCls}, symbol + ' '), _h('span', {className: 'pinned-timer-label'}, name + ' Jobs')),
+            _h('div', {style: 'width: 200%;'}, _h('span', {className: symbolCls}, symbol + ' '), _h('span', {className: 'pinned-timer-label'}, name + ' 个任务')),
             _h('span', {className: 'pinned-timer-value', id: valueId}, '--:--:--')
         );
         if (!state.isHelper) {
             const cb = _h('input', {type: 'checkbox', id: autoRefreshId});
             if (state.autoRefresh[pinKey]) cb.checked = true;
-            row.appendChild(_h('label', {className: 'pinned-auto-refresh', title: 'Auto-refresh jobs when timer hits 0'}, cb, ' Auto'));
+            row.appendChild(_h('label', {className: 'pinned-auto-refresh', title: '计时器归零时自动刷新任务'}, cb, ' 自动'));
             pinnedTimersContainer.appendChild(row);
             cb.addEventListener('change', async () => {
                 state.autoRefresh[pinKey] = cb.checked;
@@ -77,7 +77,7 @@ export function renderPinnedTimers() {
         if (!key.startsWith('exp_') || !state.pinnedTimers[key]) continue;
         const expId = key.substring(4);
         const endTime = state.expeditionEndTimes[expId];
-        let expLabel = 'Expedition';
+        let expLabel = '远征';
         const row = _h('div', {className: 'pinned-timer-row'},
             _h('span', {className: 'pinned-timer-label'}, '🎯 ', _h('span', {className: 'pinned-exp-label', dataset: {expId: expId}}, expLabel)),
             _h('span', {className: 'pinned-timer-value pinned-exp-timer', dataset: {expId: expId}}, endTime ? formatTimeRemaining(endTime) : '--:--:--')
@@ -111,7 +111,7 @@ export function renderPinnedTimers() {
             if (exp.endTime) state.expeditionEndTimes[exp.id] = exp.endTime;
             const labelEl = pinnedTimersContainer.querySelector(`.pinned-exp-label[data-exp-id="${exp.id}"]`);
             if (labelEl) {
-                labelEl.textContent = `${exp.locationName || 'Expedition'} — ${exp.zoneName || ''}`;
+                labelEl.textContent = `${exp.locationName || '远征'} — ${exp.zoneName || ''}`;
             }
         }
     });
@@ -131,7 +131,7 @@ export function updatePinnedTimerValues() {
                 const h = Math.floor(totalSec / 3600);
                 const m = Math.floor((totalSec % 3600) / 60);
                 const s = totalSec % 60;
-                pinnedDaily.textContent = `${h}h:${m}m:${s}s`;
+                pinnedDaily.textContent = `${h}时:${m}分:${s}秒`;
             }
         }
     }

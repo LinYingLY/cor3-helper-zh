@@ -25,18 +25,18 @@ loadoutOverviewToggle.addEventListener('click', () => { loadoutOverviewToggle.cl
 loadoutSwToggle.addEventListener('click', () => { loadoutSwToggle.classList.toggle('open'); loadoutSwBody.classList.toggle('open'); });
 
 const LOADOUT_SPEC_MAP = {
-    cpuFrequency: 'CPU Frequency', cpuCores: 'CPU Cores', cpuConsuming: 'Power Consuming',
-    gpuPower: 'GPU Power', gpuMemory: 'GPU Memory', gpuConsuming: 'Power Consuming',
-    ramFrequency: 'RAM Frequency', ramMemory: 'RAM Memory',
-    psuPower: 'PSU Power', psuProtection: 'PSU Protection',
-    cpu_frequency: 'CPU Frequency', cpu_cores: 'CPU Cores',
-    gpu_power: 'GPU Power', gpu_memory: 'GPU Memory',
-    ram_frequency: 'RAM Frequency', ram_memory: 'RAM Memory',
-    psu_power: 'PSU Power', psu_total: 'PSU Total'
+    cpuFrequency: 'CPU 频率', cpuCores: 'CPU 核心', cpuConsuming: '消耗功耗',
+    gpuPower: 'GPU 功耗', gpuMemory: '显存', gpuConsuming: '消耗功耗',
+    ramFrequency: '内存频率', ramMemory: '内存',
+    psuPower: '电源功耗', psuProtection: 'PSU 防护',
+    cpu_frequency: 'CPU 频率', cpu_cores: 'CPU 核心',
+    gpu_power: 'GPU 功耗', gpu_memory: '显存',
+    ram_frequency: '内存频率', ram_memory: '内存',
+    psu_power: '电源功耗', psu_total: 'PSU 总计'
 };
 const LOADOUT_UNIT_MAP = {
     cpu_frequency: 'GHz', cpuFrequency: 'GHz',
-    cpu_cores: 'Count', cpuCores: 'Count',
+    cpu_cores: '计数', cpuCores: '计数',
     gpu_power: 'PFLOPS', gpuPower: 'PFLOPS',
     gpu_memory: 'TB', gpuMemory: 'TB',
     ram_frequency: 'GHz', ramFrequency: 'GHz',
@@ -54,16 +54,16 @@ const LOADOUT_INSTALL_SVG = '<svg width="15" height="15" viewBox="0 0 15 15" fil
 const LOADOUT_UNINSTALL_SVG = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><mask id="mu" maskUnits="userSpaceOnUse" x="0" y="0" width="15" height="15" style="mask-type:alpha"><rect width="15" height="15" fill="#D9D9D9"/></mask><g mask="url(#mu)"><path d="M4.277 13.425a1.614 1.614 0 01-1.174-.482 1.614 1.614 0 01-.482-1.174V3.847H1.793V2.191h3.628V1.363H9.56v.828h3.646v1.656h-.828v7.922c0 .461-.16.853-.482 1.174-.321.322-.713.482-1.174.482H4.277zm6.445-9.578H4.277v7.922h6.445V3.847zM5.466 10.616h1.453V4.991H5.466v5.625zm2.614 0h1.453V4.991H8.08v5.625z" fill="#FF5050"/></g></svg>';
 
 const HW_SPEC_DISPLAY = {
-    cpuFrequency: ['Frequency', 'GHz'],
-    cpuCores: ['Cores count', 'count'],
-    cpuConsuming: ['Power consuming', 'kW'],
-    gpuPower: ['Power', 'PFLOPS'],
-    gpuMemory: ['Memory', 'TB'],
-    gpuConsuming: ['Power consuming', 'kW'],
-    ramFrequency: ['Frequency', 'GHz'],
-    ramMemory: ['Memory', 'TB'],
-    psuPower: ['Power', 'kW'],
-    psuProtection: ['Protection', '%']
+    cpuFrequency: ['频率', 'GHz'],
+    cpuCores: ['核心数量', 'count'],
+    cpuConsuming: ['消耗功耗', 'kW'],
+    gpuPower: ['功耗', 'PFLOPS'],
+    gpuMemory: ['内存', 'TB'],
+    gpuConsuming: ['消耗功耗', 'kW'],
+    ramFrequency: ['频率', 'GHz'],
+    ramMemory: ['内存', 'TB'],
+    psuPower: ['功耗', 'kW'],
+    psuProtection: ['防护', '%']
 };
 
 function hwSpecRows(specs, vuln) {
@@ -74,7 +74,7 @@ function hwSpecRows(specs, vuln) {
         h += '<div class="loadout-hw-stat-row"><span>' + d[0] + ' ' + d[1] + '</span><span class="stat-val">' + v + '</span></div>';
     });
     if (vuln !== undefined && vuln !== null) {
-        h += '<div class="loadout-hw-stat-row"><span>Vulnerability %</span><span class="stat-val">' + vuln + '</span></div>';
+        h += '<div class="loadout-hw-stat-row"><span>漏洞 %</span><span class="stat-val">' + vuln + '</span></div>';
     }
     return h;
 }
@@ -87,7 +87,7 @@ function hwSpecRowsSmall(specs, vuln, cls) {
         h += '<div class="' + cls + '"><span>' + d[0] + ' ' + d[1] + '</span><span class="stat-val">' + v + '</span></div>';
     });
     if (vuln !== undefined && vuln !== null) {
-        h += '<div class="' + cls + '"><span>Vulnerability %</span><span class="stat-val">' + vuln + '</span></div>';
+        h += '<div class="' + cls + '"><span>脆弱度 %</span><span class="stat-val">' + vuln + '</span></div>';
     }
     return h;
 }
@@ -103,7 +103,7 @@ function showHwInfoPopup(item) {
         zoomHWImg = `style="transform:scale(${zoomList[matchedSubstr]});object-fit:contain;"`;
     }
     if (item.image) h += `<div style="overflow:clip;"><img ${zoomHWImg} src="${item.image}" alt=""></div>`;
-    h += '<span>' + (item.description || 'No description available.') + '</span>';
+    h += '<span>' + (item.description || '暂无描述。') + '</span>';
     h += '</div>';
     h += '<div class="info-specs">';
     const specs = item.specs || {};
@@ -113,7 +113,7 @@ function showHwInfoPopup(item) {
         h += '<div class="info-spec-item"><div class="info-spec-label">' + d[0] + '</div><div class="info-spec-val">' + v + ' ' + d[1] + '</div></div>';
     });
     if (item.itemVulnerability !== undefined) {
-        h += '<div class="info-spec-item"><div class="info-spec-label">Vulnerability</div><div class="info-spec-val">' + item.itemVulnerability + ' %</div></div>';
+        h += '<div class="info-spec-item"><div class="info-spec-label">漏洞</div><div class="info-spec-val">' + item.itemVulnerability + ' %</div></div>';
     }
     h += '</div>';
     _safeSetHtml(popup, h);
@@ -125,7 +125,7 @@ function showHwInfoPopup(item) {
 
 function renderLoadoutHardware(data) {
     if (!data || !data.equippedHardware) {
-        loadoutHwContainer.replaceChildren(_noData('No hardware data'));
+        loadoutHwContainer.replaceChildren(_noData('无硬件数据'));
         return;
     }
     const hw = data.equippedHardware;
@@ -140,17 +140,17 @@ function renderLoadoutHardware(data) {
         html += '<div class="loadout-hw-left">';
         html += '<div class="loadout-hw-header">';
         html += '<div class="loadout-hw-cat">' + (item.category || cat.toUpperCase()) + '</div>';
-        html += '<div class="loadout-hw-name">' + (item.name || 'Unknown') + '</div>';
+        html += '<div class="loadout-hw-name">' + (item.name || '未知') + '</div>';
         html += '</div>';
         html += '<div class="loadout-hw-stats">' + hwSpecRows(item.specs || {}, item.itemVulnerability) + '</div>';
         html += '</div>';
         html += '<div class="loadout-hw-right">';
-        html += '<button class="loadout-hw-change-btn" data-cat="' + cat + '">' + LOADOUT_CHANGE_SVG + 'CHANGE</button>';
-        html += '<button class="loadout-hw-info-btn" data-hw-cat="' + cat + '">' + LOADOUT_INFO_SVG + 'INFO</button>';
+        html += '<button class="loadout-hw-change-btn" data-cat="' + cat + '">' + LOADOUT_CHANGE_SVG + '更改</button>';
+        html += '<button class="loadout-hw-info-btn" data-hw-cat="' + cat + '">' + LOADOUT_INFO_SVG + '信息</button>';
         html += '</div>';
         html += '</div>';
         html += '<div class="loadout-hw-replace-list" data-cat="' + cat + '">';
-        html += '<input type="text" class="loadout-hw-replace-search" placeholder="Search..." data-cat="' + cat + '">';
+        html += '<input type="text" class="loadout-hw-replace-search" placeholder="搜索..." data-cat="' + cat + '">';
         html += '<div class="replace-items-wrap" data-cat="' + cat + '">';
         replacements.forEach(r => {
             html += '<div class="loadout-hw-replace-item" data-search-name="' + (r.name || '').toLowerCase() + '">';
@@ -162,15 +162,15 @@ function renderLoadoutHardware(data) {
             html += '<div class="replace-stats">' + hwSpecRowsSmall(r.specs || {}, r.itemVulnerability, 'replace-stat-row') + '</div>';
             html += '</div>';
             html += '<div class="replace-right">';
-            html += '<button class="replace-btn" data-id="' + r.id + '">' + LOADOUT_CHANGE_SVG + 'CHANGE</button>';
-            html += '<button class="replace-info-btn" data-hw-id="' + r.id + '">' + LOADOUT_INFO_SVG + '<span style="margin-top: 1px;">INFO</span></button>';
+            html += '<button class="replace-btn" data-id="' + r.id + '">' + LOADOUT_CHANGE_SVG + '更改</button>';
+            html += '<button class="replace-info-btn" data-hw-id="' + r.id + '">' + LOADOUT_INFO_SVG + '<span style="margin-top: 1px;">信息</span></button>';
             html += '</div>';
             html += '</div>';
         });
         html += '</div>';
         html += '</div>';
     });
-    if (html) { _safeSetHtml(loadoutHwContainer, html); } else { loadoutHwContainer.replaceChildren(_noData('No hardware equipped')); }
+    if (html) { _safeSetHtml(loadoutHwContainer, html); } else { loadoutHwContainer.replaceChildren(_noData('未装备硬件')); }
 
     loadoutHwContainer.querySelectorAll('.loadout-hw-change-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -203,7 +203,7 @@ function renderLoadoutHardware(data) {
             try {
                 const tab = await getCor3Tab();
                 if (tab) await chrome.tabs.sendMessage(tab.id, { action: "equipHardware", moduleConfigId });
-            } catch (err) { showLoadoutError('Equip failed: ' + err.message); }
+            } catch (err) { showLoadoutError('装备失败: ' + err.message); }
         });
     });
 
@@ -228,7 +228,7 @@ function renderLoadoutHardware(data) {
 
 function renderLoadoutOverview(data) {
     if (!data || !data.resources) {
-        loadoutOverviewContainer.replaceChildren(_noData('No resource data'));
+        loadoutOverviewContainer.replaceChildren(_noData('无资源数据'));
         return;
     }
     const res = data.resources;
@@ -238,7 +238,7 @@ function renderLoadoutOverview(data) {
     const UNIT_LABELS = { cpu_frequency: 'GHZ', cpu_cores: 'COUNT', gpu_power: 'PFLOPS', gpu_memory: 'TB', ram_frequency: 'GHZ', ram_memory: 'TB', psu_power: 'KW' };
 
     let html = '<div class="loadout-res-stats">';
-    html += '<div class="loadout-res-header"><div class="loadout-res-header-cell">Type</div><div class="loadout-res-header-cell">Usage / Available</div></div>';
+    html += '<div class="loadout-res-header"><div class="loadout-res-header-cell">类型</div><div class="loadout-res-header-cell">使用量 / 可用量</div></div>';
     const keys = ['cpu_frequency', 'cpu_cores', 'gpu_power', 'gpu_memory', 'ram_frequency', 'ram_memory', 'psu_power'];
     keys.forEach(key => {
         const s = supply[key];
@@ -299,7 +299,7 @@ function swMatchesFilter(sw, filterVal) {
 
 function renderLoadoutSoftware(data) {
     if (!data) {
-        loadoutSwContainer.replaceChildren(_noData('No software data'));
+        loadoutSwContainer.replaceChildren(_noData('无软件数据'));
         return;
     }
     const equipped = data.equippedSoftware || [];
@@ -325,7 +325,7 @@ function renderLoadoutSoftware(data) {
     loadoutSwCount.textContent = '(' + installedCount + '/' + totalCount + ')';
 
     if (sorted.length === 0) {
-        loadoutSwContainer.replaceChildren(_noData('No programs found'));
+        loadoutSwContainer.replaceChildren(_noData('未找到程序'));
         return;
     }
 
@@ -345,19 +345,19 @@ function renderLoadoutSoftware(data) {
             html += `style="transform:scale(${zoomList[matchedSubstring]});"`;
         }
         html += ' src="' + (sw.image || '') + '" alt="' + (sw.name || '') + '"></div>';
-        html += '<div class="loadout-sw-name">' + (sw.name || 'Unknown') + '</div>';
+        html += '<div class="loadout-sw-name">' + (sw.name || '未知') + '</div>';
         html += '</div>';
         if (sw.installed) {
-            html += '<button class="loadout-sw-install-btn uninstall" data-id="' + sw.id + '" data-action="uninstall">' + LOADOUT_UNINSTALL_SVG + 'UNINSTALL</button>';
+            html += '<button class="loadout-sw-install-btn uninstall" data-id="' + sw.id + '" data-action="uninstall">' + LOADOUT_UNINSTALL_SVG + '卸载</button>';
         } else {
-            html += '<button class="loadout-sw-install-btn install" data-id="' + sw.id + '" data-action="install">' + LOADOUT_INSTALL_SVG + 'INSTALL</button>';
+            html += '<button class="loadout-sw-install-btn install" data-id="' + sw.id + '" data-action="install">' + LOADOUT_INSTALL_SVG + '安装</button>';
         }
         html += '</div>';
 
         const funcLines = specs.map(spec => {
             const typeLabel = (spec.type || '').toUpperCase();
             let line = '<div>';
-            line += '<span class="func-label">FUNC:</span>';
+            line += '<span class="func-label">功能:</span>';
             line += '<span class="func-tags">' + typeLabel;
             if (spec.power) line += ' ' + spec.power[0] + '/' + spec.power[1];
             line += '</span>';
@@ -366,11 +366,11 @@ function renderLoadoutSoftware(data) {
         });
         html += '<div class="loadout-sw-func">';
         html += '<div class="func-left">' + funcLines.join(' ') + '</div>';
-        html += '<button class="loadout-sw-info-btn" data-sw-id="' + sw.id + '">' + LOADOUT_INFO_SVG + ' <span style="margin-top: 1px;">INFO</span></button>';
+        html += '<button class="loadout-sw-info-btn" data-sw-id="' + sw.id + '">' + LOADOUT_INFO_SVG + ' <span style="margin-top: 1px;">信息</span></button>';
         html += '</div>';
 
         html += '<div class="loadout-sw-details" data-details-id="' + sw.id + '">';
-        html += '<div class="loadout-sw-details-header">Basic Required</div>';
+        html += '<div class="loadout-sw-details-header">基础需求</div>';
 
         const consumeKeys = ['cpu_frequency', 'cpu_cores', 'gpu_power', 'gpu_memory', 'ram_frequency', 'ram_memory'];
         const noAllocKeys = new Set(['cpu_frequency', 'ram_frequency']);
@@ -446,7 +446,7 @@ function renderLoadoutSoftware(data) {
                 counter++;
             });
 
-            if (!hasConsume) html += '<div style="font-size:9px;color:rgba(107,120,136,1);">No consumption data</div>';
+            if (!hasConsume) html += '<div style="font-size:9px;color:rgba(107,120,136,1);">无消耗数据</div>';
         } else {
             consumeKeys.forEach(ck => {
                 const vals = consuming[ck];
@@ -464,23 +464,23 @@ function renderLoadoutSoftware(data) {
                 html += '</div>';
                 html += '<div class="loadout-sw-stat-bar"><div class="stat-bar-fill"></div></div>';
             });
-            if (!hasConsume) html += '<div style="font-size:9px;color:rgba(107,120,136,1);">No consumption data</div>';
+            if (!hasConsume) html += '<div style="font-size:9px;color:rgba(107,120,136,1);">无消耗数据</div>';
         }
 
         html += '<div class="loadout-sw-tool-section">';
         specs.forEach(spec => {
-            const typeLabel = (spec.type || '').toUpperCase() + ' TOOL';
+            const typeLabel = (spec.type || '').toUpperCase() + ' 工具';
             html += '<div class="loadout-sw-tool-row">';
             html += '<div>' + loadoutToolSvg(spec.type) + '</div>';
             html += '<div>';
             html += '<div class="loadout-sw-tool-name">' + typeLabel + '</div>';
             html += '<div class="loadout-sw-tool-detail">';
             if (spec.fileTypes && spec.fileTypes.length > 0) {
-                html += spec.fileTypes.length + ' files';
+                html += spec.fileTypes.length + ' 个文件';
                 html += ' <span class="info-tooltip">' + LOADOUT_INFO_SQUARE_SVG + '<span class="tooltip-text">' + spec.fileTypes.join(', ') + '</span></span>';
             }
             if (spec.serverTypes && spec.serverTypes.length > 0) {
-                html += spec.serverTypes.length + ' servers';
+                html += spec.serverTypes.length + ' 台服务器';
                 html += ' <span class="info-tooltip">' + LOADOUT_INFO_SQUARE_SVG + '<span class="tooltip-text">' + spec.serverTypes.join(', ') + '</span></span>';
             }
             html += '</div>';
@@ -489,7 +489,7 @@ function renderLoadoutSoftware(data) {
             if (spec.power) {
                 const pwEntry = pwInfo && pwInfo.abilities ? pwInfo.abilities.find(a => a.type === spec.type) : null;
                 html += '<div class="loadout-sw-power-row">';
-                html += '<span class="power-label">Power</span>';
+                html += '<span class="power-label">算力</span>';
                 if (pwEntry) {
                     html += '<span class="power-val" style="color:rgba(0,205,171,1);font-weight:bold;">' + pwEntry.computedPower + '/' + spec.power[1] + '</span>';
                 } else {
@@ -507,7 +507,7 @@ function renderLoadoutSoftware(data) {
         html += '</div>';
 
         if (pwInfo && pwInfo.ratio !== undefined) {
-            html += '<div class="loadout-sw-stat-row" style="margin-top:4px;border-top:1px solid rgba(44,52,62,1);padding-top:4px;"><span class="stat-name">Performance Ratio</span><span class="stat-val">' + (pwInfo.ratio * 100).toFixed(1) + '%</span></div>';
+            html += '<div class="loadout-sw-stat-row" style="margin-top:4px;border-top:1px solid rgba(44,52,62,1);padding-top:4px;"><span class="stat-name">性能比率</span><span class="stat-val">' + (pwInfo.ratio * 100).toFixed(1) + '%</span></div>';
         }
 
         html += '</div>';
@@ -532,7 +532,7 @@ function renderLoadoutSoftware(data) {
                         await chrome.tabs.sendMessage(tab.id, { action: "unequipSoftware", moduleConfigId });
                     }
                 }
-            } catch (err) { showLoadoutError((action === 'install' ? 'Install' : 'Uninstall') + ' failed: ' + err.message); }
+            } catch (err) { showLoadoutError((action === 'install' ? '安装' : '卸载') + ' 失败：' + err.message); }
         });
     });
 
@@ -560,9 +560,9 @@ function clearLoadoutError() {
 
 export function renderLoadout(data) {
     if (!data) {
-        loadoutHwContainer.replaceChildren(_noData('No loadout data yet'));
-        loadoutOverviewContainer.replaceChildren(_noData('No loadout data yet'));
-        loadoutSwContainer.replaceChildren(_noData('No loadout data yet'));
+        loadoutHwContainer.replaceChildren(_noData('暂无装备栏数据'));
+        loadoutOverviewContainer.replaceChildren(_noData('暂无装备栏数据'));
+        loadoutSwContainer.replaceChildren(_noData('暂无装备栏数据'));
         return;
     }
     cachedLoadoutData = data;
@@ -580,7 +580,7 @@ export async function loadLoadout() {
 export async function refreshLoadout() {
     try {
         const tab = await getCor3Tab();
-        if (!tab) throw new Error('No cor3.gg tab');
+        if (!tab) throw new Error('未找到 cor3.gg 标签页');
         await chrome.tabs.sendMessage(tab.id, { action: "requestLoadout" });
         setTimeout(() => { loadLoadout(); refreshAllTimestamps(); }, 3000);
     } catch (e) {

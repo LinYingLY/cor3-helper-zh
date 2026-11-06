@@ -47,9 +47,9 @@ function showMarketInfoPopup(lot) {
 
     let itemName;
     if (isAccess) {
-        itemName = (det.serverName || '') + ' ' + (det.accessType || '') + ' access';
+        itemName = (det.serverName || '') + ' ' + (det.accessType || '') + ' 访问权限';
     } else {
-        itemName = det.name || 'Unknown';
+        itemName = det.name || '未知';
     }
 
     let h = '<div class="info-title">' + INFO_SVG + ' ' + itemName.toUpperCase() + '</div>';
@@ -60,34 +60,34 @@ function showMarketInfoPopup(lot) {
         zoomMarketImg = `style="transform:scale(${zoomList[matchedSbstr]});object-fit:contain;"`;
     }
     if (det.image) h += `<div style="overflow:clip;"><img ${zoomMarketImg} src="${det.image}" alt=""></div>`;
-    h += '<span>' + (det.description || 'No description available.') + '</span>';
+    h += '<span>' + (det.description || '暂无描述。') + '</span>';
     h += '</div>';
     h += '<div class="info-specs">';
-    h += '<div class="info-spec-item"><div class="info-spec-label">Price</div><div class="info-spec-val">' + (lot.price ? lot.price.toLocaleString() : '--') + '</div></div>';
-    if (lot.priceModifier) h += '<div class="info-spec-item"><div class="info-spec-label">Price Modifier</div><div class="info-spec-val">' + (lot.priceModifier > 0 ? '+' : '') + lot.priceModifier + '</div></div>';
+    h += '<div class="info-spec-item"><div class="info-spec-label">价格</div><div class="info-spec-val">' + (lot.price ? lot.price.toLocaleString() : '--') + '</div></div>';
+    if (lot.priceModifier) h += '<div class="info-spec-item"><div class="info-spec-label">价格修正</div><div class="info-spec-val">' + (lot.priceModifier > 0 ? '+' : '') + lot.priceModifier + '</div></div>';
 
     if (isAccess) {
-        if (lot.accessLevel) h += '<div class="info-spec-item"><div class="info-spec-label">Access Level</div><div class="info-spec-val">' + lot.accessLevel + '</div></div>';
-        if (det.durationHours !== undefined) h += '<div class="info-spec-item"><div class="info-spec-label">Duration</div><div class="info-spec-val">' + det.durationHours + 'h</div></div>';
-        if (det.accessType) h += '<div class="info-spec-item"><div class="info-spec-label">Access Type</div><div class="info-spec-val">' + det.accessType + '</div></div>';
-        if (det.serverName) h += '<div class="info-spec-item"><div class="info-spec-label">Server</div><div class="info-spec-val">' + det.serverName + '</div></div>';
-        h += '<div class="info-spec-item"><div class="info-spec-label">Available</div><div class="info-spec-val">' + (lot.availableCount !== undefined ? lot.availableCount : '--') + '</div></div>';
-        if (lot.lockedByQuest) h += '<div class="info-spec-item"><div class="info-spec-label">Locked By Quest</div><div class="info-spec-val">' + lot.lockedByQuest + '</div></div>';
-        if (lot.unavailableReason) h += '<div class="info-spec-item"><div class="info-spec-label">Status</div><div class="info-spec-val">' + lot.unavailableReason + '</div></div>';
+        if (lot.accessLevel) h += '<div class="info-spec-item"><div class="info-spec-label">访问等级</div><div class="info-spec-val">' + lot.accessLevel + '</div></div>';
+        if (det.durationHours !== undefined) h += '<div class="info-spec-item"><div class="info-spec-label">时长</div><div class="info-spec-val">' + det.durationHours + 'h</div></div>';
+        if (det.accessType) h += '<div class="info-spec-item"><div class="info-spec-label">访问类型</div><div class="info-spec-val">' + det.accessType + '</div></div>';
+        if (det.serverName) h += '<div class="info-spec-item"><div class="info-spec-label">服务器</div><div class="info-spec-val">' + det.serverName + '</div></div>';
+        h += '<div class="info-spec-item"><div class="info-spec-label">可用</div><div class="info-spec-val">' + (lot.availableCount !== undefined ? lot.availableCount : '--') + '</div></div>';
+        if (lot.lockedByQuest) h += '<div class="info-spec-item"><div class="info-spec-label">任务解锁</div><div class="info-spec-val">' + lot.lockedByQuest + '</div></div>';
+        if (lot.unavailableReason) h += '<div class="info-spec-item"><div class="info-spec-label">状态</div><div class="info-spec-val">' + lot.unavailableReason + '</div></div>';
     } else {
-        if (det.manufacturer) h += '<div class="info-spec-item"><div class="info-spec-label">Manufacturer</div><div class="info-spec-val">' + det.manufacturer + '</div></div>';
-        if (det.tier) h += '<div class="info-spec-item"><div class="info-spec-label">Tier</div><div class="info-spec-val">' + det.tier + '</div></div>';
-        if (det.itemVulnerability !== undefined) h += '<div class="info-spec-item"><div class="info-spec-label">Vulnerability</div><div class="info-spec-val">' + det.itemVulnerability + ' %</div></div>';
-        if (lot.accessLevel) h += '<div class="info-spec-item"><div class="info-spec-label">Access Level</div><div class="info-spec-val">' + lot.accessLevel + '</div></div>';
+        if (det.manufacturer) h += '<div class="info-spec-item"><div class="info-spec-label">制造商</div><div class="info-spec-val">' + det.manufacturer + '</div></div>';
+        if (det.tier) h += '<div class="info-spec-item"><div class="info-spec-label">层级</div><div class="info-spec-val">' + det.tier + '</div></div>';
+        if (det.itemVulnerability !== undefined) h += '<div class="info-spec-item"><div class="info-spec-label">漏洞</div><div class="info-spec-val">' + det.itemVulnerability + ' %</div></div>';
+        if (lot.accessLevel) h += '<div class="info-spec-item"><div class="info-spec-label">访问等级</div><div class="info-spec-val">' + lot.accessLevel + '</div></div>';
         if (det.specs && typeof det.specs === 'object') {
             if (Array.isArray(det.specs)) {
                 for (const spec of det.specs) {
                     if (spec && typeof spec === 'object') {
-                        if (spec.type) h += '<div class="info-spec-item"><div class="info-spec-label">Type</div><div class="info-spec-val">' + spec.type + '</div></div>';
-                        if (spec.power && Array.isArray(spec.power)) h += '<div class="info-spec-item"><div class="info-spec-label">Power</div><div class="info-spec-val">' + spec.power[0] + ' – ' + spec.power[1] + '</div></div>';
-                        if (spec.fileTypes && Array.isArray(spec.fileTypes)) h += '<div class="info-spec-item"><div class="info-spec-label">File Types</div><div class="info-spec-val">' + spec.fileTypes.join(', ') + '</div></div>';
-                        if (spec.serverTypes && Array.isArray(spec.serverTypes)) h += '<div class="info-spec-item"><div class="info-spec-label">Server Types</div><div class="info-spec-val">' + spec.serverTypes.join(', ') + '</div></div>';
-                        if (spec.remote !== undefined) h += '<div class="info-spec-item"><div class="info-spec-label">Remote</div><div class="info-spec-val">' + (spec.remote ? 'Yes' : 'No') + '</div></div>';
+                        if (spec.type) h += '<div class="info-spec-item"><div class="info-spec-label">类型</div><div class="info-spec-val">' + spec.type + '</div></div>';
+                        if (spec.power && Array.isArray(spec.power)) h += '<div class="info-spec-item"><div class="info-spec-label">算力</div><div class="info-spec-val">' + spec.power[0] + ' – ' + spec.power[1] + '</div></div>';
+                        if (spec.fileTypes && Array.isArray(spec.fileTypes)) h += '<div class="info-spec-item"><div class="info-spec-label">文件类型</div><div class="info-spec-val">' + spec.fileTypes.join(', ') + '</div></div>';
+                        if (spec.serverTypes && Array.isArray(spec.serverTypes)) h += '<div class="info-spec-item"><div class="info-spec-label">服务器类型</div><div class="info-spec-val">' + spec.serverTypes.join(', ') + '</div></div>';
+                        if (spec.remote !== undefined) h += '<div class="info-spec-item"><div class="info-spec-label">远程</div><div class="info-spec-val">' + (spec.remote ? '是' : '否') + '</div></div>';
                     }
                 }
             } else {
@@ -120,7 +120,7 @@ function renderMarketInto(container, data, labelPrefix, idPrefix) {
     _clearEl(container);
 
     if (!data || !data.market) {
-        container.replaceChildren(_noData('No market data available.', 'Make sure you have the cor3.gg tab open.'));
+        container.replaceChildren(_noData('无可用市场数据。', '请确保已打开 cor3.gg 标签页。'));
         return;
     }
 
@@ -141,17 +141,17 @@ function renderMarketInto(container, data, labelPrefix, idPrefix) {
     }
 
     if (md.userCredits !== undefined) {
-        html += `<div style="font-size:11px;color:var(--accent-green);margin-bottom:4px;">💰 Credits: ${md.userCredits.toLocaleString()}</div>`;
+        html += `<div style="font-size:11px;color:var(--accent-green);margin-bottom:4px;">💰 信用点: ${md.userCredits.toLocaleString()}</div>`;
     }
 
     if (rep) {
         const pct = rep.requiredReputation > 0 ? Math.min(100, Math.floor((rep.progress / rep.requiredReputation) * 100)) : 0;
-        html += `<div style="font-size:11px;color:var(--text-muted);margin-bottom:2px;">Reputation — Level ${rep.level}</div>`;
+        html += `<div style="font-size:11px;color:var(--text-muted);margin-bottom:2px;">声望 — 等级 ${rep.level}</div>`;
         html += `<div class="market-rep-bar"><div class="market-rep-fill" style="width:${pct}%"></div></div>`;
         html += `<div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">`;
-        html += `Progress: ${rep.progress}/${rep.requiredReputation} · `;
-        html += `Level Locked: ${rep.isLevelLocked ? 'Yes' : 'No'} · `;
-        html += `Max Level: ${rep.isMaxLevel ? 'Yes' : 'No'}`;
+        html += `进度: ${rep.progress}/${rep.requiredReputation} · `;
+        html += `等级锁定: ${rep.isLevelLocked ? '是' : '否'} · `;
+        html += `最高等级: ${rep.isMaxLevel ? '是' : '否'}`;
         html += `</div>`;
     }
 
@@ -159,12 +159,12 @@ function renderMarketInto(container, data, labelPrefix, idPrefix) {
     const availableJobs = md.jobs ? md.jobs.filter(j => !j.isCompleted && !j.isExpired).length : 0;
 
     if (md.nextJobsResetAt) {
-        html += `<div class="${idPrefix}-reset-timer" style="font-size:11px;color:var(--accent-orange);margin-bottom:8px;">⏳ Jobs Reset: ${formatTimeRemaining(md.nextJobsResetAt)}</div>`;
+        html += `<div class="${idPrefix}-reset-timer" style="font-size:11px;color:var(--accent-orange);margin-bottom:8px;">⏳ 任务重置: ${formatTimeRemaining(md.nextJobsResetAt)}</div>`;
     } else if (jobCount > 0) {
-        html += `<div style="font-size:11px;color:var(--accent-orange);margin-bottom:8px;">Jobs: ${availableJobs}/${jobCount}</div>`;
+        html += `<div style="font-size:11px;color:var(--accent-orange);margin-bottom:8px;">任务: ${availableJobs}/${jobCount}</div>`;
     }
 
-    html += `<div class="expandable-header" id="${idPrefix}ItemsToggle"><span class="expand-arrow">▶</span><span class="expand-label">Items List (${(md.lots || []).length})</span></div>`;
+    html += `<div class="expandable-header" id="${idPrefix}ItemsToggle"><span class="expand-arrow">▶</span><span class="expand-label">物品列表 (${(md.lots || []).length})</span></div>`;
     html += `<div class="expandable-body" id="${idPrefix}ItemsBody">`;
 
     if (md.lots && md.lots.length > 0) {
@@ -183,7 +183,7 @@ function renderMarketInto(container, data, labelPrefix, idPrefix) {
                 const det = lot.details || {};
                 const isAccess = cat === 'ACCESS';
                 const isBought = lot.availableCount === 0;
-                const boughtTag = isBought && !isAccess ? '<span class="market-item-bought">BOUGHT</span>' : '';
+                const boughtTag = isBought && !isAccess ? '<span class="market-item-bought">已购买</span>' : '';
                 const matchedSubstring = det.name ? Object.keys(zoomList).find(substring => det.name.includes(substring)) : "";
                 let zoomLotImg = '';
                 if (matchedSubstring) {
@@ -193,9 +193,9 @@ function renderMarketInto(container, data, labelPrefix, idPrefix) {
 
                 let itemName;
                 if (isAccess) {
-                    itemName = (det.serverName || '') + ' ' + (det.accessType || '') + ' access';
+                    itemName = (det.serverName || '') + ' ' + (det.accessType || '') + ' 访问权限';
                 } else {
-                    itemName = det.name || 'Unknown';
+                    itemName = det.name || '未知';
                 }
 
                 const unavailTag = lot.unavailableReason ? `<span class="market-item-bought" style="background:rgba(255,160,0,0.2);color:var(--accent-orange);">${lot.unavailableReason.toUpperCase()}</span>` : '';
@@ -208,38 +208,38 @@ function renderMarketInto(container, data, labelPrefix, idPrefix) {
                 html += `<div class="market-item-info">`;
                 html += `<div class="market-item-header">`;
                 html += `<div class="market-item-name">${itemName}${boughtTag}${unavailTag}</div>`;
-                html += `<button class="market-item-info-btn" data-lot-idx="${lotIdx}">${INFO_BTN_SVG} INFO</button>`;
+                html += `<button class="market-item-info-btn" data-lot-idx="${lotIdx}">${INFO_BTN_SVG} 信息</button>`;
                 html += `</div>`;
                 html += `<div class="market-item-price">💰 ${lot.price ? lot.price.toLocaleString() : '--'}</div>`;
 
                 const uid = idPrefix + '_mitem_' + lot.id;
-                html += `<div class="expandable-header" data-expand="${uid}"><span class="expand-arrow">▶</span><span class="expand-label">Details</span></div>`;
+                html += `<div class="expandable-header" data-expand="${uid}"><span class="expand-arrow">▶</span><span class="expand-label">详情</span></div>`;
                 html += `<div class="expandable-body" id="${uid}">`;
 
                 if (isAccess) {
-                    if (lot.accessLevel) html += `<div class="detail-row"><span class="label">Access Level:</span> ${lot.accessLevel}</div>`;
-                    if (det.durationHours !== undefined) html += `<div class="detail-row"><span class="label">Duration:</span> ${det.durationHours}h</div>`;
-                    if (det.accessType) html += `<div class="detail-row"><span class="label">Access Type:</span> ${det.accessType}</div>`;
-                    if (det.serverName) html += `<div class="detail-row"><span class="label">Server:</span> ${det.serverName}</div>`;
-                    html += `<div class="detail-row"><span class="label">Available:</span> ${lot.availableCount !== undefined ? lot.availableCount : '--'}</div>`;
-                    if (lot.lockedByQuest) html += `<div class="detail-row"><span class="label">Locked By Quest:</span> ${lot.lockedByQuest}</div>`;
-                    if (lot.unavailableReason) html += `<div class="detail-row"><span class="label">Status:</span> ${lot.unavailableReason}</div>`;
+                    if (lot.accessLevel) html += `<div class="detail-row"><span class="label">访问等级:</span> ${lot.accessLevel}</div>`;
+                    if (det.durationHours !== undefined) html += `<div class="detail-row"><span class="label">持续时间:</span> ${det.durationHours}h</div>`;
+                    if (det.accessType) html += `<div class="detail-row"><span class="label">访问类型:</span> ${det.accessType}</div>`;
+                    if (det.serverName) html += `<div class="detail-row"><span class="label">服务器:</span> ${det.serverName}</div>`;
+                    html += `<div class="detail-row"><span class="label">可用:</span> ${lot.availableCount !== undefined ? lot.availableCount : '--'}</div>`;
+                    if (lot.lockedByQuest) html += `<div class="detail-row"><span class="label">任务锁定:</span> ${lot.lockedByQuest}</div>`;
+                    if (lot.unavailableReason) html += `<div class="detail-row"><span class="label">状态:</span> ${lot.unavailableReason}</div>`;
                 } else {
-                    if (det.manufacturer) html += `<div class="detail-row"><span class="label">Manufacturer:</span> ${det.manufacturer}</div>`;
-                    if (det.tier) html += `<div class="detail-row"><span class="label">Tier:</span> ${det.tier}</div>`;
-                    if (det.itemVulnerability !== undefined) html += `<div class="detail-row"><span class="label">Vulnerability:</span> ${det.itemVulnerability}%</div>`;
-                    if (det.price) html += `<div class="detail-row"><span class="label">Base Price:</span> 💰 ${det.price.toLocaleString()}</div>`;
-                    if (lot.priceModifier) html += `<div class="detail-row"><span class="label">Price Modifier:</span> ${lot.priceModifier > 0 ? '+' : ''}${lot.priceModifier}</div>`;
-                    if (lot.accessLevel) html += `<div class="detail-row"><span class="label">Access Level:</span> ${lot.accessLevel}</div>`;
+                    if (det.manufacturer) html += `<div class="detail-row"><span class="label">制造商:</span> ${det.manufacturer}</div>`;
+                    if (det.tier) html += `<div class="detail-row"><span class="label">层级:</span> ${det.tier}</div>`;
+                    if (det.itemVulnerability !== undefined) html += `<div class="detail-row"><span class="label">漏洞:</span> ${det.itemVulnerability}%</div>`;
+                    if (det.price) html += `<div class="detail-row"><span class="label">基础价格:</span> 💰 ${det.price.toLocaleString()}</div>`;
+                    if (lot.priceModifier) html += `<div class="detail-row"><span class="label">价格修正:</span> ${lot.priceModifier > 0 ? '+' : ''}${lot.priceModifier}</div>`;
+                    if (lot.accessLevel) html += `<div class="detail-row"><span class="label">访问等级:</span> ${lot.accessLevel}</div>`;
                     if (det.specs && typeof det.specs === 'object') {
                         if (Array.isArray(det.specs)) {
                             for (const spec of det.specs) {
                                 if (spec && typeof spec === 'object') {
-                                    if (spec.type) html += `<div class="detail-row"><span class="label">Type:</span> ${spec.type}</div>`;
-                                    if (spec.power && Array.isArray(spec.power)) html += `<div class="detail-row"><span class="label">Power:</span> ${spec.power[0]} – ${spec.power[1]}</div>`;
-                                    if (spec.fileTypes && Array.isArray(spec.fileTypes)) html += `<div class="detail-row"><span class="label">File Types:</span> ${spec.fileTypes.join(', ')}</div>`;
-                                    if (spec.serverTypes && Array.isArray(spec.serverTypes)) html += `<div class="detail-row"><span class="label">Server Types:</span> ${spec.serverTypes.join(', ')}</div>`;
-                                    if (spec.remote !== undefined) html += `<div class="detail-row"><span class="label">Remote:</span> ${spec.remote ? 'Yes' : 'No'}</div>`;
+                                    if (spec.type) html += `<div class="detail-row"><span class="label">类型:</span> ${spec.type}</div>`;
+                                    if (spec.power && Array.isArray(spec.power)) html += `<div class="detail-row"><span class="label">算力:</span> ${spec.power[0]} – ${spec.power[1]}</div>`;
+                                    if (spec.fileTypes && Array.isArray(spec.fileTypes)) html += `<div class="detail-row"><span class="label">文件类型:</span> ${spec.fileTypes.join(', ')}</div>`;
+                                    if (spec.serverTypes && Array.isArray(spec.serverTypes)) html += `<div class="detail-row"><span class="label">服务器类型:</span> ${spec.serverTypes.join(', ')}</div>`;
+                                    if (spec.remote !== undefined) html += `<div class="detail-row"><span class="label">远程:</span> ${spec.remote ? '是' : '否'}</div>`;
                                 }
                             }
                         } else {
@@ -265,7 +265,7 @@ function renderMarketInto(container, data, labelPrefix, idPrefix) {
             }
         }
     } else {
-        html += '<div class="no-decisions">No items in market.</div>';
+        html += '<div class="no-decisions">市场中暂无物品。</div>';
     }
     html += `</div>`;
 
@@ -274,7 +274,7 @@ function renderMarketInto(container, data, labelPrefix, idPrefix) {
     const completedJobs = (md.jobs || []).filter(j => j.isCompleted || j.isExpired).map(j => ({ ...j, _status: j.isCompleted ? 'COMPLETED' : 'EXPIRED' }));
     const allJobsList = [...openJobs, ...recentActive, ...completedJobs];
     const activeJobCount = openJobs.length + recentActive.length;
-    html += `<div class="expandable-header" id="${idPrefix}JobsToggle"><span class="expand-arrow">▶</span><span class="expand-label">Jobs List (${activeJobCount}/${allJobsList.length})</span></div>`;
+    html += `<div class="expandable-header" id="${idPrefix}JobsToggle"><span class="expand-arrow">▶</span><span class="expand-label">任务列表 (${activeJobCount}/${allJobsList.length})</span></div>`;
     html += `<div class="expandable-body" id="${idPrefix}JobsBody">`;
     if (allJobsList.length > 0) {
         allJobsList.sort((a, b) => {
@@ -283,11 +283,11 @@ function renderMarketInto(container, data, labelPrefix, idPrefix) {
             return sA.localeCompare(sB);
         });
         html += `<table style="width:100%;font-size:10px;border-collapse:collapse;margin-bottom:4px;">`;
-        html += `<tr style="color:var(--text-dim);border-bottom:1px solid var(--border);"><th style="text-align:left;padding:3px 4px;">Job</th><th style="text-align:left;padding:3px 4px;">Server</th><th style="text-align:center;padding:3px 4px;">Status</th><th style="text-align:right;padding:3px 4px;">Reward/Penalty</th></tr>`;
+        html += `<tr style="color:var(--text-dim);border-bottom:1px solid var(--border);"><th style="text-align:left;padding:3px 4px;">任务</th><th style="text-align:left;padding:3px 4px;">服务器</th><th style="text-align:center;padding:3px 4px;">状态</th><th style="text-align:right;padding:3px 4px;">奖励/惩罚</th></tr>`;
         for (const job of allJobsList) {
             const dimStyle = (job._status === 'COMPLETED' || job._status === 'EXPIRED') ? 'opacity:0.5;' : '';
-            const jobName = job.name || job.id || 'Unknown';
-            const serverName = (job.relatedServers && job.relatedServers[0]) ? job.relatedServers[0].serverName : 'N/A';
+            const jobName = job.name || job.id || '未知';
+            const serverName = (job.relatedServers && job.relatedServers[0]) ? job.relatedServers[0].serverName : '无';
             let rewardStr = '--';
             let rewardColor = 'var(--accent-green)';
             const isFailed = job._status === 'FAILED' || job._status === 'EXPIRED';
@@ -326,7 +326,7 @@ function renderMarketInto(container, data, labelPrefix, idPrefix) {
         }
         html += `</table>`;
     } else {
-        html += '<div class="no-decisions">No jobs available.</div>';
+        html += '<div class="no-decisions">暂无可用任务。</div>';
     }
     html += `</div>`;
 
@@ -371,7 +371,7 @@ export function renderMarket(data) {
     if (data && data.market && data.market.marketName) {
         state.coreMarketName = data.market.marketName;
         updateMarketLabel(coreMarketLabel, state.coreMarketName, 'Market-1', '🏠');
-        TIMER_LABELS.home_jobs = state.coreMarketName + ' Jobs Reset';
+        TIMER_LABELS.home_jobs = state.coreMarketName + ' 个任务已重置';
         const opt = alarmTimerSelect.querySelector('option[value="home_jobs"]');
         if (opt) opt.textContent = TIMER_LABELS.home_jobs;
         renderPinnedTimers();
@@ -383,12 +383,12 @@ export function renderMarket(data) {
 export function renderDarkMarket(data, available, maintenanceEndsAt, blockerServer) {
     if (available === false) {
         let timerHtml = '';
-        if (blockerServer) timerHtml += ' (' + blockerServer + ' in maintenance';
+        if (blockerServer) timerHtml += ' (' + blockerServer + ' 维护中';
         if (maintenanceEndsAt) {
             const diff = new Date(maintenanceEndsAt).getTime() - Date.now();
             if (diff > 0) {
                 const mins = Math.ceil(diff / 60000);
-                timerHtml += (blockerServer ? ', ' : ' (') + '~' + mins + 'm remaining';
+                timerHtml += (blockerServer ? ', ' : ' (') + '~' + mins + '分剩余';
             }
         }
         if (timerHtml) timerHtml += ')';
@@ -399,10 +399,10 @@ export function renderDarkMarket(data, available, maintenanceEndsAt, blockerServ
                 state.darkMarketName = data.market.marketName;
                 updateMarketLabel(darkMarketLabel, state.darkMarketName, 'Market-2', '🌑');
             }
-            renderMarketInto(darkMarketContainer, data, 'Market-2 (cached)', 'dark');
+            renderMarketInto(darkMarketContainer, data, '市场-2（缓存）', 'dark');
             darkMarketContainer.prepend(warningEl);
         } else {
-            darkMarketContainer.replaceChildren(warningEl, _noData('No cached market data available.'));
+            darkMarketContainer.replaceChildren(warningEl, _noData('没有可用的市场缓存数据。'));
         }
         return;
     }
@@ -410,7 +410,7 @@ export function renderDarkMarket(data, available, maintenanceEndsAt, blockerServ
     if (data && data.market && data.market.marketName) {
         state.darkMarketName = data.market.marketName;
         updateMarketLabel(darkMarketLabel, state.darkMarketName, 'Market-2', '🌑');
-        TIMER_LABELS.dark_jobs = state.darkMarketName + ' Jobs Reset';
+        TIMER_LABELS.dark_jobs = state.darkMarketName + ' 个任务已重置';
         const opt = alarmTimerSelect.querySelector('option[value="dark_jobs"]');
         if (opt) opt.textContent = TIMER_LABELS.dark_jobs;
         renderPinnedTimers();
@@ -422,12 +422,12 @@ export function renderDarkMarket(data, available, maintenanceEndsAt, blockerServ
 export function renderSoyuzMarket(data, available, maintenanceEndsAt, blockerServer) {
     if (available === false) {
         let timerHtml = '';
-        if (blockerServer) timerHtml += ' (' + blockerServer + ' in maintenance';
+        if (blockerServer) timerHtml += ' (' + blockerServer + ' 维护中';
         if (maintenanceEndsAt) {
             const diff = new Date(maintenanceEndsAt).getTime() - Date.now();
             if (diff > 0) {
                 const mins = Math.ceil(diff / 60000);
-                timerHtml += (blockerServer ? ', ' : ' (') + '~' + mins + 'm remaining';
+                timerHtml += (blockerServer ? ', ' : ' (') + '~' + mins + '分剩余';
             }
         }
         if (timerHtml) timerHtml += ')';
@@ -438,10 +438,10 @@ export function renderSoyuzMarket(data, available, maintenanceEndsAt, blockerSer
                 state.soyuzMarketName = data.market.marketName;
                 updateMarketLabel(soyuzMarketLabel, state.soyuzMarketName, 'Market-3', '☭');
             }
-            renderMarketInto(soyuzMarketContainer, data, 'Market-3 (cached)', 'soyuz');
+            renderMarketInto(soyuzMarketContainer, data, '市场-3（缓存）', 'soyuz');
             soyuzMarketContainer.prepend(warningEl);
         } else {
-            soyuzMarketContainer.replaceChildren(warningEl, _noData('No cached market data available.'));
+            soyuzMarketContainer.replaceChildren(warningEl, _noData('没有可用的市场缓存数据。'));
         }
         return;
     }
@@ -449,7 +449,7 @@ export function renderSoyuzMarket(data, available, maintenanceEndsAt, blockerSer
     if (data && data.market && data.market.marketName) {
         state.soyuzMarketName = data.market.marketName;
         updateMarketLabel(soyuzMarketLabel, state.soyuzMarketName, 'Market-3', '☭');
-        TIMER_LABELS.soyuz_jobs = state.soyuzMarketName + ' Jobs Reset';
+        TIMER_LABELS.soyuz_jobs = state.soyuzMarketName + ' 个任务已重置';
         const opt = alarmTimerSelect.querySelector('option[value="soyuz_jobs"]');
         if (opt) opt.textContent = TIMER_LABELS.soyuz_jobs;
         renderPinnedTimers();
@@ -461,12 +461,12 @@ export function renderSoyuzMarket(data, available, maintenanceEndsAt, blockerSer
 export function renderUsolMarket(data, available, maintenanceEndsAt, blockerServer) {
     if (available === false) {
         let timerHtml = '';
-        if (blockerServer) timerHtml += ' (' + blockerServer + ' in maintenance';
+        if (blockerServer) timerHtml += ' (' + blockerServer + ' 维护中';
         if (maintenanceEndsAt) {
             const diff = new Date(maintenanceEndsAt).getTime() - Date.now();
             if (diff > 0) {
                 const mins = Math.ceil(diff / 60000);
-                timerHtml += (blockerServer ? ', ' : ' (') + '~' + mins + 'm remaining';
+                timerHtml += (blockerServer ? ', ' : ' (') + '~' + mins + '分剩余';
             }
         }
         if (timerHtml) timerHtml += ')';
@@ -477,10 +477,10 @@ export function renderUsolMarket(data, available, maintenanceEndsAt, blockerServ
                 state.usolMarketName = data.market.marketName;
                 updateMarketLabel(usolMarketLabel, state.usolMarketName, 'Market-4', '☮');
             }
-            renderMarketInto(usolMarketContainer, data, 'Market-4 (cached)', 'usol');
+            renderMarketInto(usolMarketContainer, data, '市场-4（缓存）', 'usol');
             usolMarketContainer.prepend(warningEl);
         } else {
-            usolMarketContainer.replaceChildren(warningEl, _noData('No cached market data available.'));
+            usolMarketContainer.replaceChildren(warningEl, _noData('没有可用的市场缓存数据。'));
         }
         return;
     }
@@ -488,7 +488,7 @@ export function renderUsolMarket(data, available, maintenanceEndsAt, blockerServ
     if (data && data.market && data.market.marketName) {
         state.usolMarketName = data.market.marketName;
         updateMarketLabel(usolMarketLabel, state.usolMarketName, 'Market-4', '☮');
-        TIMER_LABELS.usol_jobs = state.usolMarketName + ' Jobs Reset';
+        TIMER_LABELS.usol_jobs = state.usolMarketName + ' 个任务已重置';
         const opt = alarmTimerSelect.querySelector('option[value="usol_jobs"]');
         if (opt) opt.textContent = TIMER_LABELS.usol_jobs;
         renderPinnedTimers();
@@ -518,10 +518,10 @@ export async function loadUsolMarket() {
 }
 
 export async function requestMarketData() {
-    marketContainer.replaceChildren(_noData('Requesting market data...'));
-    darkMarketContainer.replaceChildren(_noData('Requesting market data...'));
-    soyuzMarketContainer.replaceChildren(_noData('Requesting market data...'));
-    usolMarketContainer.replaceChildren(_noData('Requesting market data...'));
+    marketContainer.replaceChildren(_noData('正在请求市场数据...'));
+    darkMarketContainer.replaceChildren(_noData('正在请求市场数据...'));
+    soyuzMarketContainer.replaceChildren(_noData('正在请求市场数据...'));
+    usolMarketContainer.replaceChildren(_noData('正在请求市场数据...'));
     await chrome.storage.local.remove(['marketData', 'darkMarketData', 'darkMarketAvailable', 'soyuzMarketData', 'soyuzMarketAvailable', 'usolMarketData', 'usolMarketAvailable']);
 
     try {
@@ -599,10 +599,10 @@ export function getMarketContainers() {
 
 export function initMarketRefreshButtons() {
     refreshMarketBtn.addEventListener('click', async () => {
-        marketContainer.replaceChildren(_noData('Refreshing market data...'));
+        marketContainer.replaceChildren(_noData('正在刷新市场数据...'));
         try {
             const tab = await getCor3Tab();
-            if (!tab) throw new Error('No cor3.gg tab');
+            if (!tab) throw new Error('未找到 cor3.gg 标签页');
             await chrome.tabs.sendMessage(tab.id, { action: "refreshMarket" });
             setTimeout(() => { loadMarket(); refreshAllTimestamps(); }, 3000);
         } catch (e) {
@@ -611,10 +611,10 @@ export function initMarketRefreshButtons() {
     });
 
     refreshDarkMarketBtn.addEventListener('click', async () => {
-        darkMarketContainer.replaceChildren(_noData('Refreshing market data...'));
+        darkMarketContainer.replaceChildren(_noData('正在刷新市场数据...'));
         try {
             const tab = await getCor3Tab();
-            if (!tab) throw new Error('No cor3.gg tab');
+            if (!tab) throw new Error('未找到 cor3.gg 标签页');
             await chrome.tabs.sendMessage(tab.id, { action: "refreshDarkMarket" });
             setTimeout(() => { loadDarkMarket(); refreshAllTimestamps(); }, 3000);
         } catch (e) {
@@ -623,10 +623,10 @@ export function initMarketRefreshButtons() {
     });
 
     refreshSoyuzMarketBtn.addEventListener('click', async () => {
-        soyuzMarketContainer.replaceChildren(_noData('Refreshing market data...'));
+        soyuzMarketContainer.replaceChildren(_noData('正在刷新市场数据...'));
         try {
             const tab = await getCor3Tab();
-            if (!tab) throw new Error('No cor3.gg tab');
+            if (!tab) throw new Error('未找到 cor3.gg 标签页');
             await chrome.tabs.sendMessage(tab.id, { action: "refreshSoyuzMarket" });
             setTimeout(() => { loadSoyuzMarket(); refreshAllTimestamps(); }, 5000);
         } catch (e) {
@@ -635,10 +635,10 @@ export function initMarketRefreshButtons() {
     });
 
     refreshUsolMarketBtn.addEventListener('click', async () => {
-        usolMarketContainer.replaceChildren(_noData('Refreshing market data...'));
+        usolMarketContainer.replaceChildren(_noData('正在刷新市场数据...'));
         try {
             const tab = await getCor3Tab();
-            if (!tab) throw new Error('No cor3.gg tab');
+            if (!tab) throw new Error('未找到 cor3.gg 标签页');
             await chrome.tabs.sendMessage(tab.id, { action: "refreshUsolMarket" });
             setTimeout(() => { loadUsolMarket(); refreshAllTimestamps(); }, 5000);
         } catch (e) {
@@ -648,7 +648,7 @@ export function initMarketRefreshButtons() {
 }
 
 export async function refreshMarket1Only() {
-    marketContainer.replaceChildren(_noData('Refreshing Market-1...'));
+    marketContainer.replaceChildren(_noData('正在刷新市场 1...'));
     await chrome.storage.local.remove('marketData');
     try {
         const tab = await getCor3Tab();
@@ -660,11 +660,11 @@ export async function refreshMarket1Only() {
 }
 
 export async function setDarkMarketEndpoint() {
-    darkMarketContainer.replaceChildren(_noData('Setting Market-2 endpoint...'));
+    darkMarketContainer.replaceChildren(_noData('正在设置市场 2 端点...'));
 }
 
 export async function refreshMarket2Only() {
-    darkMarketContainer.replaceChildren(_noData('Refreshing Market-2...'));
+    darkMarketContainer.replaceChildren(_noData('正在刷新市场 2...'));
     await chrome.storage.local.remove(['darkMarketData', 'darkMarketAvailable']);
     try {
         const tab = await getCor3Tab();
@@ -685,7 +685,7 @@ export async function refreshMarket2Only() {
 }
 
 export async function refreshMarket3Only() {
-    soyuzMarketContainer.replaceChildren(_noData('Refreshing Market-3...'));
+    soyuzMarketContainer.replaceChildren(_noData('正在刷新市场 3...'));
     await chrome.storage.local.remove(['soyuzMarketData', 'soyuzMarketAvailable']);
     try {
         const tab = await getCor3Tab();
@@ -706,7 +706,7 @@ export async function refreshMarket3Only() {
 }
 
 export async function refreshMarket4Only() {
-    usolMarketContainer.replaceChildren(_noData('Refreshing Market-4...'));
+    usolMarketContainer.replaceChildren(_noData('正在刷新市场 4...'));
     await chrome.storage.local.remove(['usolMarketData', 'usolMarketAvailable']);
     try {
         const tab = await getCor3Tab();
@@ -736,7 +736,7 @@ export function initMarketStorageListener() {
                 if (md.market && md.market.marketName) {
                     state.coreMarketName = md.market.marketName;
                     updateMarketLabel(coreMarketLabel, state.coreMarketName, 'Market-1', '🏠');
-                    TIMER_LABELS.home_jobs = state.coreMarketName + ' Jobs Reset';
+                    TIMER_LABELS.home_jobs = state.coreMarketName + ' 个任务已重置';
                     const opt = alarmTimerSelect.querySelector('option[value="home_jobs"]');
                     if (opt) opt.textContent = TIMER_LABELS.home_jobs;
                 }
@@ -783,13 +783,13 @@ export function initMarketCacheLoad() {
             if (result.marketData.market && result.marketData.market.marketName) {
                 state.coreMarketName = result.marketData.market.marketName;
                 updateMarketLabel(coreMarketLabel, state.coreMarketName, 'Market-1', '🏠');
-                TIMER_LABELS.home_jobs = state.coreMarketName + ' Jobs Reset';
+                TIMER_LABELS.home_jobs = state.coreMarketName + ' 个任务已重置';
                 const opt = alarmTimerSelect.querySelector('option[value="home_jobs"]');
                 if (opt) opt.textContent = TIMER_LABELS.home_jobs;
             }
             renderMarket(result.marketData);
         } else {
-            marketContainer.replaceChildren(_noData('No market data cached. Click 🔄 to refresh.'));
+            marketContainer.replaceChildren(_noData('未缓存市场数据。点击 🔄 刷新。'));
         }
         if (result.darkMarketData || result.darkMarketAvailable === false) {
             if (result.darkMarketData) {
@@ -797,7 +797,7 @@ export function initMarketCacheLoad() {
                 if (result.darkMarketData.market && result.darkMarketData.market.marketName) {
                     state.darkMarketName = result.darkMarketData.market.marketName;
                     updateMarketLabel(darkMarketLabel, state.darkMarketName, 'Market-2', '🌑');
-                    TIMER_LABELS.dark_jobs = state.darkMarketName + ' Jobs Reset';
+                    TIMER_LABELS.dark_jobs = state.darkMarketName + ' 个任务已重置';
                     const opt = alarmTimerSelect.querySelector('option[value="dark_jobs"]');
                     if (opt) opt.textContent = TIMER_LABELS.dark_jobs;
                 }
@@ -808,7 +808,7 @@ export function initMarketCacheLoad() {
             if (darkBlocker) {
                 renderDarkMarket(null, false, darkBlocker.maintenanceEndsAt, darkBlocker.blockerName);
             } else {
-                darkMarketContainer.replaceChildren(_noData('No market data cached. Click 🔄 to refresh.'));
+                darkMarketContainer.replaceChildren(_noData('未缓存市场数据。点击 🔄 刷新。'));
             }
         }
         if (result.soyuzMarketData || result.soyuzMarketAvailable === false) {
@@ -817,7 +817,7 @@ export function initMarketCacheLoad() {
                 if (result.soyuzMarketData.market && result.soyuzMarketData.market.marketName) {
                     state.soyuzMarketName = result.soyuzMarketData.market.marketName;
                     updateMarketLabel(soyuzMarketLabel, state.soyuzMarketName, 'Market-3', '☭');
-                    TIMER_LABELS.soyuz_jobs = state.soyuzMarketName + ' Jobs Reset';
+                    TIMER_LABELS.soyuz_jobs = state.soyuzMarketName + ' 个任务已重置';
                     const opt = alarmTimerSelect.querySelector('option[value="soyuz_jobs"]');
                     if (opt) opt.textContent = TIMER_LABELS.soyuz_jobs;
                 }
@@ -828,7 +828,7 @@ export function initMarketCacheLoad() {
             if (soyuzBlocker) {
                 renderSoyuzMarket(null, false, soyuzBlocker.maintenanceEndsAt, soyuzBlocker.blockerName);
             } else {
-                soyuzMarketContainer.replaceChildren(_noData('No market data cached. Click 🔄 to refresh.'));
+                soyuzMarketContainer.replaceChildren(_noData('未缓存市场数据。点击 🔄 刷新。'));
             }
         }
         if (result.usolMarketData || result.usolMarketAvailable === false) {
@@ -837,7 +837,7 @@ export function initMarketCacheLoad() {
                 if (result.usolMarketData.market && result.usolMarketData.market.marketName) {
                     state.usolMarketName = result.usolMarketData.market.marketName;
                     updateMarketLabel(usolMarketLabel, state.usolMarketName, 'Market-4', '☮');
-                    TIMER_LABELS.usol_jobs = state.usolMarketName + ' Jobs Reset';
+                    TIMER_LABELS.usol_jobs = state.usolMarketName + ' 个任务已重置';
                     const opt = alarmTimerSelect.querySelector('option[value="usol_jobs"]');
                     if (opt) opt.textContent = TIMER_LABELS.usol_jobs;
                 }
@@ -848,7 +848,7 @@ export function initMarketCacheLoad() {
             if (usolBlocker) {
                 renderUsolMarket(null, false, usolBlocker.maintenanceEndsAt, usolBlocker.blockerName);
             } else {
-                usolMarketContainer.replaceChildren(_noData('No market data cached. Click 🔄 to refresh.'));
+                usolMarketContainer.replaceChildren(_noData('未缓存市场数据。点击 🔄 刷新。'));
             }
         }
     });

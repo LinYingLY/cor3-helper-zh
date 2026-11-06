@@ -17,9 +17,9 @@ import { processQueue } from './main-loop.js';
 
         if (event.data && event.data.type === 'COR3_AUTOJOB_STOP') {
             state.abortFlag = true;
-            log('Stop signal received — aborting after current step', 'warn');
+            log('收到停止信号 — 当前步骤结束后中止', 'warn');
         }
     });
 
-    console.log('[COR3 Helper] Auto Job Solver engine loaded');
+    console.log('[COR3 助手] 自动任务求解器引擎已加载');
 })();

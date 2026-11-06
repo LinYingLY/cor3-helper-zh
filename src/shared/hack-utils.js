@@ -50,21 +50,21 @@ export function formatMinigameLockError(lockData) {
     var remaining = new Date(expiresAt).getTime() - Date.now();
     if (remaining <= 0) return null;
     var mins = Math.ceil(remaining / 60000);
-    return { message: 'Minigame locked (~' + mins + 'm remaining)', lockExpiresAt: expiresAt, remainingMs: remaining };
+    return { message: '小游戏已锁定(约' + mins + '分剩余)', lockExpiresAt: expiresAt, remainingMs: remaining };
 }
 
 export function createWaitForHackToBeDone(logFn, abortFlagFn) {
     return async function waitForHackToBeDone() {
-        logFn('Hack minigame started, waiting for solver to complete...');
+        logFn('破解小游戏已开始，等待求解器完成...');
         var hackSolverTimeout = 60000;
         var hackType = await detectHackType(5000);
         if (hackType === 'ice-wall') {
             hackSolverTimeout = 120000;
-            logFn('ICE Wall hack detected — waiting up to 2 minutes');
+            logFn('检测到冰墙破解 — 最多等待 2 分钟');
         } else if (hackType) {
-            logFn(hackType + ' hack detected — waiting up to 60s');
+            logFn(hackType + ' 检测到破解 — 最多等待 60s');
         } else {
-            logFn('Could not detect hack type — using default 60s timeout', 'warn');
+            logFn('无法识别破解类型 — 使用默认 60 秒超时', 'warn');
         }
 
         var saiUpdateReceived = false;
@@ -82,7 +82,7 @@ export function createWaitForHackToBeDone(logFn, abortFlagFn) {
                 function pollClose() {
                     if (done) return;
                     if (abortFlagFn && abortFlagFn()) {
-                        if (!done) { done = true; window.removeEventListener('message', onEvent); safeClearTimeout(timeoutTimerId); reject(new Error('Aborted')); }
+                        if (!done) { done = true; window.removeEventListener('message', onEvent); safeClearTimeout(timeoutTimerId); reject(new Error('已中止')); }
                         return;
                     }
                     if (canPollClose && !isHackMinigameOpen()) {
@@ -98,19 +98,19 @@ export function createWaitForHackToBeDone(logFn, abortFlagFn) {
             });
         } catch (e) {
             if (abortFlagFn && abortFlagFn()) {
-                logFn('Hack wait aborted by user', 'warn');
+                logFn('破解等待已被用户中止', 'warn');
                 return;
             }
-            logFn('Hack solver did not complete in ' + (hackSolverTimeout / 1000) + 's — checking login status directly', 'warn');
+            logFn('破解求解器未在以下时间内完成 ' + (hackSolverTimeout / 1000) + ' 秒 — 直接检查登录状态', 'warn');
         }
         if (saiUpdateReceived) {
-            logFn('Hack completed (SAI update)', 'success');
+            logFn('破解完成 (SAI 更新)', 'success');
         } else if (canPollClose && !isHackMinigameOpen()) {
-            logFn('Hack completed (minigame closed)', 'success');
+            logFn('破解完成 (小游戏已关闭)', 'success');
         }
 
         if (isHackMinigameOpen()) {
-            logFn('Waiting for hack minigame dialog to close...');
+            logFn('正在等待破解小游戏对话框关闭...');
             await waitForHackMinigameClose(30000);
         }
     };
@@ -168,18 +168,18 @@ export function waitForIceWallStuckClear(logFn, maxWaitMs) {
             resolve({ stuck: false, reloaded: false });
             return;
         }
-        logFn('ICE Wall stuck on "Awaiting secure channel…" — waiting up to ' + (maxWaitMs / 1000) + 's for it to clear');
+        logFn('冰墙卡在“等待安全通道…” — 最长等待 ' + (maxWaitMs / 1000) + ' 秒后清除');
         var elapsed = 0;
         var interval = 500;
         function poll() {
             if (!isIceWallAwaitingStuck()) {
-                logFn('ICE Wall "Awaiting secure channel…" screen cleared');
+                logFn('冰墙 "等待安全信道…" 界面已清除');
                 resolve({ stuck: true, reloaded: false });
                 return;
             }
             elapsed += interval;
             if (elapsed >= maxWaitMs) {
-                logFn('ICE Wall still stuck after ' + (maxWaitMs / 1000) + 's — page reload required to clear stuck UI', 'warn');
+                logFn('冰墙仍卡住，已等待 ' + (maxWaitMs / 1000) + ' 秒 — 需要刷新页面以清除卡死界面', 'warn');
                 resolve({ stuck: true, reloaded: true });
                 return;
             }

@@ -97,7 +97,7 @@ export function tryPrettyPrint(raw) {
             const parsed = JSON.parse(stripped);
             const event = parsed[0];
             const data = parsed.length > 1 ? parsed.slice(1) : [];
-            let result = 'Event: ' + event + '\n';
+            let result = '事件: ' + event + '\n';
             if (data.length === 1) {
                 result += '\n' + JSON.stringify(data[0], null, 2);
             } else if (data.length > 1) {
@@ -109,7 +109,7 @@ export function tryPrettyPrint(raw) {
     // Handshake (0{...})
     if (raw.startsWith('0{')) {
         try {
-            return 'Handshake\n\n' + JSON.stringify(JSON.parse(raw.substring(1)), null, 2);
+            return '握手\n\n' + JSON.stringify(JSON.parse(raw.substring(1)), null, 2);
         } catch (e) { /* fall through */ }
     }
     // Try plain JSON

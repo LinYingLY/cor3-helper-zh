@@ -40,13 +40,13 @@ function parsePollingForDesktopOptions(responseText) {
                 if (Array.isArray(parsed) && parsed[0] === 'desktop' && parsed[1]) {
                     var payload = parsed[1];
                     if (payload.event && payload.event.action === 'get.options' && payload.data) {
-                        console.log('[COR3 Helper] Desktop get.options found in polling response — folders:', payload.data.folders ? payload.data.folders.length : 0);
+                        console.log('[COR3 Helper] 轮询响应中发现桌面 get.options — 文件夹：', payload.data.folders ? payload.data.folders.length : 0);
                         // Cache Downloads folder ID
                         if (payload.data.folders) {
                             var dlf = payload.data.folders.find(function (f) { return f.name === 'Downloads'; });
                             if (dlf) {
                                 window.__cor3DownloadFolderId = dlf.id;
-                                console.log('[COR3 Helper] Cached Downloads folder ID from polling:', dlf.id);
+                                console.log('[COR3 Helper] 已从轮询缓存 Downloads 文件夹 ID：', dlf.id);
                             }
                         }
                         // Also relay as postMessage so auto-job-solver can pick it up
@@ -84,13 +84,13 @@ export function installHttpIntercept() {
                     if (!webVersion) {
                         webVersion = parsedUrl.searchParams.get('v');
                     }
-                    console.log('[COR3 Helper] Captured web version from translation.json:', webVersion);
+                    console.log('[COR3 Helper] 已从 translation.json 捕获网页版本：', webVersion);
                     window.__cor3WebVersion = webVersion;
                     setTimeout(function () {
                         window.postMessage({ type: 'COR3_WEB_VERSION', version: webVersion }, '*');
                     }, 250);
                 } catch (e) {
-                    console.log('[COR3 Helper] Error parsing version:', e);
+                    console.log('[COR3 Helper] 解析版本出错：', e);
                 }
             }
         } catch (e) { /* silent */ }
@@ -114,7 +114,7 @@ export function installHttpIntercept() {
                     if (resp && resp.ok) {
                         resp.clone().json().then(function (data) {
                             if (data && data.systemVersion !== undefined) {
-                                console.log('[COR3 Helper] Captured system version from api/users/me:', data.systemVersion);
+                                console.log('[COR3 Helper] 已从 api/users/me 捕获系统版本：', data.systemVersion);
                                 window.__cor3SystemVersion = data.systemVersion;
                                 window.postMessage({ type: 'COR3_SYSTEM_VERSION', version: data.systemVersion }, '*');
                             }

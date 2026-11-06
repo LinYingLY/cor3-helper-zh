@@ -15,7 +15,7 @@ import { ensureSearchOnlyLoadout } from './loadout.js';
 // ---- Fetch maintenance data and update UI ----
 
 export async function fetchMaintenanceData() {
-    log('Fetching maintenance data...');
+    log('正在获取维护数据...');
     setCachedMapData(null);
     sendCmd('get.map', {});
     try {
@@ -42,10 +42,10 @@ export async function fetchMaintenanceData() {
             var tB = b.timeUntilMaintenance || b.maintenanceEndsAt || '';
             return tA < tB ? -1 : tA > tB ? 1 : 0;
         });
-        log('Maintenance: ' + maintServers.length + ' server(s) with upcoming/active maintenance');
+        log('维护：' + maintServers.length + ' 个即将/正在维护的服务器');
         updateMaintenanceUI({ servers: maintServers });
     } catch (e) {
-        log('Maintenance data fetch timeout', 'warn');
+        log('维护数据获取超时', 'warn');
     }
 }
 
@@ -53,7 +53,7 @@ export async function fetchMaintenanceData() {
 
 export async function forceMaintenanceBatch(servers) {
     if (_forceMaintenanceRunning) {
-        log('Force maintenance already in progress', 'warn');
+        log('强制维护已在进行中', 'warn');
         return;
     }
     setForceMaintenanceRunning(true);
@@ -61,7 +61,7 @@ export async function forceMaintenanceBatch(servers) {
 
     servers.sort(function (a, b) { return getServerPathLength(b.id) - getServerPathLength(a.id); });
     var serverIds = servers.map(function (s) { return s.id; });
-    log('\ud83d\udd27 Batch force maintenance: ' + servers.length + ' server(s) \u2014 order: ' + servers.map(function (s) { return s.name; }).join(', '));
+    log('\ud83d\udd27 批量强制维护：' + servers.length + ' 个服务器 — 顺序： ' + servers.map(function (s) { return s.name; }).join(', '));
 
     var completed = 0;
     var failed = [];
@@ -70,23 +70,23 @@ export async function forceMaintenanceBatch(servers) {
         var srv = servers[i];
         window.postMessage({ type: 'COR3_VALUABLE_FORCE_MAINT_BATCH_PROGRESS', currentServerId: srv.id, serverIds: serverIds }, '*');
 
-        log('\ud83d\udd27 Batch [' + (i + 1) + '/' + servers.length + ']: ' + srv.name + ' \u2014 equipping search software...');
+        log('\ud83d\udd27 批量 [' + (i + 1) + '/' + servers.length + ']: ' + srv.name + ' \u2014 正在装备搜寻软件...');
 
         try {
             var searchPower = await ensureSearchOnlyLoadout(srv.id);
             if (!searchPower) {
-                log('\ud83d\udd27 Batch [' + (i + 1) + '/' + servers.length + ']: could not equip search software for ' + srv.name, 'error');
+                log('\ud83d\udd27 批量 [' + (i + 1) + '/' + servers.length + ']：无法为其装备搜索软件 ' + srv.name, 'error');
                 failed.push(srv.name);
                 if (i < servers.length - 1) await delay(2000);
                 continue;
             }
 
-            log('\ud83d\udd27 Batch [' + (i + 1) + '/' + servers.length + ']: ' + srv.name + ' \u2014 sending search-valuable requests...');
+            log('\ud83d\udd27 批量 [' + (i + 1) + '/' + servers.length + ']: ' + srv.name + ' \u2014 正在发送高价搜寻请求...');
             var MAX_ATTEMPTS = 50;
             var maintStarted = false;
 
             for (var j = 0; j < MAX_ATTEMPTS; j++) {
-                if (!running) { log('Batch force maintenance stopped', 'warn'); break; }
+                if (!running) { log('批量强制维护已停止', 'warn'); break; }
                 sendCmd('file.search-valuable', { serverId: srv.id });
                 var searchResult = await new Promise(function (resolve) {
                     var done = false;
@@ -123,7 +123,7 @@ export async function forceMaintenanceBatch(servers) {
                         var mapCheck = await waitForEvent('COR3_WS_NETWORK_MAP', 10000);
                         setCachedMapData(mapCheck);
                         if (mapCheck && mapCheck.servers && mapCheck.servers[srv.id] && mapCheck.servers[srv.id].maintenanceEndsAt) {
-                            log('\ud83d\udd27 Batch [' + (i + 1) + '/' + servers.length + ']: ' + srv.name + ' \u2014 confirmed in maintenance', 'success');
+                            log('\ud83d\udd27 批量 [' + (i + 1) + '/' + servers.length + ']: ' + srv.name + ' \u2014 已确认维护中', 'success');
                             maintStarted = true;
                             break;
                         }
@@ -132,17 +132,17 @@ export async function forceMaintenanceBatch(servers) {
                             var pathBlock = await checkPathMaintenance(getServerName(srv.id));
                             if (pathBlock.blocked) {
                                 var bMins = Math.ceil(pathBlock.remainingMs / 60000);
-                                log('\ud83d\udd27 Batch [' + (i + 1) + '/' + servers.length + ']: cannot reach ' + srv.name + ' \u2014 ' + pathBlock.blockerName + ' in maintenance (~' + bMins + 'm)', 'error');
-                                failed.push(srv.name + ' (blocked by ' + pathBlock.blockerName + ')');
+                                log('\ud83d\udd27 批量 [' + (i + 1) + '/' + servers.length + ']: 未能连接 ' + srv.name + ' \u2014 ' + pathBlock.blockerName + ' 维护中 (~' + bMins + 'm)', 'error');
+                                failed.push(srv.name + ' (被阻挡：' + pathBlock.blockerName + ')');
                                 break;
                             }
-                            log('\ud83d\udd27 Batch [' + (i + 1) + '/' + servers.length + ']: cannot reach ' + srv.name + ' \u2014 path-through failed', 'error');
-                            failed.push(srv.name + ' (unreachable)');
+                            log('\ud83d\udd27 批量 [' + (i + 1) + '/' + servers.length + ']: 未能连接 ' + srv.name + ' \u2014 路径穿透失败', 'error');
+                            failed.push(srv.name + ' (不可达)');
                             break;
                         }
                         await delay(humanDelay());
                     } catch (e) {
-                        log('\ud83d\udd27 Batch: map check failed for ' + srv.name + ' \u2014 retrying...', 'warn');
+                        log('\ud83d\udd27 批量：地图检查失败 ' + srv.name + ' \u2014 重试中...', 'warn');
                     }
                     continue;
                 }
@@ -151,22 +151,22 @@ export async function forceMaintenanceBatch(servers) {
 
             if (maintStarted) {
                 completed++;
-                log('\ud83d\udd27 Batch [' + (i + 1) + '/' + servers.length + ']: ' + srv.name + ' \u2014 maintenance started!', 'success');
+                log('\ud83d\udd27 批量 [' + (i + 1) + '/' + servers.length + ']: ' + srv.name + ' \u2014 维护开始了！', 'success');
                 window.postMessage({ type: 'COR3_VALUABLE_FORCE_MAINT_SERVER_DONE', serverId: srv.id, serverName: srv.name }, '*');
             } else if (running) {
-                log('\ud83d\udd27 Batch [' + (i + 1) + '/' + servers.length + ']: ' + srv.name + ' \u2014 did not trigger after ' + MAX_ATTEMPTS + ' attempts', 'warn');
-                failed.push(srv.name + ' (max attempts)');
+                log('\ud83d\udd27 批量 [' + (i + 1) + '/' + servers.length + ']: ' + srv.name + ' \u2014 在 ' + MAX_ATTEMPTS + ' 次尝试', 'warn');
+                failed.push(srv.name + ' (已达最大尝试次数)');
             }
         } catch (e) {
-            log('\ud83d\udd27 Batch [' + (i + 1) + '/' + servers.length + ']: ' + srv.name + ' \u2014 error: ' + e.message, 'error');
-            failed.push(srv.name + ' (error)');
+            log('\ud83d\udd27 批量 [' + (i + 1) + '/' + servers.length + ']: ' + srv.name + ' \u2014 错误：' + e.message, 'error');
+            failed.push(srv.name + ' (错误)');
         }
 
         if (!running) break;
         if (i < servers.length - 1) await delay(2000);
     }
 
-    log('\ud83d\udd27 Batch force maintenance complete: ' + completed + '/' + servers.length + ' succeeded' + (failed.length > 0 ? ' \u2014 failed: ' + failed.join(', ') : ''), completed === servers.length ? 'success' : 'warn');
+    log('\ud83d\udd27 批量强制维护完成：' + completed + '/' + servers.length + ' 成功' + (failed.length > 0 ? ' \u2014 失败：' + failed.join(', ') : ''), completed === servers.length ? 'success' : 'warn');
 
     await delay(1500);
     await fetchMaintenanceData();

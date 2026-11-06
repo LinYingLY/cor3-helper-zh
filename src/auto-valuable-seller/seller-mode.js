@@ -25,7 +25,7 @@ import {
 import { fetchMaintenanceData } from './maintenance.js';
 
 export async function runSeller(selectedServers, selectedDownloads) {
-    log('=== Valuable Seller Started ===', 'info');
+    log('=== 高价出售已开始 ===', 'info');
     setCachedMapData(null);
     clearDesktopToServerMap();
 
@@ -38,20 +38,20 @@ export async function runSeller(selectedServers, selectedDownloads) {
         return pathB.length - pathA.length;
     });
 
-    log('Selected: ' + selectedServers.length + ' server(s), ' + selectedDownloads.length + ' download(s) (processing furthest first)');
+    log('已选：' + selectedServers.length + ' 个服务器， ' + selectedDownloads.length + ' 个下载(优先处理最远的)');
     var _sellerDownloadsData = { files: [] };
 
     // Step 1: For selected servers, access + search-valuable + download
     for (var si = 0; si < selectedServers.length; si++) {
-        if (!running) { log('Seller stopped by user.', 'warn'); break; }
+        if (!running) { log('自动出售已被用户停止。', 'warn'); break; }
 
         var serverId = selectedServers[si];
         var serverName = getServerName(serverId);
-        log('Processing server ' + (si + 1) + '/' + selectedServers.length + ': ' + serverName);
+        log('正在处理服务器 ' + (si + 1) + '/' + selectedServers.length + ': ' + serverName);
 
         // Ensure access (hack loadout equipped internally if needed)
         if (!await ensureServerAccess(serverId)) {
-            log(serverName + ': skipping (no access)', 'warn');
+            log(serverName + ': 跳过 (无访问权限)', 'warn');
             continue;
         }
 
@@ -71,35 +71,35 @@ export async function runSeller(selectedServers, selectedDownloads) {
         // Search for valuable files (skip if search phase found no files on this server)
         var detectedFileIds = {};
         if (hasSearchFiles) {
-            log(serverName + ': searching for valuable files...');
+            log(serverName + '：正在搜索高价值文件...');
             var fileSearchResult = await searchValuableFiles(serverId);
             if (fileSearchResult && fileSearchResult.found) {
                 var valuableFound = fileSearchResult.found.filter(function (f) { return f.basePrice > 0; });
                 for (var dfi = 0; dfi < valuableFound.length; dfi++) {
                     detectedFileIds[valuableFound[dfi].id] = true;
                 }
-                log(serverName + ': file search-valuable completed \u2014 detected ' + valuableFound.length + ' file(s)' + (valuableFound.length < fileSearchResult.found.length ? ' (' + (fileSearchResult.found.length - valuableFound.length) + ' skipped, basePrice=0)' : '') + ', searchPower used: ' + (fileSearchResult.searchPowerUsed || '?'), 'success');
+                log(serverName + '：文件高价值搜索完成 \u2014 检测到 ' + valuableFound.length + ' 个文件' + (valuableFound.length < fileSearchResult.found.length ? ' (' + (fileSearchResult.found.length - valuableFound.length) + ' 已跳过, basePrice=0)' : '') + '，searchPower 用量： ' + (fileSearchResult.searchPowerUsed || '?'), 'success');
             }
             await delay(humanDelay());
         } else {
-            log(serverName + ': skipping file search-valuable (no valuable files found during scan)');
+            log(serverName + '：跳过文件高价值搜索（扫描期间未发现高价值文件）');
         }
 
         // Search for valuable logs (skip if search phase found no logs on this server)
         var detectedLogIds = {};
         if (hasSearchLogs) {
-            log(serverName + ': searching for valuable logs...');
+            log(serverName + '：正在搜索高价值日志...');
             var logSearchResult = await searchValuableLogs(serverId);
             if (logSearchResult && logSearchResult.found) {
                 var valuableLogsFound = logSearchResult.found.filter(function (l) { return l.basePrice > 0; });
                 for (var dli = 0; dli < valuableLogsFound.length; dli++) {
                     detectedLogIds[valuableLogsFound[dli].id] = true;
                 }
-                log(serverName + ': log search-valuable completed \u2014 detected ' + valuableLogsFound.length + ' log(s)' + (valuableLogsFound.length < logSearchResult.found.length ? ' (' + (logSearchResult.found.length - valuableLogsFound.length) + ' skipped, basePrice=0)' : ''), 'success');
+                log(serverName + '：日志高价值搜索完成 \u2014 检测到 ' + valuableLogsFound.length + ' 条日志' + (valuableLogsFound.length < logSearchResult.found.length ? ' (' + (logSearchResult.found.length - valuableLogsFound.length) + ' 已跳过, basePrice=0)' : ''), 'success');
             }
             await delay(humanDelay());
         } else {
-            log(serverName + ': skipping log search-valuable (no valuable logs found during scan)');
+            log(serverName + '：跳过日志高价值搜索（扫描期间未发现高价值日志）');
         }
 
         // Re-fetch files from server
@@ -112,7 +112,7 @@ export async function runSeller(selectedServers, selectedDownloads) {
             var beforeCount = valuableFiles.length;
             valuableFiles = valuableFiles.filter(function (f) { return detectedFileIds[f.fileId || f.id]; });
             if (beforeCount !== valuableFiles.length) {
-                log(serverName + ': filtered files: ' + valuableFiles.length + ' detected of ' + beforeCount + ' total valuable');
+                log(serverName + '：已筛选文件： ' + valuableFiles.length + ' 已探测，共 ' + beforeCount + ' 共计高价物品');
             }
         }
 
@@ -132,12 +132,12 @@ export async function runSeller(selectedServers, selectedDownloads) {
             if (!running) break;
             var vf = valuableFiles[fi];
             var tagLabels = (vf.tags || []).map(function (t) { return typeof t === 'string' ? t : (t.label || t.key); }).join(', ');
-            log(serverName + ': downloading file "' + vf.name + '" (tags: ' + tagLabels + ', price: ' + vf.basePrice + ')');
+            log(serverName + '：正在下载文件 "' + vf.name + '" (标签: ' + tagLabels + ', 价格: ' + vf.basePrice + ')');
             var dlOk = await downloadFile(serverId, vf.fileId);
             if (dlOk) {
-                log(serverName + ': file downloaded \u2713', 'success');
+                log(serverName + '：文件已下载 \u2713', 'success');
             } else {
-                log(serverName + ': file download failed', 'error');
+                log(serverName + '：文件下载失败', 'error');
             }
             await delay(humanDelay());
         }
@@ -152,7 +152,7 @@ export async function runSeller(selectedServers, selectedDownloads) {
             var beforeLogCount = valuableLogs.length;
             valuableLogs = valuableLogs.filter(function (l) { return detectedLogIds[String(l.seq)]; });
             if (beforeLogCount !== valuableLogs.length) {
-                log(serverName + ': filtered logs: ' + valuableLogs.length + ' detected of ' + beforeLogCount + ' total valuable');
+                log(serverName + '：已筛选日志： ' + valuableLogs.length + ' 已探测，共 ' + beforeLogCount + ' 共计高价物品');
             }
         }
 
@@ -172,12 +172,12 @@ export async function runSeller(selectedServers, selectedDownloads) {
             if (!running) break;
             var vl = valuableLogs[li];
             var ltagLabels = (vl.tags || []).map(function (t) { return typeof t === 'string' ? t : (t.label || t.key); }).join(', ');
-            log(serverName + ': downloading log "' + vl.message + '" (tags: ' + ltagLabels + ', price: ' + vl.basePrice + ')');
+            log(serverName + '：正在下载日志 "' + vl.message + '" (标签: ' + ltagLabels + ', 价格: ' + vl.basePrice + ')');
             var dlLogOk = await downloadLog(serverId, vl.seq);
             if (dlLogOk) {
-                log(serverName + ': log downloaded \u2713', 'success');
+                log(serverName + '：日志已下载 \u2713', 'success');
             } else {
-                log(serverName + ': log download failed', 'error');
+                log(serverName + '：日志下载失败', 'error');
             }
             await delay(humanDelay());
         }
@@ -192,7 +192,7 @@ export async function runSeller(selectedServers, selectedDownloads) {
         }
 
         // Refresh downloads folder and update Downloads tab
-        log(serverName + ': refreshing downloads folder...');
+        log(serverName + '：正在刷新下载文件夹...');
         await delay(500);
         var dlFiles = await getDownloadsFolder();
         var valuableDlFiles = dlFiles.filter(function (f) { return f.isValuable; });
@@ -223,9 +223,9 @@ export async function runSeller(selectedServers, selectedDownloads) {
             });
         }
         updateDownloadsUI(_sellerDownloadsData);
-        log(serverName + ': downloads folder has ' + _sellerDownloadsData.files.length + ' valuable file(s)');
+        log(serverName + '：下载文件夹中有 ' + _sellerDownloadsData.files.length + ' 个高价文件');
 
-        log(serverName + ': done processing');
+        log(serverName + '：处理完成');
     }
 
     // Step 2: Sell items at markets in priority order
@@ -234,20 +234,20 @@ export async function runSeller(selectedServers, selectedDownloads) {
     var grandTotalSold = 0;
 
     if (running) {
-        log('--- Selling valuables at markets ---');
+        log('--- 在市场出售高价值物品 ---');
 
         for (var mi = 0; mi < MARKET_SELL_ORDER.length; mi++) {
             if (!running) break;
 
             var market = MARKET_SELL_ORDER[mi];
-            log('Checking ' + market.name + ' market for sellable items...');
+            log('正在检查 ' + market.name + ' 市场找可出售物品...');
 
             // Set endpoint to market server before requesting sellable items (HOME is default, skip)
             if (market.serverId) {
-                log(market.name + ': setting endpoint to market server...');
+                log(market.name + '：正在将端点设为市场服务器...');
                 var epOk = await _sendSetEndpoint(market.serverId);
                 if (!epOk) {
-                    log(market.name + ': failed to set endpoint \u2014 skipping', 'warn');
+                    log(market.name + '：设置端点失败 — 跳过', 'warn');
                     continue;
                 }
                 await delay(humanDelay());
@@ -256,7 +256,7 @@ export async function runSeller(selectedServers, selectedDownloads) {
             var sellableResult = await getSellableItems(market.id);
             var sellableItems = sellableResult.items || [];
             if (sellableItems.length === 0) {
-                log(market.name + ': no sellable items');
+                log(market.name + '：没有可出售物品');
                 await delay(humanDelay());
                 continue;
             }
@@ -268,11 +268,11 @@ export async function runSeller(selectedServers, selectedDownloads) {
             }).filter(Boolean);
             var marketCredits = sellableResult.totalPrice;
             var marketRep = sellableResult.totalRepGain;
-            log(market.name + ': found ' + items.length + ' sellable item(s) (\ud83d\udcb0' + marketCredits + ' \u2b50' + marketRep + ')');
+            log(market.name + ': 找到 ' + items.length + ' 件可出售物品（\ud83d\udcb0' + marketCredits + ' \u2b50' + marketRep + ')');
 
             if (items.length > 0) {
                 await delay(humanDelay());
-                log(market.name + ': selling ' + items.length + ' item(s)...');
+                log(market.name + '：正在出售 ' + items.length + ' 件物品...');
                 var sold = await sellItems(market.id, items, function (soldItem) {
                     var sid = soldItem.itemId;
                     _sellerDownloadsData.files = _sellerDownloadsData.files.filter(function (f) { return f.id !== sid; });
@@ -298,12 +298,12 @@ export async function runSeller(selectedServers, selectedDownloads) {
                     }
                 });
                 if (sold > 0) {
-                    log(market.name + ': sold ' + sold + '/' + items.length + ' item(s) \u2713', 'success');
+                    log(market.name + '：已出售 ' + sold + '/' + items.length + ' 件物品 \u2713', 'success');
                     grandTotalCredits += marketCredits;
                     grandTotalRep += marketRep;
                     grandTotalSold += sold;
                 } else {
-                    log(market.name + ': sell failed', 'error');
+                    log(market.name + '：出售失败', 'error');
                 }
                 await delay(humanDelay());
             }
@@ -311,9 +311,9 @@ export async function runSeller(selectedServers, selectedDownloads) {
     }
 
     if (grandTotalSold > 0) {
-        log('=== Total: ' + grandTotalSold + ' item(s) sold \u2014 \ud83d\udcb0' + grandTotalCredits + ' credits, \u2b50' + grandTotalRep + ' reputation ===', 'success');
+        log('=== 总计：' + grandTotalSold + ' 件物品已出售 \u2014 \ud83d\udcb0' + grandTotalCredits + ' 信用点,⭐' + grandTotalRep + ' 声望 ===', 'success');
     }
     await fetchMaintenanceData();
-    log('=== Valuable Seller Complete ===', 'success');
+    log('=== 高价出售完成 ===', 'success');
     signalDone();
 }

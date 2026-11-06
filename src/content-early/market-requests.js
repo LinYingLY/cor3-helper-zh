@@ -25,7 +25,7 @@ export function __cor3WaitForMsg(eventType, timeoutMs) {
         window.addEventListener('message', handler);
         timer = setTimeout(function () {
             window.removeEventListener('message', handler);
-            reject(new Error('Timeout waiting for ' + eventType));
+            reject(new Error('等待超时: ' + eventType));
         }, timeoutMs || 10000);
     });
 }
@@ -33,58 +33,58 @@ export function __cor3WaitForMsg(eventType, timeoutMs) {
 // Ensure access to a server (login status check → hack if needed)
 export function __cor3EnsureServerAccess(serverId, serverName) {
     return new Promise(function (resolve, reject) {
-        console.log('[COR3 Helper] Path-through: checking access to ' + serverName);
+        console.log('[COR3 Helper] 路径穿行：正在检查访问 ' + serverName);
         var getLoginStatus = '42["event",{"event":{"name":"sai","action":"get.login.status"},"data":{"serverId":"' + serverId + '"}}]';
         wsSend(getLoginStatus);
         __cor3WaitForMsg('COR3_AUTOJOB_SAI_LOGIN_STATUS', 10000).then(function (loginData) {
             if (loginData.data && loginData.data.activeAccesses && loginData.data.activeAccesses.length > 0) {
-                console.log('[COR3 Helper] Path-through: ' + serverName + ' already has access');
+                console.log('[COR3 Helper] 路径穿透: ' + serverName + ' 已有访问权限');
                 resolve();
                 return;
             }
             // Need to hack
-            console.log('[COR3 Helper] Path-through: ' + serverName + ' no access — hacking...');
+            console.log('[COR3 Helper] 路径穿透: ' + serverName + ' 无访问权限 — 正在破解...');
             // Enable decrypt solver for the hack minigame
             window.postMessage({ type: 'COR3_AUTOJOB_ENABLE_DECRYPT_SOLVER' }, '*');
             var hackStart = '42["event",{"event":{"name":"sai","action":"hack.start"},"data":{"serverId":"' + serverId + '"}}]';
             wsSend(hackStart);
             __cor3WaitForMsg('COR3_AUTOJOB_SAI_HACK_START', 30000).then(function (hackData) {
                 if (hackData.error) {
-                    reject(new Error(serverName + ' hack failed: ' + (hackData.error.message || JSON.stringify(hackData.error))));
+                    reject(new Error(serverName + ' 破解失败：' + (hackData.error.message || JSON.stringify(hackData.error))));
                     return;
                 }
-                console.log('[COR3 Helper] Path-through: ' + serverName + ' hack started, waiting for solver...');
+                console.log('[COR3 Helper] 路径穿透: ' + serverName + ' 破解已启动，等待求解器...');
                 // Wait briefly for SAI update, then check login status
                 __cor3WaitForMsg('COR3_AUTOJOB_SAI_UPDATE', 5000).catch(function () {}).then(function () {
                     // Whether SAI update arrived or timed out, check login status
                     var retries = 3;
                     function checkAccess(attempt) {
-                        console.log('[COR3 Helper] Path-through: ' + serverName + ' checking access (attempt ' + attempt + '/' + retries + ')');
+                        console.log('[COR3 Helper] 路径穿透: ' + serverName + ' 正在检查访问(第 ' + attempt + '/' + retries + ')');
                         wsSend(getLoginStatus);
                         __cor3WaitForMsg('COR3_AUTOJOB_SAI_LOGIN_STATUS', 5000).then(function (data) {
                             if (data.data && data.data.activeAccesses && data.data.activeAccesses.length > 0) {
-                                console.log('[COR3 Helper] Path-through: ' + serverName + ' access confirmed');
+                                console.log('[COR3 Helper] 路径穿透: ' + serverName + ' 访问已确认');
                                 resolve();
                             } else if (attempt < retries) {
                                 setTimeout(function () { checkAccess(attempt + 1); }, 3000);
                             } else {
-                                reject(new Error(serverName + ' no access after hack'));
+                                reject(new Error(serverName + ' 破解后仍无访问权限'));
                             }
                         }).catch(function () {
                             if (attempt < retries) {
                                 setTimeout(function () { checkAccess(attempt + 1); }, 3000);
                             } else {
-                                reject(new Error(serverName + ' login status timeout'));
+                                reject(new Error(serverName + ' 登录状态超时'));
                             }
                         });
                     }
                     setTimeout(function () { checkAccess(1); }, 1500);
                 });
             }).catch(function (e) {
-                reject(new Error(serverName + ' hack start timeout'));
+                reject(new Error(serverName + ' 破解启动超时'));
             });
         }).catch(function () {
-            reject(new Error(serverName + ' login status timeout'));
+            reject(new Error(serverName + ' 登录状态超时'));
         });
     });
 }
@@ -251,7 +251,7 @@ export function __cor3PostUnreachable(marketType, serverName) {
                 maintenanceEndsAt: blocker.maintenanceEndsAt,
                 detectedAt: Date.now()
             };
-            console.log('[COR3 Helper] Cached unreachable ' + marketType + ': ' + blocker.blockerName + ' maintenance until ' + (blocker.maintenanceEndsAt || 'unknown'));
+            console.log('[COR3 Helper] 已缓存不可访问的 ' + marketType + ': ' + blocker.blockerName + ' 维护至 ' + (blocker.maintenanceEndsAt || 'unknown'));
         }
         window.postMessage({
             type: msgType,
@@ -276,12 +276,12 @@ function __cor3MarketPathThroughRetry(marketType) {
     if (!cfg) return;
     var label = marketType.toUpperCase();
     window[cfg.flag] = true;
-    console.log('[COR3 Helper] Path-through: fetching network map for ' + label + ' dynamic pathing');
+    console.log('[COR3 Helper] 路径穿行：正在获取网络地图 ' + label + ' 动态路径');
 
     __cor3FetchMapData().then(function (mapData) {
         if (!mapData) {
             window[cfg.flag] = false;
-            console.log('[COR3 Helper] Path-through: map data timeout — aborting ' + label);
+            console.log('[COR3 Helper] 路径穿行：地图数据超时 — 中止 ' + label);
             __cor3PostUnreachable(marketType, null);
             return;
         }
@@ -289,18 +289,18 @@ function __cor3MarketPathThroughRetry(marketType) {
         var paths = __cor3FindPathsToServer(mapData.servers, mapData.connections, cfg.serverId);
         if (paths.length === 0) {
             window[cfg.flag] = false;
-            console.log('[COR3 Helper] Path-through: no viable paths to ' + label + ' (all blocked by maintenance)');
+            console.log('[COR3 Helper] 路径穿行：没有可用路径，目标 ' + label + ' (全部因维护受阻)');
             __cor3PostUnreachable(marketType, null);
             return;
         }
 
-        console.log('[COR3 Helper] Path-through: found ' + paths.length + ' viable path(s) to ' + label);
+        console.log('[COR3 Helper] 路径穿行：找到 ' + paths.length + ' 条可行路径: ' + label);
 
         var pathIdx = 0;
         function tryNextPath() {
             if (pathIdx >= paths.length) {
                 window[cfg.flag] = false;
-                console.log('[COR3 Helper] Path-through: all ' + paths.length + ' path(s) exhausted for ' + label);
+                console.log('[COR3 Helper] 路径穿行：全部 ' + paths.length + ' 条路径已耗尽，目标 ' + label);
                 __cor3PostUnreachable(marketType, null);
                 return;
             }
@@ -314,7 +314,7 @@ function __cor3MarketPathThroughRetry(marketType) {
                 return;
             }
             var pathNames = currentPath.map(function (s) { return s.name; }).join(' → ');
-            console.log('[COR3 Helper] Path-through: trying path ' + pathIdx + '/' + paths.length + ': ' + pathNames);
+            console.log('[COR3 Helper] 路径穿行：尝试路径 ' + pathIdx + '/' + paths.length + ': ' + pathNames);
 
             var stepIdx = 0;
             function nextStep() {
@@ -324,7 +324,7 @@ function __cor3MarketPathThroughRetry(marketType) {
                 }
                 var server = intermediates[stepIdx];
                 stepIdx++;
-                console.log('[COR3 Helper] Path-through: step ' + stepIdx + '/' + intermediates.length + ': setting endpoint to ' + server.name);
+                console.log('[COR3 Helper] 路径穿行：步骤 ' + stepIdx + '/' + intermediates.length + ': 正在设置端点为 ' + server.name);
                 var setEp = '42["event",{"event":{"name":"network-map","action":"set.endpoint"},"data":{"serverId":"' + server.id + '"}}]';
                 wsSend(setEp);
 
@@ -338,10 +338,10 @@ function __cor3MarketPathThroughRetry(marketType) {
                         if (evt.data.success === false) {
                             var errMsg = evt.data.error && evt.data.error.message ? evt.data.error.message : 'unknown';
                             if (errMsg === 'server-in-maintenance') {
-                                console.log('[COR3 Helper] Path-through: ' + server.name + ' in maintenance — trying next path');
+                                console.log('[COR3 Helper] 路径穿透: ' + server.name + ' 维护中 — 尝试下一条路径');
                                 tryNextPath();
                             } else {
-                                console.log('[COR3 Helper] Path-through: ' + server.name + ' unreachable (' + errMsg + ') — trying next path');
+                                console.log('[COR3 Helper] 路径穿透: ' + server.name + ' 不可达 (' + errMsg + '）— 尝试下一条路径');
                                 tryNextPath();
                             }
                             return;
@@ -349,7 +349,7 @@ function __cor3MarketPathThroughRetry(marketType) {
                         __cor3EnsureServerAccess(server.id, server.name).then(function () {
                             setTimeout(nextStep, 500);
                         }).catch(function (e) {
-                            console.log('[COR3 Helper] Path-through: ' + server.name + ' access failed — ' + e.message + ' — trying next path');
+                            console.log('[COR3 Helper] 路径穿透: ' + server.name + ' 访问失败 — ' + e.message + ' — 尝试下一条路径');
                             tryNextPath();
                         });
                     }
@@ -372,7 +372,7 @@ function __cor3MarketPathThroughRetry(marketType) {
 
         function retryTargetEndpoint() {
             window[cfg.flag] = false;
-            console.log('[COR3 Helper] Path-through: all intermediates done, retrying ' + label + ' endpoint');
+            console.log('[COR3 Helper] 路径穿行：全部中间节点已完成，重试 ' + label + ' 端点');
             var setEndpoint = '42["event",{"event":{"name":"network-map","action":"set.endpoint"},"data":{"serverId":"' + cfg.serverId + '"}}]';
             wsSend(setEndpoint);
             var retryDone = false;
@@ -384,11 +384,11 @@ function __cor3MarketPathThroughRetry(marketType) {
                     clearTimeout(retryTimer);
                     if (evt.data.success === false) {
                         var retryErr = evt.data.error && evt.data.error.message ? evt.data.error.message : 'unknown';
-                        console.log('[COR3 Helper] Path-through: ' + label + ' endpoint retry failed (' + retryErr + ')');
+                        console.log('[COR3 Helper] 路径穿透: ' + label + ' 端点重试失败(' + retryErr + ')');
                         __cor3PostUnreachable(marketType, null);
                         return;
                     }
-                    console.log('[COR3 Helper] Path-through: ' + label + ' endpoint set successfully');
+                    console.log('[COR3 Helper] 路径穿透: ' + label + ' 端点设置成功');
                     var getOptions = '42["event",{"event":{"name":"market","action":"get.options"},"data":{"marketId":"' + cfg.marketId + '"}}]';
                     wsSend(getOptions);
                 }
@@ -396,7 +396,7 @@ function __cor3MarketPathThroughRetry(marketType) {
                     retryDone = true;
                     window.removeEventListener('message', onRetryResult);
                     clearTimeout(retryTimer);
-                    console.log('[COR3 Helper] Path-through: ' + label + ' endpoint still unreachable after path-through');
+                    console.log('[COR3 Helper] 路径穿透: ' + label + ' 路径穿透后端点仍不可达');
                 }
             }
             window.addEventListener('message', onRetryResult);
@@ -416,7 +416,7 @@ function __cor3MarketPathThroughRetry(marketType) {
 
 window.__cor3RequestMarket = function (callback) {
     var myAbortId = getMarketRefreshAbortId();
-    console.log('[COR3 Helper] Requesting HOME market (batch: options+lots+jobs)');
+    console.log('[COR3 Helper] 正在请求 HOME 市场（批量：选项+批次+任务）');
     trackMarketRequest(HOME_MARKET_ID);
     var getOptions = '42["event",{"event":{"name":"market","action":"get.options"},"data":{"marketId":"' + HOME_MARKET_ID + '"}}]';
     var getLots = '42["event",{"event":{"name":"market","action":"get.lots"},"data":{"marketId":"' + HOME_MARKET_ID + '"}}]';
@@ -429,20 +429,20 @@ window.__cor3RequestMarket = function (callback) {
         if (myAbortId !== getMarketRefreshAbortId()) {
             window.removeEventListener('message', onComplete);
             clearTimeout(homeTimer);
-            console.log('[COR3 Helper] HOME market fetch aborted (token-expired)');
+            console.log('[COR3 Helper] HOME 市场获取已中止（令牌过期）');
             return;
         }
         if (evt.data.type === 'COR3_MARKET_FETCH_COMPLETE' && evt.data.marketType === 'home') {
             window.removeEventListener('message', onComplete);
             clearTimeout(homeTimer);
-            console.log('[COR3 Helper] HOME market fetch complete');
+            console.log('[COR3 Helper] HOME 市场获取完成');
             if (callback) callback();
         }
     }
     window.addEventListener('message', onComplete);
     var homeTimer = setTimeout(function () {
         window.removeEventListener('message', onComplete);
-        console.log('[COR3 Helper] HOME market fetch timeout');
+        console.log('[COR3 Helper] HOME 市场获取超时');
         if (callback) callback();
     }, 15000);
     return true;
@@ -453,7 +453,7 @@ window.__cor3RequestMarket = function (callback) {
 window.__cor3RequestDarkMarket = function (callback) {
     var cachedUnreachable = window.__cor3IsMarketUnreachable('dark');
     if (cachedUnreachable) {
-        console.log('[COR3 Helper] D4RK market known unreachable (' + cachedUnreachable.blockerName + ' maintenance) — skipping set.endpoint');
+        console.log('[COR3 Helper] D4RK 市场已知不可达 (' + cachedUnreachable.blockerName + ' 维护中) — 跳过 set.endpoint');
         window.postMessage({
             type: 'COR3_WS_DARK_MARKET_UNREACHABLE',
             error: 'no-path-to-server',
@@ -465,17 +465,17 @@ window.__cor3RequestDarkMarket = function (callback) {
         return true;
     }
     var myAbortId = getMarketRefreshAbortId();
-    console.log('[COR3 Helper] Setting D4RK endpoint');
+    console.log('[COR3 Helper] 正在设置 D4RK 端点');
     var setEndpoint = '42["event",{"event":{"name":"network-map","action":"set.endpoint"},"data":{"serverId":"' + DARK_SERVER_ID + '"}}]';
     window.__cor3DarkMarketPending = true;
     wsSend(setEndpoint);
 
     function fetchDarkBatch(cb) {
         if (myAbortId !== getMarketRefreshAbortId()) {
-            console.log('[COR3 Helper] D4RK market fetch aborted (token-expired)');
+            console.log('[COR3 Helper] D4RK 市场获取已中止 (token-expired)');
             return;
         }
-        console.log('[COR3 Helper] Requesting D4RK market (batch: options+lots+jobs)');
+        console.log('[COR3 Helper] 正在请求 D4RK 市场（批量：选项+批次+任务）');
         trackMarketRequest(DARK_MARKET_ID);
         var getOptions = '42["event",{"event":{"name":"market","action":"get.options"},"data":{"marketId":"' + DARK_MARKET_ID + '"}}]';
         var getLots = '42["event",{"event":{"name":"market","action":"get.lots"},"data":{"marketId":"' + DARK_MARKET_ID + '"}}]';
@@ -488,20 +488,20 @@ window.__cor3RequestDarkMarket = function (callback) {
             if (myAbortId !== getMarketRefreshAbortId()) {
                 window.removeEventListener('message', onComplete);
                 clearTimeout(tmr);
-                console.log('[COR3 Helper] D4RK market fetch aborted (token-expired)');
+                console.log('[COR3 Helper] D4RK 市场获取已中止 (token-expired)');
                 return;
             }
             if (evt.data.type === 'COR3_MARKET_FETCH_COMPLETE' && evt.data.marketType === 'dark') {
                 window.removeEventListener('message', onComplete);
                 clearTimeout(tmr);
-                console.log('[COR3 Helper] D4RK market fetch complete');
+                console.log('[COR3 Helper] D4RK 市场获取完成');
                 if (cb) cb();
             }
         }
         window.addEventListener('message', onComplete);
         var tmr = setTimeout(function () {
             window.removeEventListener('message', onComplete);
-            console.log('[COR3 Helper] D4RK market fetch timeout');
+            console.log('[COR3 Helper] D4RK 市场获取超时');
             if (cb) cb();
         }, 15000);
     }
@@ -514,7 +514,7 @@ window.__cor3RequestDarkMarket = function (callback) {
             window.removeEventListener('message', onDarkEndpoint);
             clearTimeout(darkEpTimer);
             window.__cor3DarkMarketPending = false;
-            console.log('[COR3 Helper] D4RK endpoint aborted (token-expired)');
+            console.log('[COR3 Helper] D4RK 端点已中止（令牌过期）');
             return;
         }
         if (evt.data && evt.data.type === 'COR3_WS_ENDPOINT_RESULT') {
@@ -529,7 +529,7 @@ window.__cor3RequestDarkMarket = function (callback) {
             window.removeEventListener('message', onDarkEndpoint);
             clearTimeout(darkEpTimer);
             window.__cor3DarkMarketPending = false;
-            console.log('[COR3 Helper] D4RK endpoint unreachable — attempting path-through');
+            console.log('[COR3 Helper] D4RK 端点不可访问 — 尝试路径穿行');
             __cor3MarketPathThroughRetry('dark');
             if (callback) callback();
         }
@@ -540,7 +540,7 @@ window.__cor3RequestDarkMarket = function (callback) {
             handled = true;
             window.removeEventListener('message', onDarkEndpoint);
             window.__cor3DarkMarketPending = false;
-            console.log('[COR3 Helper] D4RK endpoint timeout — requesting market data anyway');
+            console.log('[COR3 Helper] D4RK 端点超时 — 仍继续请求市场数据');
             fetchDarkBatch(callback);
         }
     }, 5000);
@@ -562,7 +562,7 @@ window.__cor3RefreshDarkMarket = function (callback) {
 window.__cor3RequestSoyuzMarket = function (callback) {
     var cachedUnreachable = window.__cor3IsMarketUnreachable('soyuz');
     if (cachedUnreachable) {
-        console.log('[COR3 Helper] SOYUZ market known unreachable (' + cachedUnreachable.blockerName + ' maintenance) — skipping set.endpoint');
+        console.log('[COR3 Helper] SOYUZ 市场已知不可达 (' + cachedUnreachable.blockerName + ' 维护中) — 跳过 set.endpoint');
         window.postMessage({
             type: 'COR3_WS_SOYUZ_MARKET_UNREACHABLE',
             error: 'no-path-to-server',
@@ -574,17 +574,17 @@ window.__cor3RequestSoyuzMarket = function (callback) {
         return true;
     }
     var myAbortId = getMarketRefreshAbortId();
-    console.log('[COR3 Helper] Setting SOYUZ endpoint');
+    console.log('[COR3 Helper] 正在设置 SOYUZ 端点');
     var setEndpoint = '42["event",{"event":{"name":"network-map","action":"set.endpoint"},"data":{"serverId":"' + SOYUZ_SERVER_ID + '"}}]';
     window.__cor3SoyuzMarketPending = true;
     wsSend(setEndpoint);
 
     function fetchSoyuzBatch(cb) {
         if (myAbortId !== getMarketRefreshAbortId()) {
-            console.log('[COR3 Helper] SOYUZ market fetch aborted (token-expired)');
+            console.log('[COR3 Helper] SOYUZ 市场获取已中止 (token-expired)');
             return;
         }
-        console.log('[COR3 Helper] Requesting SOYUZ market (batch: options+lots+jobs)');
+        console.log('[COR3 Helper] 正在请求 SOYUZ 市场（批量：选项+批次+任务）');
         trackMarketRequest(SOYUZ_MARKET_ID);
         var getOptions = '42["event",{"event":{"name":"market","action":"get.options"},"data":{"marketId":"' + SOYUZ_MARKET_ID + '"}}]';
         var getLots = '42["event",{"event":{"name":"market","action":"get.lots"},"data":{"marketId":"' + SOYUZ_MARKET_ID + '"}}]';
@@ -597,20 +597,20 @@ window.__cor3RequestSoyuzMarket = function (callback) {
             if (myAbortId !== getMarketRefreshAbortId()) {
                 window.removeEventListener('message', onComplete);
                 clearTimeout(tmr);
-                console.log('[COR3 Helper] SOYUZ market fetch aborted (token-expired)');
+                console.log('[COR3 Helper] SOYUZ 市场获取已中止 (token-expired)');
                 return;
             }
             if (evt.data.type === 'COR3_MARKET_FETCH_COMPLETE' && evt.data.marketType === 'soyuz') {
                 window.removeEventListener('message', onComplete);
                 clearTimeout(tmr);
-                console.log('[COR3 Helper] SOYUZ market fetch complete');
+                console.log('[COR3 Helper] SOYUZ 市场获取完成');
                 if (cb) cb();
             }
         }
         window.addEventListener('message', onComplete);
         var tmr = setTimeout(function () {
             window.removeEventListener('message', onComplete);
-            console.log('[COR3 Helper] SOYUZ market fetch timeout');
+            console.log('[COR3 Helper] SOYUZ 市场获取超时');
             if (cb) cb();
         }, 15000);
     }
@@ -623,7 +623,7 @@ window.__cor3RequestSoyuzMarket = function (callback) {
             window.removeEventListener('message', onSoyuzEndpoint);
             clearTimeout(soyuzEpTimer);
             window.__cor3SoyuzMarketPending = false;
-            console.log('[COR3 Helper] SOYUZ endpoint aborted (token-expired)');
+            console.log('[COR3 Helper] SOYUZ 端点已中止（令牌过期）');
             return;
         }
         if (evt.data && evt.data.type === 'COR3_WS_ENDPOINT_RESULT') {
@@ -638,7 +638,7 @@ window.__cor3RequestSoyuzMarket = function (callback) {
             window.removeEventListener('message', onSoyuzEndpoint);
             clearTimeout(soyuzEpTimer);
             window.__cor3SoyuzMarketPending = false;
-            console.log('[COR3 Helper] SOYUZ endpoint unreachable — attempting path-through');
+            console.log('[COR3 Helper] SOYUZ 端点不可访问 — 尝试路径穿行');
             __cor3MarketPathThroughRetry('soyuz');
             if (callback) callback();
         }
@@ -649,7 +649,7 @@ window.__cor3RequestSoyuzMarket = function (callback) {
             handled = true;
             window.removeEventListener('message', onSoyuzEndpoint);
             window.__cor3SoyuzMarketPending = false;
-            console.log('[COR3 Helper] SOYUZ endpoint timeout');
+            console.log('[COR3 Helper] SOYUZ 端点超时');
             if (callback) callback();
         }
     }, 10000);
@@ -666,7 +666,7 @@ window.__cor3RefreshSoyuzMarket = function (callback) {
 window.__cor3RequestUsolMarket = function (callback) {
     var cachedUnreachable = window.__cor3IsMarketUnreachable('usol');
     if (cachedUnreachable) {
-        console.log('[COR3 Helper] USOL market known unreachable (' + cachedUnreachable.blockerName + ' maintenance) — skipping set.endpoint');
+        console.log('[COR3 Helper] USOL 市场已知不可达 (' + cachedUnreachable.blockerName + ' 维护中) — 跳过 set.endpoint');
         window.postMessage({
             type: 'COR3_WS_USOL_MARKET_UNREACHABLE',
             error: 'no-path-to-server',
@@ -678,17 +678,17 @@ window.__cor3RequestUsolMarket = function (callback) {
         return true;
     }
     var myAbortId = getMarketRefreshAbortId();
-    console.log('[COR3 Helper] Setting USOL endpoint');
+    console.log('[COR3 Helper] 正在设置 USOL 端点');
     var setEndpoint = '42["event",{"event":{"name":"network-map","action":"set.endpoint"},"data":{"serverId":"' + USOL_SERVER_ID + '"}}]';
     window.__cor3UsolMarketPending = true;
     wsSend(setEndpoint);
 
     function fetchUsolBatch(cb) {
         if (myAbortId !== getMarketRefreshAbortId()) {
-            console.log('[COR3 Helper] USOL market fetch aborted (token-expired)');
+            console.log('[COR3 Helper] USOL 市场获取已中止 (token-expired)');
             return;
         }
-        console.log('[COR3 Helper] Requesting USOL market (batch: options+lots+jobs)');
+        console.log('[COR3 Helper] 正在请求 USOL 市场（批量：选项+批次+任务）');
         trackMarketRequest(USOL_MARKET_ID);
         var getOptions = '42["event",{"event":{"name":"market","action":"get.options"},"data":{"marketId":"' + USOL_MARKET_ID + '"}}]';
         var getLots = '42["event",{"event":{"name":"market","action":"get.lots"},"data":{"marketId":"' + USOL_MARKET_ID + '"}}]';
@@ -701,20 +701,20 @@ window.__cor3RequestUsolMarket = function (callback) {
             if (myAbortId !== getMarketRefreshAbortId()) {
                 window.removeEventListener('message', onComplete);
                 clearTimeout(tmr);
-                console.log('[COR3 Helper] USOL market fetch aborted (token-expired)');
+                console.log('[COR3 Helper] USOL 市场获取已中止 (token-expired)');
                 return;
             }
             if (evt.data.type === 'COR3_MARKET_FETCH_COMPLETE' && evt.data.marketType === 'usol') {
                 window.removeEventListener('message', onComplete);
                 clearTimeout(tmr);
-                console.log('[COR3 Helper] USOL market fetch complete');
+                console.log('[COR3 Helper] USOL 市场获取完成');
                 if (cb) cb();
             }
         }
         window.addEventListener('message', onComplete);
         var tmr = setTimeout(function () {
             window.removeEventListener('message', onComplete);
-            console.log('[COR3 Helper] USOL market fetch timeout');
+            console.log('[COR3 Helper] USOL 市场获取超时');
             if (cb) cb();
         }, 15000);
     }
@@ -727,7 +727,7 @@ window.__cor3RequestUsolMarket = function (callback) {
             window.removeEventListener('message', onUsolEndpoint);
             clearTimeout(usolEpTimer);
             window.__cor3UsolMarketPending = false;
-            console.log('[COR3 Helper] USOL endpoint aborted (token-expired)');
+            console.log('[COR3 Helper] USOL 端点已中止（令牌过期）');
             return;
         }
         if (evt.data && evt.data.type === 'COR3_WS_ENDPOINT_RESULT') {
@@ -742,7 +742,7 @@ window.__cor3RequestUsolMarket = function (callback) {
             window.removeEventListener('message', onUsolEndpoint);
             clearTimeout(usolEpTimer);
             window.__cor3UsolMarketPending = false;
-            console.log('[COR3 Helper] USOL endpoint unreachable — attempting path-through');
+            console.log('[COR3 Helper] USOL 端点不可访问 — 尝试路径穿行');
             __cor3MarketPathThroughRetry('usol');
             if (callback) callback();
         }
@@ -753,7 +753,7 @@ window.__cor3RequestUsolMarket = function (callback) {
             handled = true;
             window.removeEventListener('message', onUsolEndpoint);
             window.__cor3UsolMarketPending = false;
-            console.log('[COR3 Helper] USOL endpoint timeout');
+            console.log('[COR3 Helper] USOL 端点超时');
             if (callback) callback();
         }
     }, 10000);
@@ -776,19 +776,19 @@ window.__cor3RefreshAllMarketsSequential = function (callback, opts) {
 
     function refreshNext() {
         if (myAbortId !== getMarketRefreshAbortId()) {
-            console.log('[COR3 Helper] Sequential refresh aborted (token-expired)');
+            console.log('[COR3 Helper] 顺序刷新已中止（令牌过期）');
             window.postMessage({ type: 'COR3_ALL_MARKETS_REFRESHED' }, '*');
             return;
         }
         if (idx >= order.length) {
-            console.log('[COR3 Helper] Sequential refresh: all markets done');
+            console.log('[COR3 Helper] 顺序刷新：全部市场完成');
             window.postMessage({ type: 'COR3_ALL_MARKETS_REFRESHED' }, '*');
             if (callback) callback();
             return;
         }
         var market = order[idx];
         idx++;
-        console.log('[COR3 Helper] Sequential refresh: starting ' + market.toUpperCase());
+        console.log('[COR3 Helper] 顺序刷新：开始 ' + market.toUpperCase());
         if (market === 'usol') {
             if (skipLots) {
                 window.__cor3RequestUsolMarketJobsOnly(function () { refreshNext(); });
@@ -823,7 +823,7 @@ window.__cor3RefreshAllMarketsSequential = function (callback, opts) {
 
 window.__cor3RequestMarketJobsOnly = function (callback) {
     var myAbortId = getMarketRefreshAbortId();
-    console.log('[COR3 Helper] Requesting HOME market (batch: options+jobs, jobs-only)');
+    console.log('[COR3 Helper] 正在请求 HOME 市场（批量：选项+任务，仅任务）');
     trackMarketRequest(HOME_MARKET_ID);
     var getOptions = '42["event",{"event":{"name":"market","action":"get.options"},"data":{"marketId":"' + HOME_MARKET_ID + '"}}]';
     var getJobs = '42["event",{"event":{"name":"market","action":"get.jobs"},"data":{"marketId":"' + HOME_MARKET_ID + '"}}]';
@@ -839,14 +839,14 @@ window.__cor3RequestMarketJobsOnly = function (callback) {
         if (evt.data.type === 'COR3_MARKET_FETCH_COMPLETE' && evt.data.marketType === 'home') {
             window.removeEventListener('message', onComplete);
             clearTimeout(tmr);
-            console.log('[COR3 Helper] HOME market jobs-only fetch complete');
+            console.log('[COR3 Helper] HOME 市场仅任务获取完成');
             if (callback) callback();
         }
     }
     window.addEventListener('message', onComplete);
     var tmr = setTimeout(function () {
         window.removeEventListener('message', onComplete);
-        console.log('[COR3 Helper] HOME market jobs-only fetch timeout');
+        console.log('[COR3 Helper] HOME 市场仅任务获取超时');
         if (callback) callback();
     }, 15000);
 };
@@ -854,20 +854,20 @@ window.__cor3RequestMarketJobsOnly = function (callback) {
 window.__cor3RequestDarkMarketJobsOnly = function (callback) {
     var cachedUnreachable = window.__cor3IsMarketUnreachable('dark');
     if (cachedUnreachable) {
-        console.log('[COR3 Helper] D4RK market known unreachable (' + cachedUnreachable.blockerName + ' maintenance) — skipping jobs-only');
+        console.log('[COR3 Helper] D4RK 市场已知不可达 (' + cachedUnreachable.blockerName + ' 维护中) — 跳过仅任务模式');
         window.postMessage({ type: 'COR3_WS_DARK_MARKET_UNREACHABLE', error: 'no-path-to-server', blockerServerName: cachedUnreachable.blockerName, maintenanceEndsAt: cachedUnreachable.maintenanceEndsAt, cached: true }, '*');
         if (callback) callback();
         return true;
     }
     var myAbortId = getMarketRefreshAbortId();
-    console.log('[COR3 Helper] Setting D4RK endpoint (jobs-only)');
+    console.log('[COR3 Helper] 正在设置 D4RK 端点（仅任务）');
     var setEndpoint = '42["event",{"event":{"name":"network-map","action":"set.endpoint"},"data":{"serverId":"' + DARK_SERVER_ID + '"}}]';
     window.__cor3DarkMarketPending = true;
     wsSend(setEndpoint);
 
     function fetchDarkJobsBatch(cb) {
-        if (myAbortId !== getMarketRefreshAbortId()) { console.log('[COR3 Helper] D4RK market jobs-only fetch aborted (token-expired)'); return; }
-        console.log('[COR3 Helper] Requesting D4RK market (batch: options+jobs, jobs-only)');
+        if (myAbortId !== getMarketRefreshAbortId()) { console.log('[COR3 Helper] D4RK 市场仅任务获取已中止（令牌过期）'); return; }
+        console.log('[COR3 Helper] 正在请求 D4RK 市场（批量：选项+任务，仅任务）');
         trackMarketRequest(DARK_MARKET_ID);
         var getOptions = '42["event",{"event":{"name":"market","action":"get.options"},"data":{"marketId":"' + DARK_MARKET_ID + '"}}]';
         var getJobs = '42["event",{"event":{"name":"market","action":"get.jobs"},"data":{"marketId":"' + DARK_MARKET_ID + '"}}]';
@@ -876,10 +876,10 @@ window.__cor3RequestDarkMarketJobsOnly = function (callback) {
         function onComplete(evt) {
             if (!evt.data) return;
             if (myAbortId !== getMarketRefreshAbortId()) { window.removeEventListener('message', onComplete); clearTimeout(tmr); return; }
-            if (evt.data.type === 'COR3_MARKET_FETCH_COMPLETE' && evt.data.marketType === 'dark') { window.removeEventListener('message', onComplete); clearTimeout(tmr); console.log('[COR3 Helper] D4RK market jobs-only fetch complete'); if (cb) cb(); }
+            if (evt.data.type === 'COR3_MARKET_FETCH_COMPLETE' && evt.data.marketType === 'dark') { window.removeEventListener('message', onComplete); clearTimeout(tmr); console.log('[COR3 Helper] D4RK 市场仅任务获取完成'); if (cb) cb(); }
         }
         window.addEventListener('message', onComplete);
-        var tmr = setTimeout(function () { window.removeEventListener('message', onComplete); console.log('[COR3 Helper] D4RK market jobs-only fetch timeout'); if (cb) cb(); }, 15000);
+        var tmr = setTimeout(function () { window.removeEventListener('message', onComplete); console.log('[COR3 Helper] D4RK 市场仅任务获取超时'); if (cb) cb(); }, 15000);
     }
 
     var handled = false;
@@ -887,29 +887,29 @@ window.__cor3RequestDarkMarketJobsOnly = function (callback) {
         if (handled) return;
         if (myAbortId !== getMarketRefreshAbortId()) { handled = true; window.removeEventListener('message', onEndpoint); clearTimeout(epTmr); window.__cor3DarkMarketPending = false; return; }
         if (evt.data && evt.data.type === 'COR3_WS_ENDPOINT_RESULT') { handled = true; window.removeEventListener('message', onEndpoint); clearTimeout(epTmr); window.__cor3DarkMarketPending = false; fetchDarkJobsBatch(callback); }
-        if (evt.data && evt.data.type === 'COR3_WS_DARK_MARKET_UNREACHABLE') { handled = true; window.removeEventListener('message', onEndpoint); clearTimeout(epTmr); window.__cor3DarkMarketPending = false; console.log('[COR3 Helper] D4RK endpoint unreachable (jobs-only) — attempting path-through'); __cor3MarketPathThroughRetry('dark'); if (callback) callback(); }
+        if (evt.data && evt.data.type === 'COR3_WS_DARK_MARKET_UNREACHABLE') { handled = true; window.removeEventListener('message', onEndpoint); clearTimeout(epTmr); window.__cor3DarkMarketPending = false; console.log('[COR3 Helper] D4RK 端点不可访问（仅任务）— 尝试路径穿行'); __cor3MarketPathThroughRetry('dark'); if (callback) callback(); }
     }
     window.addEventListener('message', onEndpoint);
-    var epTmr = setTimeout(function () { if (!handled) { handled = true; window.removeEventListener('message', onEndpoint); window.__cor3DarkMarketPending = false; console.log('[COR3 Helper] D4RK endpoint timeout (jobs-only) — requesting data anyway'); fetchDarkJobsBatch(callback); } }, 5000);
+    var epTmr = setTimeout(function () { if (!handled) { handled = true; window.removeEventListener('message', onEndpoint); window.__cor3DarkMarketPending = false; console.log('[COR3 Helper] D4RK 端点超时（仅任务）— 仍继续请求数据'); fetchDarkJobsBatch(callback); } }, 5000);
 };
 
 window.__cor3RequestSoyuzMarketJobsOnly = function (callback) {
     var cachedUnreachable = window.__cor3IsMarketUnreachable('soyuz');
     if (cachedUnreachable) {
-        console.log('[COR3 Helper] SOYUZ market known unreachable (' + cachedUnreachable.blockerName + ' maintenance) — skipping jobs-only');
+        console.log('[COR3 Helper] SOYUZ 市场已知不可达 (' + cachedUnreachable.blockerName + ' 维护中) — 跳过仅任务模式');
         window.postMessage({ type: 'COR3_WS_SOYUZ_MARKET_UNREACHABLE', error: 'no-path-to-server', blockerServerName: cachedUnreachable.blockerName, maintenanceEndsAt: cachedUnreachable.maintenanceEndsAt, cached: true }, '*');
         if (callback) callback();
         return true;
     }
     var myAbortId = getMarketRefreshAbortId();
-    console.log('[COR3 Helper] Setting SOYUZ endpoint (jobs-only)');
+    console.log('[COR3 Helper] 正在设置 SOYUZ 端点（仅任务）');
     var setEndpoint = '42["event",{"event":{"name":"network-map","action":"set.endpoint"},"data":{"serverId":"' + SOYUZ_SERVER_ID + '"}}]';
     window.__cor3SoyuzMarketPending = true;
     wsSend(setEndpoint);
 
     function fetchSoyuzJobsBatch(cb) {
-        if (myAbortId !== getMarketRefreshAbortId()) { console.log('[COR3 Helper] SOYUZ market jobs-only fetch aborted (token-expired)'); return; }
-        console.log('[COR3 Helper] Requesting SOYUZ market (batch: options+jobs, jobs-only)');
+        if (myAbortId !== getMarketRefreshAbortId()) { console.log('[COR3 Helper] SOYUZ 市场仅任务获取已中止（令牌过期）'); return; }
+        console.log('[COR3 Helper] 正在请求 SOYUZ 市场（批量：选项+任务，仅任务）');
         trackMarketRequest(SOYUZ_MARKET_ID);
         var getOptions = '42["event",{"event":{"name":"market","action":"get.options"},"data":{"marketId":"' + SOYUZ_MARKET_ID + '"}}]';
         var getJobs = '42["event",{"event":{"name":"market","action":"get.jobs"},"data":{"marketId":"' + SOYUZ_MARKET_ID + '"}}]';
@@ -918,10 +918,10 @@ window.__cor3RequestSoyuzMarketJobsOnly = function (callback) {
         function onComplete(evt) {
             if (!evt.data) return;
             if (myAbortId !== getMarketRefreshAbortId()) { window.removeEventListener('message', onComplete); clearTimeout(tmr); return; }
-            if (evt.data.type === 'COR3_MARKET_FETCH_COMPLETE' && evt.data.marketType === 'soyuz') { window.removeEventListener('message', onComplete); clearTimeout(tmr); console.log('[COR3 Helper] SOYUZ market jobs-only fetch complete'); if (cb) cb(); }
+            if (evt.data.type === 'COR3_MARKET_FETCH_COMPLETE' && evt.data.marketType === 'soyuz') { window.removeEventListener('message', onComplete); clearTimeout(tmr); console.log('[COR3 Helper] SOYUZ 市场仅任务获取完成'); if (cb) cb(); }
         }
         window.addEventListener('message', onComplete);
-        var tmr = setTimeout(function () { window.removeEventListener('message', onComplete); console.log('[COR3 Helper] SOYUZ market jobs-only fetch timeout'); if (cb) cb(); }, 15000);
+        var tmr = setTimeout(function () { window.removeEventListener('message', onComplete); console.log('[COR3 Helper] SOYUZ 市场仅任务获取超时'); if (cb) cb(); }, 15000);
     }
 
     var handled = false;
@@ -929,29 +929,29 @@ window.__cor3RequestSoyuzMarketJobsOnly = function (callback) {
         if (handled) return;
         if (myAbortId !== getMarketRefreshAbortId()) { handled = true; window.removeEventListener('message', onEndpoint); clearTimeout(epTmr); window.__cor3SoyuzMarketPending = false; return; }
         if (evt.data && evt.data.type === 'COR3_WS_ENDPOINT_RESULT') { handled = true; window.removeEventListener('message', onEndpoint); clearTimeout(epTmr); window.__cor3SoyuzMarketPending = false; fetchSoyuzJobsBatch(callback); }
-        if (evt.data && evt.data.type === 'COR3_WS_SOYUZ_MARKET_UNREACHABLE') { handled = true; window.removeEventListener('message', onEndpoint); clearTimeout(epTmr); window.__cor3SoyuzMarketPending = false; console.log('[COR3 Helper] SOYUZ endpoint unreachable (jobs-only) — attempting path-through'); __cor3MarketPathThroughRetry('soyuz'); if (callback) callback(); }
+        if (evt.data && evt.data.type === 'COR3_WS_SOYUZ_MARKET_UNREACHABLE') { handled = true; window.removeEventListener('message', onEndpoint); clearTimeout(epTmr); window.__cor3SoyuzMarketPending = false; console.log('[COR3 Helper] SOYUZ 端点不可访问（仅任务）— 尝试路径穿行'); __cor3MarketPathThroughRetry('soyuz'); if (callback) callback(); }
     }
     window.addEventListener('message', onEndpoint);
-    var epTmr = setTimeout(function () { if (!handled) { handled = true; window.removeEventListener('message', onEndpoint); window.__cor3SoyuzMarketPending = false; console.log('[COR3 Helper] SOYUZ endpoint timeout (jobs-only)'); if (callback) callback(); } }, 10000);
+    var epTmr = setTimeout(function () { if (!handled) { handled = true; window.removeEventListener('message', onEndpoint); window.__cor3SoyuzMarketPending = false; console.log('[COR3 Helper] SOYUZ 端点超时（仅任务）'); if (callback) callback(); } }, 10000);
 };
 
 window.__cor3RequestUsolMarketJobsOnly = function (callback) {
     var cachedUnreachable = window.__cor3IsMarketUnreachable('usol');
     if (cachedUnreachable) {
-        console.log('[COR3 Helper] USOL market known unreachable (' + cachedUnreachable.blockerName + ' maintenance) — skipping jobs-only');
+        console.log('[COR3 Helper] USOL 市场已知不可达 (' + cachedUnreachable.blockerName + ' 维护中) — 跳过仅任务模式');
         window.postMessage({ type: 'COR3_WS_USOL_MARKET_UNREACHABLE', error: 'no-path-to-server', blockerServerName: cachedUnreachable.blockerName, maintenanceEndsAt: cachedUnreachable.maintenanceEndsAt, cached: true }, '*');
         if (callback) callback();
         return true;
     }
     var myAbortId = getMarketRefreshAbortId();
-    console.log('[COR3 Helper] Setting USOL endpoint (jobs-only)');
+    console.log('[COR3 Helper] 正在设置 USOL 端点（仅任务）');
     var setEndpoint = '42["event",{"event":{"name":"network-map","action":"set.endpoint"},"data":{"serverId":"' + USOL_SERVER_ID + '"}}]';
     window.__cor3UsolMarketPending = true;
     wsSend(setEndpoint);
 
     function fetchUsolJobsBatch(cb) {
-        if (myAbortId !== getMarketRefreshAbortId()) { console.log('[COR3 Helper] USOL market jobs-only fetch aborted (token-expired)'); return; }
-        console.log('[COR3 Helper] Requesting USOL market (batch: options+jobs, jobs-only)');
+        if (myAbortId !== getMarketRefreshAbortId()) { console.log('[COR3 Helper] USOL 市场仅任务获取已中止（令牌过期）'); return; }
+        console.log('[COR3 Helper] 正在请求 USOL 市场（批量：选项+任务，仅任务）');
         trackMarketRequest(USOL_MARKET_ID);
         var getOptions = '42["event",{"event":{"name":"market","action":"get.options"},"data":{"marketId":"' + USOL_MARKET_ID + '"}}]';
         var getJobs = '42["event",{"event":{"name":"market","action":"get.jobs"},"data":{"marketId":"' + USOL_MARKET_ID + '"}}]';
@@ -960,10 +960,10 @@ window.__cor3RequestUsolMarketJobsOnly = function (callback) {
         function onComplete(evt) {
             if (!evt.data) return;
             if (myAbortId !== getMarketRefreshAbortId()) { window.removeEventListener('message', onComplete); clearTimeout(tmr); return; }
-            if (evt.data.type === 'COR3_MARKET_FETCH_COMPLETE' && evt.data.marketType === 'usol') { window.removeEventListener('message', onComplete); clearTimeout(tmr); console.log('[COR3 Helper] USOL market jobs-only fetch complete'); if (cb) cb(); }
+            if (evt.data.type === 'COR3_MARKET_FETCH_COMPLETE' && evt.data.marketType === 'usol') { window.removeEventListener('message', onComplete); clearTimeout(tmr); console.log('[COR3 Helper] USOL 市场仅任务获取完成'); if (cb) cb(); }
         }
         window.addEventListener('message', onComplete);
-        var tmr = setTimeout(function () { window.removeEventListener('message', onComplete); console.log('[COR3 Helper] USOL market jobs-only fetch timeout'); if (cb) cb(); }, 15000);
+        var tmr = setTimeout(function () { window.removeEventListener('message', onComplete); console.log('[COR3 Helper] USOL 市场仅任务获取超时'); if (cb) cb(); }, 15000);
     }
 
     var handled = false;
@@ -971,8 +971,8 @@ window.__cor3RequestUsolMarketJobsOnly = function (callback) {
         if (handled) return;
         if (myAbortId !== getMarketRefreshAbortId()) { handled = true; window.removeEventListener('message', onEndpoint); clearTimeout(epTmr); window.__cor3UsolMarketPending = false; return; }
         if (evt.data && evt.data.type === 'COR3_WS_ENDPOINT_RESULT') { handled = true; window.removeEventListener('message', onEndpoint); clearTimeout(epTmr); window.__cor3UsolMarketPending = false; fetchUsolJobsBatch(callback); }
-        if (evt.data && evt.data.type === 'COR3_WS_USOL_MARKET_UNREACHABLE') { handled = true; window.removeEventListener('message', onEndpoint); clearTimeout(epTmr); window.__cor3UsolMarketPending = false; console.log('[COR3 Helper] USOL endpoint unreachable (jobs-only) — attempting path-through'); __cor3MarketPathThroughRetry('usol'); if (callback) callback(); }
+        if (evt.data && evt.data.type === 'COR3_WS_USOL_MARKET_UNREACHABLE') { handled = true; window.removeEventListener('message', onEndpoint); clearTimeout(epTmr); window.__cor3UsolMarketPending = false; console.log('[COR3 Helper] USOL 端点不可访问（仅任务）— 尝试路径穿行'); __cor3MarketPathThroughRetry('usol'); if (callback) callback(); }
     }
     window.addEventListener('message', onEndpoint);
-    var epTmr = setTimeout(function () { if (!handled) { handled = true; window.removeEventListener('message', onEndpoint); window.__cor3UsolMarketPending = false; console.log('[COR3 Helper] USOL endpoint timeout (jobs-only)'); if (callback) callback(); } }, 10000);
+    var epTmr = setTimeout(function () { if (!handled) { handled = true; window.removeEventListener('message', onEndpoint); window.__cor3UsolMarketPending = false; console.log('[COR3 Helper] USOL 端点超时（仅任务）'); if (callback) callback(); } }, 10000);
 };

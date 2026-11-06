@@ -48,13 +48,13 @@ export async function checkAutoChooseBackground() {
                             messageId: d.messageId,
                             selectedOption: bestOpt.id
                         });
-                        console.log(`[COR3 Helper BG] Auto-chose "${bestOpt.label}" (score: ${bestScore})`);
+                        console.log(`[COR3 助手后台] 自动选择 "${bestOpt.label}" (评分: ${bestScore})`);
                     }
                 } catch (e) { /* silent */ }
             }
         }
     } catch (e) {
-        console.log('[COR3 Helper] Background auto-choose failed:', e);
+        console.log('[COR3 Helper] 后台自动选择失败：', e);
         cor3LogError('background.js', e, { action: 'checkAutoChooseBackground' });
     }
 }

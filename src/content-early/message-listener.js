@@ -12,7 +12,7 @@ export function installSocketHealthCheck() {
         for (var i = trackedSockets.length - 1; i >= 0; i--) {
             var ws = trackedSockets[i];
             if (ws.readyState === OrigWebSocket.CLOSED || ws.readyState === OrigWebSocket.CLOSING) {
-                console.log('[COR3 Helper] Cleaning up dead socket');
+                console.log('[COR3 Helper] 正在清理失效套接字');
                 trackedSockets.splice(i, 1);
                 socketLastActivity.delete(ws);
                 if (activeSocket === ws) setActiveSocket(null);
@@ -23,7 +23,7 @@ export function installSocketHealthCheck() {
         if (activeSocket) {
             var lastActivity = socketLastActivity.get(activeSocket) || 0;
             if (now - lastActivity > 90000) {
-                console.log('[COR3 Helper] Active socket stale (no messages for 90s) — may need reconnect');
+                console.log('[COR3 助手] 活动 socket 已失效（90 秒无消息）— 可能需要重连');
             }
         }
     }, 60000);
@@ -100,7 +100,7 @@ export function installMessageListener() {
                     return new Promise(function (resolve, reject) {
                         var done = false;
                         var timer = setTimeout(function () {
-                            if (!done) { done = true; window.removeEventListener('message', handler); reject(new Error('Timeout waiting for ' + eventType)); }
+                            if (!done) { done = true; window.removeEventListener('message', handler); reject(new Error('等待超时: ' + eventType)); }
                         }, timeoutMs || 10000);
                         function handler(evt) {
                             if (done) return;
@@ -136,9 +136,9 @@ export function installMessageListener() {
                             var allSw = loadout.ownedSoftware || [];
                             var equippedSwIds = (loadout.equippedSoftware || []).map(function (s) { return s.id; });
                             var hackCandidates = findHackSoftwareForServerType(allSw, serverTypeName);
-                            addLog('⚡ Loadout: found ' + hackCandidates.length + ' hack candidate(s) for ' + serverTypeName + (hackCandidates.length > 0 ? ' — best: ' + hackCandidates[0].sw.name : ''));
+                            addLog('⚡ Loadout: found ' + hackCandidates.length + ' 个破解候选: ' + serverTypeName + (hackCandidates.length > 0 ? ' — 最佳: ' + hackCandidates[0].sw.name : ''));
                             if (hackCandidates.length === 0) {
-                                addLog('⚡ Loadout: no hack software for ' + serverTypeName + ' — proceeding anyway');
+                                addLog('⚡ Loadout: no hack software for ' + serverTypeName + ' — 仍继续执行');
                                 resolve(true);
                                 return;
                             }
@@ -146,7 +146,7 @@ export function installMessageListener() {
                             var targetSwIds = [bestHack.sw.id];
                             var alreadyBest = equippedSwIds.length === 1 && equippedSwIds[0] === bestHack.sw.id;
                             if (alreadyBest) {
-                                addLog('⚡ Loadout: best hack software "' + bestHack.sw.name + '" already equipped');
+                                addLog('⚡ Loadout: best hack software "' + bestHack.sw.name + '" 已装备');
                                 resolve(true);
                                 return;
                             }
@@ -163,7 +163,7 @@ export function installMessageListener() {
                                     return;
                                 }
                             }
-                            addLog('⚡ Loadout: equipping hack software "' + bestHack.sw.name + '" for ' + serverTypeName);
+                            addLog('⚡ Loadout: equipping hack software "' + bestHack.sw.name + '"，目标 ' + serverTypeName);
                             applyDevTcLoadout(loadout, targetHw, targetSwIds).then(function () {
                                 resolve(true);
                             });
@@ -228,14 +228,14 @@ export function installMessageListener() {
                                 clearTimeout(loginTimer);
                                 window.removeEventListener('message', onLoginStatus);
                                 if (evt.data.error) {
-                                    resolve({ ok: false, error: 'Login status error: ' + (evt.data.error.message || JSON.stringify(evt.data.error)) });
+                                    resolve({ ok: false, error: '登录状态错误：' + (evt.data.error.message || JSON.stringify(evt.data.error)) });
                                     return;
                                 }
                                 var data = evt.data.data;
                                 if (data && data.activeAccesses && data.activeAccesses.length > 0) {
                                     var access = data.activeAccesses[0];
                                     var accessType = access.accessType || access.type || 'unknown';
-                                    addLog('⚡ Using existing ' + accessType + ' access on ' + targetName);
+                                    addLog('⚡ Using existing ' + accessType + ' 访问 ' + targetName);
                                     window.__cor3AutoJobLoginWithAccess(targetId, access.id);
                                     var loginResultHandled = false;
                                     function onLoginResult(evt2) {
@@ -245,7 +245,7 @@ export function installMessageListener() {
                                             clearTimeout(loginResultTimer);
                                             window.removeEventListener('message', onLoginResult);
                                             if (evt2.data.error || !(evt2.data.data && evt2.data.data.success)) {
-                                                resolve({ ok: false, error: 'Login with access failed on ' + targetName });
+                                                resolve({ ok: false, error: '凭访问权限登录失败：' + targetName });
                                             } else {
                                                 addLog('⚡ Logged in to ' + targetName + ' (' + accessType + ')');
                                                 resolve({ ok: true });
@@ -254,10 +254,10 @@ export function installMessageListener() {
                                     }
                                     window.addEventListener('message', onLoginResult);
                                     var loginResultTimer = setTimeout(function () {
-                                        if (!loginResultHandled) { loginResultHandled = true; window.removeEventListener('message', onLoginResult); resolve({ ok: false, error: 'Login with access timed out on ' + targetName }); }
+                                        if (!loginResultHandled) { loginResultHandled = true; window.removeEventListener('message', onLoginResult); resolve({ ok: false, error: '凭访问权限登录超时：' + targetName }); }
                                     }, 10000);
                                 } else {
-                                    addLog('⚡ No active access on ' + targetName + ' — equipping hack loadout');
+                                    addLog('⚡ No active access on ' + targetName + ' — 正在装备破解配装');
                                     ensureDevTcHackLoadout(targetId, targetName).then(function () {
                                         addLog('⚡ Starting hack on ' + targetName);
                                         window.postMessage({ type: 'COR3_AUTOJOB_ENABLE_DECRYPT_SOLVER' }, '*');
@@ -272,7 +272,7 @@ export function installMessageListener() {
                         }
                         window.addEventListener('message', onLoginStatus);
                         var loginTimer = setTimeout(function () {
-                            if (!loginHandled) { loginHandled = true; window.removeEventListener('message', onLoginStatus); resolve({ ok: false, error: 'Login status timed out on ' + targetName }); }
+                            if (!loginHandled) { loginHandled = true; window.removeEventListener('message', onLoginStatus); resolve({ ok: false, error: '登录状态超时：' + targetName }); }
                         }, 10000);
                         window.__cor3AutoJobGetLoginStatus(targetId);
                     });
@@ -292,7 +292,7 @@ export function installMessageListener() {
                             if (evt3.data.error) {
                                 var errMsg = evt3.data.error.message || JSON.stringify(evt3.data.error);
                                 if ((errMsg.indexOf('sai-no-hack-software') >= 0 || errMsg.indexOf('sai-hack-impossible') >= 0) && attempt < MAX_HACK_ATTEMPTS) {
-                                    addLog('⚡ Hack error: ' + errMsg + ' — retrying with loadout swap (attempt ' + (attempt + 1) + '/' + MAX_HACK_ATTEMPTS + ')');
+                                    addLog('⚡ Hack error: ' + errMsg + ' — 更换配装重试(第 ' + (attempt + 1) + '/' + MAX_HACK_ATTEMPTS + ')');
                                     ensureDevTcHackLoadout(targetId, targetName).then(function () {
                                         setTimeout(function () {
                                             startHackWithRetry(targetId, targetName, resolve, attempt + 1);
@@ -300,14 +300,14 @@ export function installMessageListener() {
                                     });
                                     return;
                                 }
-                                resolve({ ok: false, error: 'Hack error on ' + targetName + ': ' + errMsg });
+                                resolve({ ok: false, error: '破解出错于 ' + targetName + ': ' + errMsg });
                                 return;
                             }
                             if (evt3.data.data && evt3.data.data.autoHacked) {
-                                addLog('⚡ Auto-hacked ' + targetName + ' (no minigame)');
+                                addLog('⚡ Auto-hacked ' + targetName + ' (无小游戏)');
                                 pollAccessAfterHack(targetId, targetName, resolve);
                             } else {
-                                addLog('⚡ Hack minigame started on ' + targetName + ' — waiting for solver...');
+                                addLog('⚡ Hack minigame started on ' + targetName + ' — 等待求解器...');
                                 waitForHackComplete(targetId, targetName, resolve);
                             }
                         }
@@ -315,19 +315,19 @@ export function installMessageListener() {
                             hackHandled = true;
                             clearTimeout(hackTimer);
                             window.removeEventListener('message', onHackEvent);
-                            addLog('⚡ Hack minigame started on ' + targetName + ' — waiting for solver...');
+                            addLog('⚡ Hack minigame started on ' + targetName + ' — 等待求解器...');
                             waitForHackComplete(targetId, targetName, resolve);
                         }
                         if (evt3.data && evt3.data.type === 'COR3_AUTOJOB_MINIGAME_LOCKED') {
                             hackHandled = true;
                             clearTimeout(hackTimer);
                             window.removeEventListener('message', onHackEvent);
-                            resolve({ ok: false, error: 'Hack minigame locked on ' + targetName });
+                            resolve({ ok: false, error: '破解小游戏已锁定于 ' + targetName });
                         }
                     }
                     window.addEventListener('message', onHackEvent);
                     var hackTimer = setTimeout(function () {
-                        if (!hackHandled) { hackHandled = true; window.removeEventListener('message', onHackEvent); resolve({ ok: false, error: 'Hack start timed out on ' + targetName }); }
+                        if (!hackHandled) { hackHandled = true; window.removeEventListener('message', onHackEvent); resolve({ ok: false, error: '破解开始超时于 ' + targetName }); }
                     }, 30000);
                 }
 
@@ -349,7 +349,7 @@ export function installMessageListener() {
                         if (!saiHandled) {
                             saiHandled = true;
                             window.removeEventListener('message', onSaiUpdate);
-                            addLog('⚡ Hack solver timeout on ' + targetName + ' — checking access anyway');
+                            addLog('⚡ Hack solver timeout on ' + targetName + ' — 仍在检查访问权限');
                             pollAccessAfterHack(targetId, targetName, resolve);
                         }
                     }, 120000);
@@ -371,7 +371,7 @@ export function installMessageListener() {
                                 if (evt.data.data && evt.data.data.activeAccesses && evt.data.data.activeAccesses.length > 0) {
                                     var acc = evt.data.data.activeAccesses[0];
                                     var accType = acc.accessType || acc.type || 'unknown';
-                                    addLog('⚡ Got ' + accType + ' access on ' + targetName + ' — logging in');
+                                    addLog('⚡ Got ' + accType + ' 访问 ' + targetName + ' — 正在登录');
                                     window.__cor3AutoJobLoginWithAccess(targetId, acc.id);
                                     var lrHandled = false;
                                     function onLR(evt2) {
@@ -389,17 +389,17 @@ export function installMessageListener() {
                                     }, 10000);
                                 } else {
                                     if (pollCount < MAX_POLLS) {
-                                        addLog('⚡ No access yet after hack on ' + targetName + ' (poll ' + pollCount + '/' + MAX_POLLS + ')');
+                                        addLog('⚡ No access yet after hack on ' + targetName + ' (轮询 ' + pollCount + '/' + MAX_POLLS + ')');
                                         setTimeout(doPoll, 3000);
                                     } else {
-                                        resolve({ ok: false, error: 'No access granted after hack on ' + targetName });
+                                        resolve({ ok: false, error: '破解后未获得访问权限：' + targetName });
                                     }
                                 }
                             }
                         }
                         window.addEventListener('message', onPollStatus);
                         var pollTimer = setTimeout(function () {
-                            if (!pollHandled) { pollHandled = true; window.removeEventListener('message', onPollStatus); resolve({ ok: false, error: 'Poll login status timed out on ' + targetName }); }
+                            if (!pollHandled) { pollHandled = true; window.removeEventListener('message', onPollStatus); resolve({ ok: false, error: '轮询登录状态超时于 ' + targetName }); }
                         }, 8000);
                         window.__cor3AutoJobGetLoginStatus(targetId);
                     }
@@ -407,13 +407,13 @@ export function installMessageListener() {
                 }
 
                 // --- Main flow ---
-                addLog('Setting endpoint to ' + serverName + ' (' + serverId.substring(0, 8) + ')...');
+                addLog('正在设置端点为 ' + serverName + ' (' + serverId.substring(0, 8) + ')...');
                 sendSetEndpoint(serverId).then(function (result) {
                     if (result.ok) {
                         if (result.timeout) {
-                            addLog('Endpoint set (timeout — may already be set)');
+                            addLog('端点已设置 (超时 — 可能已设置)');
                         } else {
-                            addLog('Endpoint set successfully');
+                            addLog('端点设置成功');
                         }
                         sendResult(true);
                         return;
@@ -421,17 +421,17 @@ export function installMessageListener() {
 
                     // server-in-maintenance: the target itself is in maintenance — nothing to do
                     if (result.maintenance) {
-                        addLog('Server ' + serverName + ' is in maintenance', 'var(--accent-orange)');
+                        addLog('服务器 ' + serverName + ' 正在维护', 'var(--accent-orange)');
                         sendResult(false, 'server-in-maintenance');
                         return;
                     }
 
                     // no-path-to-server: need path-through hack
                     if (result.noPath) {
-                        addLog('No direct path to ' + serverName + ' — attempting path-through hack...');
+                        addLog('无直接路径通往 ' + serverName + ' — 正在尝试路径穿透破解...');
 
                         // Fetch map data for dynamic pathing
-                        addLog('Fetching network map for path resolution...');
+                        addLog('正在获取网络地图以解析路径...');
                         window.__cor3AutoJobGetNetworkMap();
 
                         var mapHandled = false;
@@ -466,7 +466,7 @@ export function installMessageListener() {
                                     }
 
                                     if (!homeId) {
-                                        addLog('Could not find Home Server in map data', 'var(--accent-red)');
+                                        addLog('未在地图数据中找到主服务器', 'var(--accent-red)');
                                         sendResult(false, 'no-home-server-in-map');
                                         return;
                                     }
@@ -506,18 +506,18 @@ export function installMessageListener() {
                                     allPaths.sort(function (a, b) { return a.length - b.length; });
 
                                     if (allPaths.length === 0) {
-                                        addLog('No viable paths from Home to ' + serverName + ' (all paths blocked by maintenance)', 'var(--accent-red)');
+                                        addLog('没有从 Home 到 的可达路径' + serverName + ' (所有路径因维护受阻)', 'var(--accent-red)');
                                         sendResult(false, 'all-paths-blocked-by-maintenance');
                                         return;
                                     }
 
-                                    addLog('Found ' + allPaths.length + ' viable path(s) to ' + serverName + ' (maintenance servers excluded)');
+                                    addLog('找到 ' + allPaths.length + ' 条可行路径: ' + serverName + ' (已排除维护服务器)');
 
                                     // Try each path (intermediates only, exclude the target itself)
                                     var pathIdx = 0;
                                     function tryNextPath() {
                                         if (pathIdx >= allPaths.length) {
-                                            addLog('All ' + allPaths.length + ' path(s) exhausted — server unreachable', 'var(--accent-red)');
+                                            addLog('全部 ' + allPaths.length + ' 条路径已耗尽 — 服务器不可达', 'var(--accent-red)');
                                             sendResult(false, 'all-paths-failed');
                                             return;
                                         }
@@ -538,13 +538,13 @@ export function installMessageListener() {
                                                 addLog('⚡ Path-through complete — retrying endpoint to ' + serverName + '...');
                                                 sendSetEndpoint(serverId).then(function (retryResult) {
                                                     if (retryResult.ok) {
-                                                        addLog('Endpoint set successfully after path-through');
+                                                        addLog('穿透路径后端点设置成功');
                                                         sendResult(true);
                                                     } else if (retryResult.maintenance) {
-                                                        addLog('Server ' + serverName + ' is in maintenance', 'var(--accent-orange)');
+                                                        addLog('服务器 ' + serverName + ' 正在维护', 'var(--accent-orange)');
                                                         sendResult(false, 'server-in-maintenance');
                                                     } else {
-                                                        addLog('⚡ Still unreachable after path ' + pathIdx + ' — trying next path', 'var(--accent-orange)');
+                                                        addLog('⚡ Still unreachable after path ' + pathIdx + ' — 尝试下一条路径', 'var(--accent-orange)');
                                                         tryNextPath();
                                                     }
                                                 });
@@ -552,7 +552,7 @@ export function installMessageListener() {
                                             }
                                             var intermediate = intermediates[stepIdx];
                                             stepIdx++;
-                                            addLog('⚡ Path step ' + stepIdx + '/' + intermediates.length + ': setting endpoint to ' + intermediate.name);
+                                            addLog('⚡ Path step ' + stepIdx + '/' + intermediates.length + ': 正在设置端点为 ' + intermediate.name);
                                             sendSetEndpoint(intermediate.id).then(function (intResult) {
                                                 if (intResult.ok || intResult.timeout) {
                                                     setTimeout(function () {
@@ -560,16 +560,16 @@ export function installMessageListener() {
                                                             if (loginResult.ok) {
                                                                 setTimeout(nextStep, 1000);
                                                             } else {
-                                                                addLog('⚡ Login/hack failed on ' + intermediate.name + ': ' + loginResult.error + ' — trying next path', 'var(--accent-orange)');
+                                                                addLog('⚡ Login/hack failed on ' + intermediate.name + ': ' + loginResult.error + ' — 尝试下一条路径', 'var(--accent-orange)');
                                                                 tryNextPath();
                                                             }
                                                         });
                                                     }, 1000);
                                                 } else if (intResult.maintenance) {
-                                                    addLog('⚡ ' + intermediate.name + ' is in maintenance — trying next path', 'var(--accent-orange)');
+                                                    addLog('⚡ ' + intermediate.name + ' 维护中 — 尝试下一条路径', 'var(--accent-orange)');
                                                     tryNextPath();
                                                 } else {
-                                                    addLog('⚡ ' + intermediate.name + ' unreachable — trying next path', 'var(--accent-orange)');
+                                                    addLog('⚡ ' + intermediate.name + ' 不可达 — 尝试下一条路径', 'var(--accent-orange)');
                                                     tryNextPath();
                                                 }
                                             });
@@ -579,7 +579,7 @@ export function installMessageListener() {
                                     tryNextPath();
 
                                 } catch (ex) {
-                                    addLog('Path resolution error: ' + ex.message, 'var(--accent-red)');
+                                    addLog('路径解析错误：' + ex.message, 'var(--accent-red)');
                                     sendResult(false, 'path-resolution-error');
                                 }
                             }
@@ -589,7 +589,7 @@ export function installMessageListener() {
                             if (!mapHandled) {
                                 mapHandled = true;
                                 window.removeEventListener('message', onMapData);
-                                addLog('Timeout waiting for map data (12s)', 'var(--accent-red)');
+                                addLog('等待地图数据超时（12 秒）', 'var(--accent-red)');
                                 sendResult(false, 'map-timeout');
                             }
                         }, 12000);
@@ -597,7 +597,7 @@ export function installMessageListener() {
                     }
 
                     // Other endpoint error
-                    addLog('Endpoint error: ' + result.errorMsg);
+                    addLog('端点错误: ' + result.errorMsg);
                     sendResult(false, result.errorMsg);
                 });
             })(event.data.serverId);
@@ -686,7 +686,7 @@ export function installMessageListener() {
             window.__cor3LaunchExpedition(event.data.config);
         }
         if (event.data && event.data.type === 'COR3_RELAUNCH_EXPEDITION') {
-            console.log('[COR3 Helper] Relaunching expedition with stored data');
+            console.log('[COR3 Helper] 正在用已存数据重新发起远征');
             window.__cor3LaunchExpedition(event.data.data);
         }
         if (event.data && event.data.type === 'COR3_OPEN_CONTAINER') {
@@ -776,7 +776,7 @@ export function installMessageListener() {
                 var hardTimer = setTimeout(function () {
                     if (!aborted) {
                         aborted = true;
-                        doneMsg('<span style="color:var(--accent-orange);">⏱️ Search timed out after 3 minutes — auto-disabled</span>');
+                        doneMsg('<span style="color:var(--accent-orange);">⏱️ 搜索超过 3 分钟已超时——已自动禁用</span>');
                     }
                 }, HARD_TIMEOUT_MS);
 
@@ -803,13 +803,13 @@ export function installMessageListener() {
                     wsSend('42["event",{"event":{"name":"network-map","action":"connect.ip"},"data":{"ipAddress":"' + ip + '"}}]');
                 }
 
-                logMsg('<span style="color:var(--accent-cyan);">Fetching network map...</span>');
+                logMsg('<span style="color:var(--accent-cyan);">正在获取网络地图...</span>');
                 wsSend(getMapMsg);
                 waitForMap(10000).then(function (mapData1) {
                     if (aborted) return;
                     if (!mapData1 || !mapData1.servers || !mapData1.connections) {
                         clearTimeout(hardTimer);
-                        doneMsg('<span style="color:var(--accent-red);">Failed to fetch initial map data</span>');
+                        doneMsg('<span style="color:var(--accent-red);">获取初始地图数据失败</span>');
                         return;
                     }
                     var oldConnections = new Set(mapData1.connections.map(function (c) { return c.id; }));
@@ -820,12 +820,12 @@ export function installMessageListener() {
                     var total = serverIps.length;
                     var idx = 0;
 
-                    logMsg('<span style="color:var(--accent-cyan);">Found ' + total + ' IPs to scan. Starting...</span>');
+                    logMsg('<span style="color:var(--accent-cyan);">找到 ' + total + ' 个 IP 待扫描。开始...</span>');
 
                     function connectNext() {
                         if (aborted) return;
                         if (idx >= total) {
-                            logMsg('<span style="color:var(--accent-cyan);">Scanning complete. Fetching updated map...</span>');
+                            logMsg('<span style="color:var(--accent-cyan);">扫描完成，正在获取更新后的地图...</span>');
                             setTimeout(function () {
                                 if (aborted) return;
                                 wsSend(getMapMsg);
@@ -833,7 +833,7 @@ export function installMessageListener() {
                                     clearTimeout(hardTimer);
                                     if (aborted) return;
                                     if (!mapData2 || !mapData2.connections) {
-                                        doneMsg('<span style="color:var(--accent-red);">Failed to fetch updated map data</span>');
+                                        doneMsg('<span style="color:var(--accent-red);">获取更新后的地图数据失败</span>');
                                         return;
                                     }
                                     if (mapData2.servers) {
@@ -843,23 +843,23 @@ export function installMessageListener() {
                                     var newServers = (mapData2.servers || []).filter(function (s) { return !oldServerIds.has(s.id); });
                                     var parts = [];
                                     if (newConns.length > 0) {
-                                        parts.push('<div style="color:var(--accent-green);font-weight:bold;">Found ' + newConns.length + ' new connection(s):</div>');
+                                        parts.push('<div style="color:var(--accent-green);font-weight:bold;">找到 ' + newConns.length + ' 个新连接：</div>');
                                         newConns.forEach(function (c) {
                                             var a = serverNameMap[c.serverA] || c.serverA;
                                             var b = serverNameMap[c.serverB] || c.serverB;
-                                            parts.push('<div style="padding:1px 0;margin-left:8px;color:var(--accent-cyan);">' + a + ' ↔ ' + b + (c.isHidden ? ' <span style="color:var(--accent-orange);">(hidden)</span>' : '') + '</div>');
+                                            parts.push('<div style="padding:1px 0;margin-left:8px;color:var(--accent-cyan);">' + a + ' ↔ ' + b + (c.isHidden ? ' <span style="color:var(--accent-orange);">(已隐藏)</span>' : '') + '</div>');
                                         });
                                     }
                                     if (newServers.length > 0) {
-                                        parts.push('<div style="color:var(--accent-green);font-weight:bold;margin-top:4px;">Found ' + newServers.length + ' new server(s):</div>');
+                                        parts.push('<div style="color:var(--accent-green);font-weight:bold;margin-top:4px;">找到 ' + newServers.length + ' 个新服务器：</div>');
                                         newServers.forEach(function (s) {
                                             parts.push('<div style="padding:1px 0;margin-left:8px;color:var(--accent-cyan);">🖥️ ' + (s.serverName || s.id) + '</div>');
                                         });
                                     }
                                     if (newConns.length === 0 && newServers.length === 0) {
-                                        parts.push('<span style="color:var(--accent-orange);">Couldn\'t find anything new... (' + total + ' IPs scanned)</span>');
+                                        parts.push('<span style="color:var(--accent-orange);">没找到新东西...（' + total + ' 个 IP 已扫描)</span>');
                                     } else {
-                                        parts.push('<div style="margin-top:4px;color:var(--text-dim);">Scanned ' + total + ' IPs</div>');
+                                        parts.push('<div style="margin-top:4px;color:var(--text-dim);">已扫描 ' + total + ' 个 IP</div>');
                                     }
                                     doneMsg(parts.join(''));
                                 });
@@ -868,7 +868,7 @@ export function installMessageListener() {
                         }
                         var ip = serverIps[idx];
                         idx++;
-                        logMsg('<span style="color:var(--accent-cyan);">Connecting ' + idx + '/' + total + ': ' + ip + '</span>');
+                        logMsg('<span style="color:var(--accent-cyan);">正在连接 ' + idx + '/' + total + ': ' + ip + '</span>');
                         connectIp(ip);
                         setTimeout(connectNext, DELAY_MS);
                     }
@@ -895,13 +895,13 @@ export function installMessageListener() {
                     }
                     antiAfkClick();
                     window.__cor3AntiAfkTimer = setInterval(antiAfkClick, ANTI_AFK_INTERVAL);
-                    console.log('[COR3 Helper] Anti-AFK Clicker enabled (3 min interval)');
+                    console.log('[COR3 助手] 防挂机点击器已启用（间隔 3 分钟）');
                 }
             } else {
                 if (window.__cor3AntiAfkTimer) {
                     clearInterval(window.__cor3AntiAfkTimer);
                     window.__cor3AntiAfkTimer = null;
-                    console.log('[COR3 Helper] Anti-AFK Clicker disabled');
+                    console.log('[COR3 助手] 防挂机点击器已禁用');
                 }
             }
         }
