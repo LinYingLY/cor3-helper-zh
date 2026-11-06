@@ -3,6 +3,8 @@
 A Chrome extension that enhances the [cor3.gg](https://cor3.gg) experience by monitoring markets, expeditions, daily ops, and providing timer alerts — all from a compact popup UI.
 
 > 本仓库为简体中文汉化版本，中文文档见 [README.zh-CN.md](README.zh-CN.md)。
+>
+> **🌐 翻译声明**：本项目为翻译版本，原项目由 Femtoce11 编写。中文译文由 AI 工具（DeepSeek V4.1 Flash）自动翻译生成，**未经任何人工校对、修改或审核**。发布者仅发起翻译并发布结果，不对译文的准确性、完整性或可读性作出保证。译文仅供参考，如有疑问请以原文为准。
 
 ## Affiliation & Disclaimer
 
