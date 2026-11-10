@@ -1,4 +1,4 @@
-// --- Expedition Info + Decisions (inline) ---
+﻿// --- Expedition Info + Decisions (inline) ---
 import { getCor3Tab, formatTimeRemaining } from './utils.js';
 import { el, clearEl, noDataMsg } from './dom-helpers.js';
 import { updateExpeditionAlarmOptions } from './alarms.js';
@@ -110,7 +110,7 @@ function buildContainerItems(containerData) {
             el('div', { style: 'display:flex;align-items:center;gap:8px;padding:3px 0;' },
                 img,
                 el('div', { style: 'flex:1;min-width:0;' },
-                    el('div', { style: 'font-size:11px;font-weight:bold;color:var(--text-primary);' }, `${item.name} x${item.quantity}`),
+                    el('div', { style: 'font-size:11px;font-weight:bold;color:var(--text);' }, `${item.name} x${item.quantity}`),
                     el('div', { style: `font-size:9px;color:${tierColor};` }, item.tier)
                 )
             )
